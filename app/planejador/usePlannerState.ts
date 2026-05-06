@@ -64,7 +64,7 @@ export function usePlannerState() {
 
     const [editingBlock, setEditingBlock] = useState<StudyBlock | null>(null);
     const [modalOpen, setModalOpen] = useState(false);
-    const [form, setForm] = useState<NewBlockForm>(DEFAULT_FORM);
+    const [newBlockForm, setNewBlockForm] = useState<NewBlockForm>(DEFAULT_FORM);
     const [draggedId, setDraggedId] = useState<string | null>(null);
     const [resizingId, setResizingId] = useState<string | null>(null);
 
@@ -74,7 +74,7 @@ export function usePlannerState() {
 
     const openAddModal = useCallback((dayIndex: number, startTime?: string) => {
         setEditingBlock(null);
-        setForm((prev) => ({
+        setNewBlockForm((prev) => ({
             ...prev,
             dayIndex,
             startTime: startTime ?? "09:00",
@@ -87,7 +87,7 @@ export function usePlannerState() {
 
     const openEditBlock = useCallback((block: StudyBlock) => {
         setEditingBlock(block);
-        setForm({
+        setNewBlockForm({
             subject: block.subject,
             topic: block.topic ?? "",
             startTime: block.startTime,
@@ -110,17 +110,18 @@ export function usePlannerState() {
 
     const saveBlock = useCallback(() => {
         if (editingBlock) {
-            setBlocks((prev) => prev.map((b) => b.id === editingBlock.id ? { ...b, ...form } : b));
-        } else {
+            setBlocks((prev) => prev.map((b) => b.id === editingBlock.id ? { ...b, ...newBlockForm } : b));
+        } 
+        else {
             const newBlock: StudyBlock = {
                 id: generateId(),
-                subject: form.subject,
-                topic: form.topic,
-                startTime: form.startTime,
-                endTime: form.endTime,
-                color: form.color,
-                dayIndex: form.dayIndex,
-                type: form.type,
+                subject: newBlockForm.subject,
+                topic: newBlockForm.topic,
+                startTime: newBlockForm.startTime,
+                endTime: newBlockForm.endTime,
+                color: newBlockForm.color,
+                dayIndex: newBlockForm.dayIndex,
+                type: newBlockForm.type,
                 status: "todo",
             };
 
@@ -128,7 +129,7 @@ export function usePlannerState() {
             setBlocks((prev) => [...prev, newBlock]);
         }
         closeModal();
-    }, [form, closeModal, editingBlock]);
+    }, [newBlockForm, closeModal, editingBlock]);
 
     const deleteBlock = useCallback((blockId: string) => {
         setBlocks((prev) => prev.filter((b) => b.id !== blockId));
@@ -209,8 +210,8 @@ export function usePlannerState() {
     return {
         blocks,
         isLoaded,
-        form,
-        setForm,
+        form: newBlockForm,
+        setForm: setNewBlockForm,
         draggedId,
         setDraggedId,
         dragMovedRef,

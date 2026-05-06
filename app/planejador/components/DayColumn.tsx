@@ -2,217 +2,22 @@
 
 import { cn } from "@/lib/utils";
 import { Separator } from "@/components/ui/separator";
-import { Calendar, Plus, Trash2 } from "lucide-react";
+import { Calendar, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useCallback, useMemo, useRef, useState, memo } from "react";
-import { BlockType, StudyBlock, SubjectColor } from "./mockData";
+import {  StudyBlock } from "./mockData";
 import { formatDuration } from "../utils";
 import { Badge } from "@/components/ui/badge";
-import {
-    Dialog,
-    DialogContent,
-    DialogDescription,
-    DialogFooter,
-    DialogHeader,
-    DialogTitle,
-} from "@/components/ui/dialog";
+
 import { getDayName } from "../utils";
-import { Label } from "@/components/ui/label";
-import { Input } from "@/components/ui/input";
+
 import { pixelToMinutes, minutesToTimeStr } from "../usePlannerState";
 import { parseTimeToMinutes } from "../utils";
 import { BlockCard, GhostBlock } from "./Blocks";
 import { usePlannerActions } from "./PlannerActionsContext";
 
-// ── Color picker ────────────────────────────────────────────────────────────
 
-const COLOR_OPTIONS: SubjectColor[] = [
-    "blue", "emerald", "violet", "amber", "rose", "orange", "teal", "pink",
-];
 
-function ColorPicker({
-    value,
-    onChange,
-}: {
-    value?: string;
-    onChange: (c: SubjectColor) => void;
-}) {
-    const colorDots: Record<SubjectColor, string> = {
-        blue: "bg-blue-400",
-        emerald: "bg-emerald-400",
-        violet: "bg-violet-400",
-        amber: "bg-amber-400",
-        rose: "bg-rose-400",
-        orange: "bg-orange-400",
-        teal: "bg-teal-400",
-        pink: "bg-pink-400",
-    };
-    return (
-        <div className="flex gap-2 flex-wrap">
-            {COLOR_OPTIONS.map((c) => (
-                <button
-                    key={c}
-                    type="button"
-                    onClick={() => onChange(c)}
-                    className={cn(
-                        "w-6 h-6 rounded-full transition-all ring-offset-2",
-                        colorDots[c],
-                        value === c
-                            ? "ring-2 ring-primary scale-110"
-                            : "hover:scale-105 opacity-70 hover:opacity-100"
-                    )}
-                />
-            ))}
-        </div>
-    );
-}
-
-// ── Block Form Modal ─────────────────────────────────────────────────────────
-
-export function NewBlockFormModal({
-    open,
-    form,
-    onCloseModal,
-    onSave,
-    onDelete,
-    onFormChange,
-    isEditing,
-}: {
-    open: boolean;
-    form: Partial<StudyBlock>;
-    onCloseModal: () => void;
-    onSave: () => void;
-    onDelete?: () => void;
-    onFormChange: (patch: Partial<StudyBlock>) => void;
-    isEditing?: boolean;
-}) {
-    return (
-        <Dialog open={open} onOpenChange={(v) => !v && onCloseModal()}>
-
-            <DialogContent className="max-w-sm">
-                <DialogHeader>
-                    <DialogTitle>
-
-                        {isEditing ? "Editar bloco" : "Novo bloco de estudo"}
-
-                    </DialogTitle>
-                    <DialogDescription></DialogDescription>
-                </DialogHeader>
-
-                <div className="flex flex-col gap-3">
-                    <div>
-                        <Label className="text-xs text-muted-foreground mb-1 block">Matéria</Label>
-                        <Input
-                            placeholder="Ex: Matemática"
-                            value={form.subject ?? ""}
-                            onChange={(e) => onFormChange({ subject: e.target.value })}
-                            autoFocus
-                        />
-                    </div>
-
-                    <div>
-                        <Label className="text-xs text-muted-foreground mb-1 block">Tópico</Label>
-                        <Input
-                            placeholder="Ex: Cálculo — Derivadas"
-                            value={form.topic ?? ""}
-                            onChange={(e) => onFormChange({ topic: e.target.value })}
-                        />
-                    </div>
-
-                    <div>
-                        <Label className="text-xs text-muted-foreground mb-1 block">Tipo</Label>
-                        <div className="flex gap-2 flex-wrap">
-                            {["study", "exercise", "review", "practice"].map((t) => (
-                                <button
-                                    key={t}
-                                    type="button"
-                                    onClick={() => onFormChange({ type: t as BlockType })}
-                                    className={cn(
-                                        "px-3 py-1 rounded-full text-xs border transition-all",
-                                        form.type === t
-                                            ? "bg-primary text-primary-foreground border-primary"
-                                            : "border-border text-muted-foreground hover:border-primary/50"
-                                    )}
-                                >
-                                    {t}
-                                </button>
-                            ))}
-                        </div>
-                    </div>
-                    <div>
-                        <Label className="text-xs text-muted-foreground mb-1 block">Dia</Label>
-                        {["Segunda", "Terça", "Quarta", "Quinta", "Sexta", "Sábado", "Domingo"].map((d, i) => (
-                            <button
-                                key={d}
-                                type="button"
-                                onClick={() => onFormChange({ dayIndex: i })}
-                                className={cn(
-                                    "px-3 py-1 rounded-full text-xs border transition-all",
-                                    form.dayIndex === i
-                                        ? "bg-primary text-primary-foreground border-primary"
-                                        : "border-border text-muted-foreground hover:border-primary/50"
-                                )}
-                            >
-                                {d}
-                            </button>
-                        ))}
-                    </div>
-
-                    <div className="grid grid-cols-2 gap-3">
-                        <div>
-                            <Label className="text-xs text-muted-foreground mb-1 block">Início</Label>
-                            <Input
-                                type="time"
-                                value={form.startTime ?? "09:00"}
-                                onChange={(e) => onFormChange({ startTime: e.target.value })}
-                            />
-                        </div>
-                        <div>
-                            <Label className="text-xs text-muted-foreground mb-1 block">Fim</Label>
-                            <Input
-                                type="time"
-                                value={form.endTime ?? "10:00"}
-                                onChange={(e) => onFormChange({ endTime: e.target.value })}
-                            />
-                        </div>
-                    </div>
-
-                    <div>
-                        <Label className="text-xs text-muted-foreground mb-1 block">Cor</Label>
-                        <ColorPicker
-                            value={form.color as SubjectColor}
-                            onChange={(c) => onFormChange({ color: c })}
-                        />
-                    </div>
-                </div>
-
-                <DialogFooter className="flex items-center justify-between mt-1">
-                    <div>
-                        {isEditing && onDelete && (
-                            <Button
-                                variant="ghost"
-                                size="sm"
-                                className="text-destructive hover:text-destructive hover:bg-destructive/10"
-                                onClick={onDelete}
-                            >
-                                <Trash2 className="w-3.5 h-3.5 mr-1" />
-                                Excluir
-                            </Button>
-                        )}
-                    </div>
-                    <div className="flex gap-2">
-                        <Button variant="outline" size="sm" onClick={onCloseModal}>
-                            Cancelar
-                        </Button>
-                        <Button size="sm" onClick={onSave}>
-                            Salvar
-                        </Button>
-                    </div>
-                </DialogFooter>
-            </DialogContent>
-        </Dialog>
-    );
-}
 
 
 

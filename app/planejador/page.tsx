@@ -1,7 +1,7 @@
 "use client";
 
 import { Suspense, useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { NewBlockFormModal, DayColumn } from "./components/DayColumn";
+import { DayColumn } from "./components/DayColumn";
 import { getMondayOfCurrentWeek, getWeekDates } from "../teste/4/components/planner-utils";
 import { Clock, ChevronLeft, ChevronRight } from "lucide-react";
 import { usePlannerState } from "./usePlannerState";
@@ -10,6 +10,7 @@ import { buildHourHeights, formatDuration, parseTimeToMinutes } from "./utils";
 import { Button } from "@/components/ui/button";
 import { addWeeks } from "date-fns";
 import { PlannerActionsProvider } from "./components/PlannerActionsContext";
+import { NewBlockFormModal } from "./components/Blocks";
 
 function formatHourLabel(hour: number) {
     return `${String(hour).padStart(2, "0")}:00`;
