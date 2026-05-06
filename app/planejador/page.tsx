@@ -1,7 +1,7 @@
 "use client";
 
 import { Suspense, useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { BlockFormModal, DayColumn } from "./components/DayColumn";
+import { NewBlockFormModal, DayColumn } from "./components/DayColumn";
 import { getMondayOfCurrentWeek, getWeekDates } from "../teste/4/components/planner-utils";
 import { Clock, ChevronLeft, ChevronRight } from "lucide-react";
 import { usePlannerState } from "./usePlannerState";
@@ -269,7 +269,7 @@ export default function Page() {
                     <SidebarTools />
                 </div>
 
-                <BlockFormModal
+                <NewBlockFormModal
                     open={modalOpen}
                     form={form}
                     isEditing={!!editingBlock}

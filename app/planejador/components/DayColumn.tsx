@@ -4,15 +4,17 @@ import { cn } from "@/lib/utils";
 import { Separator } from "@/components/ui/separator";
 import { Calendar, Plus, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { useCallback, useMemo, useRef, useState } from "react";
+import { useCallback, useMemo, useRef, useState, memo } from "react";
 import { BlockType, StudyBlock, SubjectColor } from "./mockData";
 import { formatDuration } from "../utils";
 import { Badge } from "@/components/ui/badge";
 import {
     Dialog,
     DialogContent,
+    DialogDescription,
     DialogFooter,
     DialogHeader,
+    DialogTitle,
 } from "@/components/ui/dialog";
 import { getDayName } from "../utils";
 import { Label } from "@/components/ui/label";
@@ -67,7 +69,7 @@ function ColorPicker({
 
 // ── Block Form Modal ─────────────────────────────────────────────────────────
 
-export function BlockFormModal({
+export function NewBlockFormModal({
     open,
     form,
     onCloseModal,
@@ -86,11 +88,15 @@ export function BlockFormModal({
 }) {
     return (
         <Dialog open={open} onOpenChange={(v) => !v && onCloseModal()}>
+
             <DialogContent className="max-w-sm">
                 <DialogHeader>
-                    <h2 className="text-base font-semibold">
+                    <DialogTitle>
+
                         {isEditing ? "Editar bloco" : "Novo bloco de estudo"}
-                    </h2>
+
+                    </DialogTitle>
+                    <DialogDescription></DialogDescription>
                 </DialogHeader>
 
                 <div className="flex flex-col gap-3">
@@ -132,6 +138,24 @@ export function BlockFormModal({
                                 </button>
                             ))}
                         </div>
+                    </div>
+                    <div>
+                        <Label className="text-xs text-muted-foreground mb-1 block">Dia</Label>
+                        {["Segunda", "Terça", "Quarta", "Quinta", "Sexta", "Sábado", "Domingo"].map((d, i) => (
+                            <button
+                                key={d}
+                                type="button"
+                                onClick={() => onFormChange({ dayIndex: i })}
+                                className={cn(
+                                    "px-3 py-1 rounded-full text-xs border transition-all",
+                                    form.dayIndex === i
+                                        ? "bg-primary text-primary-foreground border-primary"
+                                        : "border-border text-muted-foreground hover:border-primary/50"
+                                )}
+                            >
+                                {d}
+                            </button>
+                        ))}
                     </div>
 
                     <div className="grid grid-cols-2 gap-3">
@@ -454,3 +478,13 @@ function hourOffsetForMinutes(
     const fraction = minuteInHour / 60;
     return base + (hourHeights[hour] ?? 0) * fraction;
 }
+
+export default memo(DayColumn, (prevProps, nextProps) => {
+    return (
+        prevProps.dayIndex === nextProps.dayIndex &&
+        prevProps.date.getTime() === nextProps.date.getTime() &&
+        prevProps.hourHeights === nextProps.hourHeights &&
+        prevProps.timelineHeightPx === nextProps.timelineHeightPx &&
+        prevProps.blocks === nextProps.blocks
+    );
+});

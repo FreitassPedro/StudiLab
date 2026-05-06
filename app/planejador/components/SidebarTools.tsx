@@ -22,7 +22,10 @@ function ProgressBar({ progress }: { progress: number }) {
 }
 
 export function SidebarTools() {
-    const { allBlocks } = usePlannerActions();
+    const {
+        allBlocks,
+        openAddModal
+    } = usePlannerActions();
 
     const subjectsSummary = useMemo(() => {
         const summary = new Map<string, { plannedMinutes: number; doneMinutes: number; color: keyof typeof COLOR_MAP }>();
@@ -85,6 +88,7 @@ export function SidebarTools() {
                     <Button
                         variant={"outline"}
                         className="py-2 px-2 w-full h-auto bg-background flex flex-col"
+                        onClick={() => openAddModal(0)}
                     >
                         <Plus className="w-4 h-4" />
                         <span className="font-medium"> Adicionar Matéria </span>

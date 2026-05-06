@@ -123,6 +123,8 @@ export function usePlannerState() {
                 type: form.type,
                 status: "todo",
             };
+
+            console.log("Saving new block", newBlock);
             setBlocks((prev) => [...prev, newBlock]);
         }
         closeModal();
