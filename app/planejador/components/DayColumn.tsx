@@ -2,215 +2,20 @@
 
 import { cn } from "@/lib/utils";
 import { Separator } from "@/components/ui/separator";
-import { Calendar, Plus, Trash2 } from "lucide-react";
+import { Calendar, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { useCallback, useMemo, useRef, useState } from "react";
-import { BlockType, StudyBlock, SubjectColor } from "./mockData";
+import { useCallback, useMemo, useRef, useState, memo } from "react";
+import { StudyBlock } from "./mockData";
 import { formatDuration } from "../utils";
 import { Badge } from "@/components/ui/badge";
-import {
-    Dialog,
-    DialogContent,
-    DialogFooter,
-    DialogHeader,
-} from "@/components/ui/dialog";
+
 import { getDayName } from "../utils";
-import { Label } from "@/components/ui/label";
-import { Input } from "@/components/ui/input";
+
 import { pixelToMinutes, minutesToTimeStr } from "../usePlannerState";
 import { parseTimeToMinutes } from "../utils";
-import { StudyBlockCard } from "./StudyBlock";
+import { BlockCard, GhostBlock } from "./Blocks";
+import { usePlannerActions } from "./PlannerActionsContext";
 
-// ── Color picker ────────────────────────────────────────────────────────────
-
-const COLOR_OPTIONS: SubjectColor[] = [
-    "blue", "emerald", "violet", "amber", "rose", "orange", "teal", "pink",
-];
-
-function ColorPicker({
-    value,
-    onChange,
-}: {
-    value?: string;
-    onChange: (c: SubjectColor) => void;
-}) {
-    const colorDots: Record<SubjectColor, string> = {
-        blue: "bg-blue-400",
-        emerald: "bg-emerald-400",
-        violet: "bg-violet-400",
-        amber: "bg-amber-400",
-        rose: "bg-rose-400",
-        orange: "bg-orange-400",
-        teal: "bg-teal-400",
-        pink: "bg-pink-400",
-    };
-    return (
-        <div className="flex gap-2 flex-wrap">
-            {COLOR_OPTIONS.map((c) => (
-                <button
-                    key={c}
-                    type="button"
-                    onClick={() => onChange(c)}
-                    className={cn(
-                        "w-6 h-6 rounded-full transition-all ring-offset-2",
-                        colorDots[c],
-                        value === c
-                            ? "ring-2 ring-primary scale-110"
-                            : "hover:scale-105 opacity-70 hover:opacity-100"
-                    )}
-                />
-            ))}
-        </div>
-    );
-}
-
-// ── Block Form Modal ─────────────────────────────────────────────────────────
-
-export function BlockFormModal({
-    open,
-    form,
-    onCloseModal,
-    onSave,
-    onDelete,
-    onFormChange,
-    isEditing,
-}: {
-    open: boolean;
-    form: Partial<StudyBlock>;
-    onCloseModal: () => void;
-    onSave: () => void;
-    onDelete?: () => void;
-    onFormChange: (patch: Partial<StudyBlock>) => void;
-    isEditing?: boolean;
-}) {
-    return (
-        <Dialog open={open} onOpenChange={(v) => !v && onCloseModal()}>
-            <DialogContent className="max-w-sm">
-                <DialogHeader>
-                    <h2 className="text-base font-semibold">
-                        {isEditing ? "Editar bloco" : "Novo bloco de estudo"}
-                    </h2>
-                </DialogHeader>
-
-                <div className="flex flex-col gap-3">
-                    <div>
-                        <Label className="text-xs text-muted-foreground mb-1 block">Matéria</Label>
-                        <Input
-                            placeholder="Ex: Matemática"
-                            value={form.subject ?? ""}
-                            onChange={(e) => onFormChange({ subject: e.target.value })}
-                            autoFocus
-                        />
-                    </div>
-
-                    <div>
-                        <Label className="text-xs text-muted-foreground mb-1 block">Tópico</Label>
-                        <Input
-                            placeholder="Ex: Cálculo — Derivadas"
-                            value={form.topic ?? ""}
-                            onChange={(e) => onFormChange({ topic: e.target.value })}
-                        />
-                    </div>
-
-                    <div>
-                        <Label className="text-xs text-muted-foreground mb-1 block">Tipo</Label>
-                        <div className="flex gap-2 flex-wrap">
-                            {["study", "exercise", "review", "practice"].map((t) => (
-                                <button
-                                    key={t}
-                                    type="button"
-                                    onClick={() => onFormChange({ type: t as BlockType })}
-                                    className={cn(
-                                        "px-3 py-1 rounded-full text-xs border transition-all",
-                                        form.type === t
-                                            ? "bg-primary text-primary-foreground border-primary"
-                                            : "border-border text-muted-foreground hover:border-primary/50"
-                                    )}
-                                >
-                                    {t}
-                                </button>
-                            ))}
-                        </div>
-                    </div>
-
-                    <div className="grid grid-cols-2 gap-3">
-                        <div>
-                            <Label className="text-xs text-muted-foreground mb-1 block">Início</Label>
-                            <Input
-                                type="time"
-                                value={form.startTime ?? "09:00"}
-                                onChange={(e) => onFormChange({ startTime: e.target.value })}
-                            />
-                        </div>
-                        <div>
-                            <Label className="text-xs text-muted-foreground mb-1 block">Fim</Label>
-                            <Input
-                                type="time"
-                                value={form.endTime ?? "10:00"}
-                                onChange={(e) => onFormChange({ endTime: e.target.value })}
-                            />
-                        </div>
-                    </div>
-
-                    <div>
-                        <Label className="text-xs text-muted-foreground mb-1 block">Cor</Label>
-                        <ColorPicker
-                            value={form.color as SubjectColor}
-                            onChange={(c) => onFormChange({ color: c })}
-                        />
-                    </div>
-                </div>
-
-                <DialogFooter className="flex items-center justify-between mt-1">
-                    <div>
-                        {isEditing && onDelete && (
-                            <Button
-                                variant="ghost"
-                                size="sm"
-                                className="text-destructive hover:text-destructive hover:bg-destructive/10"
-                                onClick={onDelete}
-                            >
-                                <Trash2 className="w-3.5 h-3.5 mr-1" />
-                                Excluir
-                            </Button>
-                        )}
-                    </div>
-                    <div className="flex gap-2">
-                        <Button variant="outline" size="sm" onClick={onCloseModal}>
-                            Cancelar
-                        </Button>
-                        <Button size="sm" onClick={onSave}>
-                            Salvar
-                        </Button>
-                    </div>
-                </DialogFooter>
-            </DialogContent>
-        </Dialog>
-    );
-}
-
-
-
-// ── Ghost block shown while dragging ────────────────────────────────────────
-
-function GhostBlock({
-    topPx,
-    heightPx,
-    label,
-}: {
-    topPx: number;
-    heightPx: number;
-    label: string;
-}) {
-    return (
-        <div
-            className="absolute left-1 right-1 z-30 rounded-lg border-2 border-dashed border-primary/60 bg-primary/10 pointer-events-none flex items-center justify-center"
-            style={{ top: `${topPx}px`, height: `${heightPx}px` }}
-        >
-            <p className="text-xs font-medium text-primary/70">{label}</p>
-        </div>
-    );
-}
 
 // ── DayColumn ────────────────────────────────────────────────────────────────
 
@@ -221,17 +26,6 @@ interface DayColumnProps {
     hourHeights: number[];
     timelineHeightPx: number;
     timelineRef?: (el: HTMLDivElement | null) => void;
-    draggedId: string | null;
-    dragOffsetY: number;
-    resizingId: string | null;
-    allBlocks: StudyBlock[];
-    onRemoveBlock: (blockId: string) => void;
-    onAddBlock: (dayIndex: number, startTime?: string) => void;
-    onEditBlock: (block: StudyBlock) => void;
-    onDragStart: (id: string, offsetY: number) => void;
-    onDrop: (blockId: string, dayIndex: number, pixelTop: number) => void;
-    onDragEnd: () => void;
-    onResizeStart: (id: string, e: React.MouseEvent) => void;
 }
 
 export function DayColumn({
@@ -241,21 +35,13 @@ export function DayColumn({
     hourHeights,
     timelineHeightPx,
     timelineRef,
-    draggedId,
-    dragOffsetY,
-    resizingId,
-    allBlocks,
-    onRemoveBlock,
-    onAddBlock,
-    onEditBlock,
-    onDragStart,
-    onDrop,
-    onDragEnd,
-    onResizeStart,
 }: DayColumnProps) {
+    const { draggedId, dragOffsetY, allBlocks, openAddModal } = usePlannerActions();
     const columnRef = useRef<HTMLDivElement>(null);
     const [isDragOver, setIsDragOver] = useState(false);
     const [ghostTop, setGhostTop] = useState<number | null>(null);
+
+    console.log(`Renderizando ${getDayName(date)} - ${blocks.length} blocos`);
 
     const dayMinutes = useMemo(() => {
         return blocks.reduce((total, block) => {
@@ -311,19 +97,6 @@ export function DayColumn({
         [draggedId, getGhostMetrics]
     );
 
-    const handleMouseUp = useCallback(
-        (e: React.MouseEvent) => {
-            if (!draggedId) return;
-            const relY = getRelativeY(e.clientY);
-            const adjustedTop = relY - dragOffsetY;
-            onDrop(draggedId, dayIndex, Math.max(0, adjustedTop));
-            setIsDragOver(false);
-            setGhostTop(null);
-            onDragEnd();
-        },
-        [draggedId, dayIndex, dragOffsetY, getRelativeY, onDrop, onDragEnd]
-    );
-
     const handleMouseEnter = useCallback(
         (e: React.MouseEvent) => {
             if (!draggedId) return;
@@ -345,9 +118,9 @@ export function DayColumn({
             const relY = getRelativeY(e.clientY);
             const minutes = pixelToMinutes(relY, hourHeights);
             const snapped = Math.round(minutes / 15) * 15;
-            onAddBlock(dayIndex, minutesToTimeStr(snapped));
+            openAddModal(dayIndex, minutesToTimeStr(snapped));
         },
-        [getRelativeY, hourHeights, dayIndex, onAddBlock]
+        [getRelativeY, hourHeights, dayIndex, openAddModal]
     );
 
     const ghostLabel = useMemo(() => {
@@ -367,15 +140,15 @@ export function DayColumn({
     }, [date]);
 
     return (
-        <div className="flex flex-col min-w-0">
+        <div className="flex flex-col min-w-0 relative">
             {/* Header */}
-            <div className={cn("px-2 py-2 rounded-t-lg", isToday && "bg-primary/5")}>
-                <p className={cn("text-sm font-semibold", isToday ? "text-primary" : "text-foreground")}>
+            <div className={cn("sticky top-0 z-50 bg-background/95 backdrop-blur-sm px-2 py-2 rounded-t-lg  ", isToday && "bg-primary/5")}>
+                <h3 className={cn("text-sm font-semibold", isToday ? "text-primary" : "text-foreground")}>
                     {getDayName(date)}
-                    {isToday && (
-                        <span className="ml-1.5 text-xs font-normal text-primary/70">Hoje</span>
-                    )}
-                </p>
+                </h3>
+                {isToday && (
+                    <span className="ml-1.5 text-xs font-normal text-primary/70">Hoje</span>
+                )}
                 <p className="text-xs text-muted-foreground">{date.toLocaleDateString("pt-BR")}</p>
                 <Badge variant={dayMinutes > 0 ? "secondary" : "outline"} className="mt-1">
                     {dayMinutes > 0 ? formatDuration(dayMinutes) : "—"}
@@ -398,7 +171,6 @@ export function DayColumn({
                 )}
                 style={{ height: `${timelineHeightPx}px` }}
                 onMouseMove={handleMouseMove}
-                onMouseUp={handleMouseUp}
                 onMouseEnter={handleMouseEnter}
                 onMouseLeave={handleMouseLeave}
                 onDoubleClick={handleColumnDoubleClick}
@@ -423,15 +195,9 @@ export function DayColumn({
                 {/* Blocks */}
                 {blocks.map((block) => (
                     <div key={block.id} data-block>
-                        <StudyBlockCard
+                        <BlockCard
                             block={block}
                             hourHeights={hourHeights}
-                            isDragging={draggedId === block.id}
-                            isResizing={resizingId === block.id}
-                            onEdit={onEditBlock}
-                            onRemove={onRemoveBlock}
-                            onDragStart={onDragStart}
-                            onResizeStart={onResizeStart}
                         />
                     </div>
                 ))}
@@ -467,7 +233,7 @@ export function DayColumn({
                     className="absolute bottom-2 left-1 right-1 h-7 font-medium tracking-tight rounded-md
                         text-muted-foreground/40 border border-dashed border-border/40
                         hover:text-primary hover:bg-primary/5 hover:border-primary/30 transition-all"
-                    onClick={() => onAddBlock(dayIndex)}
+                    onClick={() => openAddModal(dayIndex)}
                 >
                     <Plus className="w-3 h-3 mr-1" />
                     <span className="text-xs">Adicionar</span>
@@ -511,3 +277,13 @@ function hourOffsetForMinutes(
     const fraction = minuteInHour / 60;
     return base + (hourHeights[hour] ?? 0) * fraction;
 }
+
+export default memo(DayColumn, (prevProps, nextProps) => {
+    return (
+        prevProps.dayIndex === nextProps.dayIndex &&
+        prevProps.date.getTime() === nextProps.date.getTime() &&
+        prevProps.hourHeights === nextProps.hourHeights &&
+        prevProps.timelineHeightPx === nextProps.timelineHeightPx &&
+        prevProps.blocks === nextProps.blocks
+    );
+});

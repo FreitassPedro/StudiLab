@@ -1,9 +1,11 @@
 "use client";
 
-import { useCallback, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { BlockType, MOCK_BLOCKS, StudyBlock, SubjectColor } from "./components/mockData";
 import { generateId } from "../teste/4/components/planner-utils";
 import { parseTimeToMinutes } from "./utils";
+
+const PLANNER_BLOCKS_STORAGE_KEY = "planner.blocks.v1";
 
 export interface NewBlockForm {
     subject: string;
@@ -34,19 +36,48 @@ export function minutesToTimeStr(minutes: number): string {
 
 export function usePlannerState() {
     const [blocks, setBlocks] = useState<StudyBlock[]>(MOCK_BLOCKS);
+    const [isLoaded, setIsLoaded] = useState(false);
+
+    // 2. Transição de Estado Assíncrona: Delegação da leitura do cache para a fase pós-hidratação.
+    useEffect(() => {
+        
+        const stored = localStorage.getItem(PLANNER_BLOCKS_STORAGE_KEY);
+        if (stored) {
+            try {
+                const parsed = JSON.parse(stored) as StudyBlock[];
+                // eslint-disable-next-line react-hooks/set-state-in-effect
+                setBlocks(parsed);
+            } catch {
+                console.error("Failed to parse stored blocks");
+            }
+        }
+        // Sinaliza que a árvore cliente-side está pronta e o estado reflete a persistência local
+        setIsLoaded(true);
+    }, []);
+
+    // 3. Serialização: Omitida no primeiro render, acionada somente após a sincronização do cache.
+    useEffect(() => {
+        if (isLoaded) {
+            localStorage.setItem(PLANNER_BLOCKS_STORAGE_KEY, JSON.stringify(blocks));
+        }
+    }, [blocks, isLoaded]);
+
     const [editingBlock, setEditingBlock] = useState<StudyBlock | null>(null);
     const [modalOpen, setModalOpen] = useState(false);
-    const [form, setForm] = useState<NewBlockForm>(DEFAULT_FORM);
+    const [newBlockForm, setNewBlockForm] = useState<NewBlockForm>(DEFAULT_FORM);
     const [draggedId, setDraggedId] = useState<string | null>(null);
     const [resizingId, setResizingId] = useState<string | null>(null);
+
 
     // Used to detect single-click vs drag
     const dragMovedRef = useRef(false);
 
     const openAddModal = useCallback((dayIndex: number, startTime?: string) => {
         setEditingBlock(null);
-        setForm((prev) => ({
+        setNewBlockForm((prev) => ({
             ...prev,
+            subject: "",
+            topic: "",
             dayIndex,
             startTime: startTime ?? "09:00",
             endTime: startTime
@@ -58,7 +89,7 @@ export function usePlannerState() {
 
     const openEditBlock = useCallback((block: StudyBlock) => {
         setEditingBlock(block);
-        setForm({
+        setNewBlockForm({
             subject: block.subject,
             topic: block.topic ?? "",
             startTime: block.startTime,
@@ -81,27 +112,45 @@ export function usePlannerState() {
 
     const saveBlock = useCallback(() => {
         if (editingBlock) {
-            setBlocks((prev) => prev.map((b) => b.id === editingBlock.id ? { ...b, ...form } : b));
-        } else {
+            setBlocks((prev) => prev.map((b) => b.id === editingBlock.id ? { ...b, ...newBlockForm } : b));
+        } 
+        else {
+            if (!newBlockForm.subject) {
+                alert("O campo 'Matéria' é obrigatório.");
+                return;
+            }
             const newBlock: StudyBlock = {
                 id: generateId(),
-                subject: form.subject,
-                topic: form.topic,
-                startTime: form.startTime,
-                endTime: form.endTime,
-                color: form.color,
-                dayIndex: form.dayIndex,
-                type: form.type,
+                subject: newBlockForm.subject,
+                topic: newBlockForm.topic,
+                startTime: newBlockForm.startTime,
+                endTime: newBlockForm.endTime,
+                color: newBlockForm.color,
+                dayIndex: newBlockForm.dayIndex,
+                type: newBlockForm.type,
+                status: "todo",
             };
+
+            console.log("Saving new block", newBlock);
             setBlocks((prev) => [...prev, newBlock]);
         }
         closeModal();
-    }, [form, closeModal, editingBlock]);
+    }, [newBlockForm, closeModal, editingBlock]);
 
     const deleteBlock = useCallback((blockId: string) => {
         setBlocks((prev) => prev.filter((b) => b.id !== blockId));
         closeModal();
     }, [closeModal]);
+
+    const toggleBlockStatus = useCallback((blockId: string) => {
+        setBlocks((prev) =>
+            prev.map((block) =>
+                block.id === blockId
+                    ? { ...block, status: block.status === "done" ? "todo" : "done" }
+                    : block
+            )
+        );
+    }, []);
 
     /**
      * Move a block to a new day + pixel offset within the timeline.
@@ -163,10 +212,12 @@ export function usePlannerState() {
         []
     );
 
+
     return {
         blocks,
-        form,
-        setForm,
+        isLoaded,
+        form: newBlockForm,
+        setForm: setNewBlockForm,
         draggedId,
         setDraggedId,
         dragMovedRef,
@@ -182,10 +233,11 @@ export function usePlannerState() {
         closeModal,
         saveBlock,
         deleteBlock,
+        toggleBlockStatus,
     };
 }
 
-// ── helpers ──────────────────────────────────────────────────────────────────
+// Helpers
 
 function snapToGrid(minutes: number, gridMinutes: number): number {
     return Math.round(minutes / gridMinutes) * gridMinutes;

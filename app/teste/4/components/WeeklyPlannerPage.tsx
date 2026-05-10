@@ -41,11 +41,11 @@ export default function WeeklyPlannerPage() {
 
   const monday = useMemo(() => getMondayOfCurrentWeek(), []);
   const weekDates = useMemo(() => getWeekDates(monday), [monday]);
-  
+
   const todayIndex = useMemo(() => {
     // Current date for comparison: 2026-03-21T... (Saturday)
-    const today = new Date();
-    const todayDay = today.getDay();
+    const today = "2026-03-21T12:00:00".split("T")[0];
+    const todayDay = new Date(today).getDay();
     // Convert: Sun=0 → 6, Mon=1 → 0, ..., Sat=6 → 5
     return todayDay === 0 ? 6 : todayDay - 1;
   }, []);
@@ -77,18 +77,18 @@ export default function WeeklyPlannerPage() {
                 <ChevronLeft className="w-4 h-4" />
               </Button>
               <div className="px-4 py-1 flex flex-col items-center">
-                 <span className="text-[11px] font-bold tabular-nums">
-                    {formatDate(weekDates[0])} — {formatDate(weekDates[6])}
-                 </span>
-                 <span className="text-[9px] text-muted-foreground font-medium">Esta Semana</span>
+                <span className="text-[11px] font-bold tabular-nums">
+                  {formatDate(weekDates[0])} — {formatDate(weekDates[6])}
+                </span>
+                <span className="text-[9px] text-muted-foreground font-medium">Esta Semana</span>
               </div>
               <Button variant="ghost" size="icon" className="h-8 w-8 hover:bg-background" disabled>
                 <ChevronRight className="w-4 h-4" />
               </Button>
             </div>
-            
+
             <Separator orientation="vertical" className="h-8" />
-            
+
             <div className="flex items-center gap-1.5">
               <Button variant="outline" size="sm" className="h-9 gap-2 shadow-sm font-medium">
                 <Printer className="w-4 h-4" />
@@ -136,13 +136,13 @@ export default function WeeklyPlannerPage() {
           </div>
 
           {/* ── Tools Sidebar ── */}
-          <SidebarTools 
-             unscheduledBlocks={unscheduledBlocks}
-             subjectBreakdown={stats.subjectBreakdown}
-             onAddUnscheduled={addUnscheduled}
-             onRemoveUnscheduled={() => {}} // Not implemented yet
-             onDragStart={setDraggedId}
-             onQuickAdd={(data) => openAddModal(todayIndex, data)}
+          <SidebarTools
+            unscheduledBlocks={unscheduledBlocks}
+            subjectBreakdown={stats.subjectBreakdown}
+            onAddUnscheduled={addUnscheduled}
+            onRemoveUnscheduled={() => { }} // Not implemented yet
+            onDragStart={setDraggedId}
+            onQuickAdd={(data) => openAddModal(todayIndex, data)}
           />
         </div>
 

@@ -42,7 +42,7 @@ export function DayColumn({
   const doneBlocks = blocks.filter(b => b.status === 'done');
   const totalBlocks = blocks.length;
   const isWeekend = dayIndex >= 5;
-
+  console.log(`Renderizando ${DAY_NAMES[dayIndex]} - ${blocks.length} blocos, ${formatDuration(dayMinutes)}`);
   return (
     <div className={cn(
       "flex flex-col min-w-0 transition-opacity",
