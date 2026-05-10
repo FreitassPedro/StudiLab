@@ -223,7 +223,7 @@ export default function Page() {
 
                 <div className="flex  overflow-hidden relative">
                     {/* ── Main planner ── */}
-                    <div className="flex flex-1 min-w-0 px-4 bg-background m-4 mr-0 rounded-2xl p-4 flex-col">
+                    <div className="flex flex-1 min-w-0 bg-background m-4 mr-0 rounded-2xl flex-col">
                         <div className="flex-1 overflow-auto">
                             <div
                                 ref={gridRef}
