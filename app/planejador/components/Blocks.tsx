@@ -1,4 +1,4 @@
-import { useCallback, useMemo } from "react";
+import { useCallback, useId, useMemo } from "react";
 import { BlockType, StudyBlock, SubjectColor } from "./mockData";
 import { COLOR_MAP, formatDuration, getBlockTimelineMetrics, parseTimeToMinutes } from "../utils";
 import { CheckCircle2, Circle, Clock, GripVertical, MoreHorizontal, Pencil, Trash2, Trash2Icon } from "lucide-react";
@@ -196,6 +196,16 @@ export function BlockCard({
 const COLOR_OPTIONS: SubjectColor[] = [
     "blue", "emerald", "violet", "amber", "rose", "orange", "teal", "pink",
 ];
+
+function normalizeSubjectName(subject: string): string {
+    return subject
+        .normalize("NFD")
+        .replace(/[\u0300-\u036f]/g, "")
+        .trim()
+        .toLowerCase()
+        .replace(/\s+/g, " ");
+}
+
 function ColorPicker({
     value,
     onChange,
@@ -253,6 +263,62 @@ export function NewBlockFormModal({
     onFormChange: (patch: Partial<StudyBlock>) => void;
     isEditing?: boolean;
 }) {
+
+    const { allBlocks } = usePlannerActions();
+    const subjectSuggestionsListId = useId().replace(/:/g, "");
+
+    const colorBySubject = useMemo(() => {
+        const map = new Map<string, SubjectColor>();
+        for (const block of allBlocks) {
+            const normalizedSubject = normalizeSubjectName(block.subject);
+            if (!normalizedSubject || map.has(normalizedSubject)) {
+                continue;
+            }
+            map.set(normalizedSubject, block.color);
+        }
+        return map;
+    }, [allBlocks]);
+
+    const subjectSuggestions = useMemo(() => {
+
+        const map = new Map<string, string>();
+        for (const block of allBlocks) {
+            const trimmedSubject = block.subject.trim();
+            const normalizedSubject = normalizeSubjectName(trimmedSubject);
+            if (!normalizedSubject || map.has(normalizedSubject)) {
+                continue;
+            }
+            map.set(normalizedSubject, trimmedSubject);
+        }
+
+        return Array.from(map.values()).sort((a, b) =>
+            a.localeCompare(b, "pt-BR", { sensitivity: "base" })
+        );
+    }, [allBlocks]);
+
+    const filteredSubjectSuggestions = useMemo(() => {
+        const normalizedQuery = normalizeSubjectName(form.subject ?? "");
+        if (!normalizedQuery) {
+            return subjectSuggestions.slice(0, 12);
+        }
+
+        return subjectSuggestions
+            .filter((subject) => normalizeSubjectName(subject).includes(normalizedQuery))
+            .slice(0, 12);
+    }, [form.subject, subjectSuggestions]);
+
+    const handleSubjectChange = useCallback((subject: string) => {
+        const normalizedSubject = normalizeSubjectName(subject);
+        const matchedColor = normalizedSubject
+            ? colorBySubject.get(normalizedSubject)
+            : undefined;
+
+        onFormChange({
+            subject,
+            ...(matchedColor ? { color: matchedColor } : {}),
+        });
+    }, [colorBySubject, onFormChange]);
+
     return (
         <Dialog open={open} onOpenChange={(v) => !v && onCloseModal()}>
             <DialogContent className="max-w-sm">
@@ -264,14 +330,20 @@ export function NewBlockFormModal({
                 </DialogHeader>
 
                 <div className="flex flex-col gap-3">
-                    <div>
+                    <div >
                         <Label className="text-xs text-muted-foreground mb-1 block">Matéria</Label>
                         <Input
                             placeholder="Ex: Matemática"
                             value={form.subject ?? ""}
-                            onChange={(e) => onFormChange({ subject: e.target.value })}
+                            onChange={(e) => handleSubjectChange(e.target.value)}
+                            list={subjectSuggestionsListId}
                             autoFocus
                         />
+                        <datalist id={subjectSuggestionsListId}>
+                            {filteredSubjectSuggestions.map((subject) => (
+                                <option key={subject} value={subject} />
+                            ))}
+                        </datalist>
                     </div>
 
                     <div>
