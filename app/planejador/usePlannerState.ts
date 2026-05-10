@@ -76,6 +76,8 @@ export function usePlannerState() {
         setEditingBlock(null);
         setNewBlockForm((prev) => ({
             ...prev,
+            subject: "",
+            topic: "",
             dayIndex,
             startTime: startTime ?? "09:00",
             endTime: startTime
@@ -113,6 +115,10 @@ export function usePlannerState() {
             setBlocks((prev) => prev.map((b) => b.id === editingBlock.id ? { ...b, ...newBlockForm } : b));
         } 
         else {
+            if (!newBlockForm.subject) {
+                alert("O campo 'Matéria' é obrigatório.");
+                return;
+            }
             const newBlock: StudyBlock = {
                 id: generateId(),
                 subject: newBlockForm.subject,

@@ -5,7 +5,7 @@ import { Separator } from "@/components/ui/separator";
 import { Calendar, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useCallback, useMemo, useRef, useState, memo } from "react";
-import {  StudyBlock } from "./mockData";
+import { StudyBlock } from "./mockData";
 import { formatDuration } from "../utils";
 import { Badge } from "@/components/ui/badge";
 
@@ -15,12 +15,6 @@ import { pixelToMinutes, minutesToTimeStr } from "../usePlannerState";
 import { parseTimeToMinutes } from "../utils";
 import { BlockCard, GhostBlock } from "./Blocks";
 import { usePlannerActions } from "./PlannerActionsContext";
-
-
-
-
-
-
 
 
 // ── DayColumn ────────────────────────────────────────────────────────────────
@@ -146,15 +140,15 @@ export function DayColumn({
     }, [date]);
 
     return (
-        <div className="flex flex-col min-w-0">
+        <div className="flex flex-col min-w-0 relative">
             {/* Header */}
-            <div className={cn("px-2 py-2 rounded-t-lg", isToday && "bg-primary/5")}>
-                <p className={cn("text-sm font-semibold", isToday ? "text-primary" : "text-foreground")}>
+            <div className={cn("sticky top-0 z-50 bg-background/95 backdrop-blur-sm px-2 py-2 rounded-t-lg  ", isToday && "bg-primary/5")}>
+                <h3 className={cn("text-sm font-semibold", isToday ? "text-primary" : "text-foreground")}>
                     {getDayName(date)}
-                    {isToday && (
-                        <span className="ml-1.5 text-xs font-normal text-primary/70">Hoje</span>
-                    )}
-                </p>
+                </h3>
+                {isToday && (
+                    <span className="ml-1.5 text-xs font-normal text-primary/70">Hoje</span>
+                )}
                 <p className="text-xs text-muted-foreground">{date.toLocaleDateString("pt-BR")}</p>
                 <Badge variant={dayMinutes > 0 ? "secondary" : "outline"} className="mt-1">
                     {dayMinutes > 0 ? formatDuration(dayMinutes) : "—"}

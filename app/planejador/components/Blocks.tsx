@@ -216,6 +216,7 @@ function ColorPicker({
     value?: string;
     onChange: (c: SubjectColor) => void;
 }) {
+
     const colorDots: Record<SubjectColor, string> = {
         blue: "bg-blue-400",
         emerald: "bg-emerald-400",
@@ -226,6 +227,7 @@ function ColorPicker({
         teal: "bg-teal-400",
         pink: "bg-pink-400",
     };
+
     return (
         <div className="flex gap-2 flex-wrap">
             {COLOR_OPTIONS.map((c) => (
@@ -267,6 +269,7 @@ export function NewBlockFormModal({
 }) {
 
     const { allBlocks } = usePlannerActions();
+
     const savedSubjects: Map<string, SubjectColor> = useMemo(() => {
         const map = new Map<string, SubjectColor>();
         for (const block of allBlocks) {
@@ -276,6 +279,8 @@ export function NewBlockFormModal({
             }
             map.set(normalizedSubject, block.color);
         }
+
+        console.log("Saved subjects map:", map);
         return map;
     }, [allBlocks]);
 
@@ -330,6 +335,8 @@ export function NewBlockFormModal({
             color: matchedColor ?? form.color ?? "blue",
         });
     }, [savedSubjects, onFormChange, form.color]);
+
+
 
 
     return (
@@ -446,7 +453,6 @@ export function NewBlockFormModal({
                         <ColorPicker
                             value={form.color as SubjectColor}
                             onChange={(c) => onFormChange({ color: c })}
-
                         />
                     </div>
                 </div>
