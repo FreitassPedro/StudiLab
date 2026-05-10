@@ -1,15 +1,18 @@
-import { useCallback, useId, useMemo } from "react";
+import { useCallback, useMemo } from "react";
 import { BlockType, StudyBlock, SubjectColor } from "./mockData";
 import { COLOR_MAP, formatDuration, getBlockTimelineMetrics, parseTimeToMinutes } from "../utils";
 import { CheckCircle2, Circle, Clock, GripVertical, MoreHorizontal, Pencil, Trash2, Trash2Icon } from "lucide-react";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
+
+
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuGroup, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
 import { usePlannerActions } from "./PlannerActionsContext";
+import { Combobox, ComboboxContent, ComboboxInput, ComboboxItem, ComboboxList } from "@/components/ui/combobox";
 
 
 interface BlockCardProps {
@@ -245,7 +248,6 @@ function ColorPicker({
 
 
 // ── Block Form Modal ─────────────────────────────────────────────────────────
-
 export function NewBlockFormModal({
     open,
     form,
@@ -265,9 +267,7 @@ export function NewBlockFormModal({
 }) {
 
     const { allBlocks } = usePlannerActions();
-    const subjectSuggestionsListId = useId().replace(/:/g, "");
-
-    const colorBySubject = useMemo(() => {
+    const savedSubjects: Map<string, SubjectColor> = useMemo(() => {
         const map = new Map<string, SubjectColor>();
         for (const block of allBlocks) {
             const normalizedSubject = normalizeSubjectName(block.subject);
@@ -279,48 +279,62 @@ export function NewBlockFormModal({
         return map;
     }, [allBlocks]);
 
-    const subjectSuggestions = useMemo(() => {
+    const subjectOptions: string[] = useMemo(() => {
 
         const map = new Map<string, string>();
+
         for (const block of allBlocks) {
-            const trimmedSubject = block.subject.trim();
-            const normalizedSubject = normalizeSubjectName(trimmedSubject);
-            if (!normalizedSubject || map.has(normalizedSubject)) {
-                continue;
-            }
-            map.set(normalizedSubject, trimmedSubject);
+
+            const trimmed = block.subject.trim();
+
+            if (!trimmed) continue;
+
+            const normalized = normalizeSubjectName(trimmed);
+
+            if (map.has(normalized)) continue;
+
+            map.set(normalized, trimmed);
         }
 
         return Array.from(map.values()).sort((a, b) =>
-            a.localeCompare(b, "pt-BR", { sensitivity: "base" })
+            a.localeCompare(b, "pt-BR", {
+                sensitivity: "base",
+            })
         );
+
     }, [allBlocks]);
 
-    const filteredSubjectSuggestions = useMemo(() => {
-        const normalizedQuery = normalizeSubjectName(form.subject ?? "");
-        if (!normalizedQuery) {
-            return subjectSuggestions.slice(0, 12);
+    const filteredOptions = useMemo(() => {
+
+        const query = normalizeSubjectName(form.subject ?? "");
+
+        if (!query) {
+            return subjectOptions.slice(0, 10);
         }
 
-        return subjectSuggestions
-            .filter((subject) => normalizeSubjectName(subject).includes(normalizedQuery))
-            .slice(0, 12);
-    }, [form.subject, subjectSuggestions]);
+        return subjectOptions
+            .filter(option =>
+                normalizeSubjectName(option).includes(query)
+            )
+            .slice(0, 10);
+
+    }, [form.subject, subjectOptions]);
 
     const handleSubjectChange = useCallback((subject: string) => {
         const normalizedSubject = normalizeSubjectName(subject);
-        const matchedColor = normalizedSubject
-            ? colorBySubject.get(normalizedSubject)
-            : undefined;
+
+        const matchedColor = savedSubjects.get(normalizedSubject);
 
         onFormChange({
             subject,
-            ...(matchedColor ? { color: matchedColor } : {}),
+            color: matchedColor ?? form.color ?? "blue",
         });
-    }, [colorBySubject, onFormChange]);
+    }, [savedSubjects, onFormChange, form.color]);
+
 
     return (
-        <Dialog open={open} onOpenChange={(v) => !v && onCloseModal()}>
+        // Use modal=false for ComboboxInput
+        <Dialog open={open} onOpenChange={(v) => !v && onCloseModal()} modal={false}>
             <DialogContent className="max-w-sm">
                 <DialogHeader>
                     <DialogTitle>
@@ -330,20 +344,34 @@ export function NewBlockFormModal({
                 </DialogHeader>
 
                 <div className="flex flex-col gap-3">
-                    <div >
-                        <Label className="text-xs text-muted-foreground mb-1 block">Matéria</Label>
-                        <Input
-                            placeholder="Ex: Matemática"
+                    <div className="flex flex-col gap-1">
+                        <Label className="text-xs text-muted-foreground mb-1">Matéria</Label>
+                        <Combobox
+                            items={filteredOptions}
                             value={form.subject ?? ""}
-                            onChange={(e) => handleSubjectChange(e.target.value)}
-                            list={subjectSuggestionsListId}
-                            autoFocus
-                        />
-                        <datalist id={subjectSuggestionsListId}>
-                            {filteredSubjectSuggestions.map((subject) => (
-                                <option key={subject} value={subject} />
-                            ))}
-                        </datalist>
+                            inputValue={form.subject ?? ""}
+                            onValueChange={(value) => handleSubjectChange(value ?? "")}
+                            onInputValueChange={(value) => handleSubjectChange(value ?? "")}
+                        >
+                            <ComboboxInput
+                                placeholder="Ex: Cálculo"
+                            />
+                            <ComboboxContent>
+                                <ComboboxList>
+                                    {(item) => (
+                                        <ComboboxItem key={item} value={item}>
+                                            <div>
+                                                <div className="w-2.5 h-2.5 rounded-full bg-current opacity-70 mr-2 inline-block"
+                                                    style={{ backgroundColor: savedSubjects.get(normalizeSubjectName(item)) ?? "blue" }}
+                                                />
+                                                {item}
+                                            </div>
+                                        </ComboboxItem>
+                                    )}
+                                </ComboboxList>
+
+                            </ComboboxContent>
+                        </Combobox>
                     </div>
 
                     <div>
@@ -418,6 +446,7 @@ export function NewBlockFormModal({
                         <ColorPicker
                             value={form.color as SubjectColor}
                             onChange={(c) => onFormChange({ color: c })}
+
                         />
                     </div>
                 </div>
