@@ -138,7 +138,7 @@ const RenderCurrentSessionCard = ({
 
     const resolvedBorderColor = subjectColor ?? '#a1a1aa';
 
-  
+
     const currentCard = useMemo(() => {
         if (!startTime) return null;
 

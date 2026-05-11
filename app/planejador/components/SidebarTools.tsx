@@ -4,7 +4,7 @@ import { Separator } from "@/components/ui/separator";
 import { useMemo, useState } from "react";
 import { usePlannerActions } from "./PlannerActionsContext";
 import { Button } from "@/components/ui/button";
-import { LayoutList, Plus } from "lucide-react";
+import { LayoutList, Plus, Trash2 } from "lucide-react";
 import { usePlannerState } from "../usePlannerState";
 
 function ProgressBar({ progress }: { progress: number }) {
@@ -65,11 +65,13 @@ export function SidebarTools() {
         <aside className={cn("border-l bg-muted/10 flex flex-col h-full p-4 transition-transform duration-300  ",
             isCollapsed ? "w-16" : "md:w-64 lg:w-100")}
         >
-            <Button variant="ghost" className="absolute top-2 right-2 p-2 flex" onClick={() => setIsCollapsed(prev => !prev)}>
-                <LayoutList
-                    className={cn("w-16 h-16 transition-transform border border-border", isCollapsed && "rotate-180")}
-                />
-            </Button>
+            <div>
+                <Button variant="outline" className="flex" onClick={() => setIsCollapsed(prev => !prev)}>
+                    <LayoutList
+                        className={cn("w-16 h-16 transition-transform border border-border", isCollapsed && "rotate-180")}
+                    />
+                </Button>
+            </div>
             {!isCollapsed && (
                 <div className="space-y-8">
                     <div className="space-y-4">

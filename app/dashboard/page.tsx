@@ -6,8 +6,11 @@ import { TodaySummarySkeleton, RecentSessionsSkeleton } from "./components/Skele
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 
+
 import Link from "next/link";
 import { Play } from "lucide-react";
+import Image from "next/image";
+import { ComfortSection } from "./components/Comfort";
 
 export default function DashboardPage() {
 
@@ -18,7 +21,7 @@ export default function DashboardPage() {
             <Suspense fallback={<TodaySummarySkeleton />}>
                 <TodaySummary />
             </Suspense>
-            
+
             <Link href="/nova-sessao" className="block">
                 <Button variant="default" className="w-full py-8 text-xl font-bold gap-3 shadow-lg hover:shadow-xl transition-all">
                     <Play className="w-6 h-6 fill-current" />
@@ -26,6 +29,7 @@ export default function DashboardPage() {
                 </Button>
             </Link>
 
+            <ComfortSection />
             <div className="grid grid-cols-1 gap-8 md:grid-cols-3">
 
                 {/* O Ditador (Coluna 1): Dita a altura matemática da linha inteira no desktop */}
@@ -43,7 +47,6 @@ export default function DashboardPage() {
                         </Suspense>
                     </div>
                 </div>
-
             </div>
         </div>
     );
