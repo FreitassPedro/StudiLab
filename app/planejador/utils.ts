@@ -1,5 +1,5 @@
 import { getDay } from "date-fns";
-import { StudyBlock, SubjectColor } from "./components/mockData";
+import { StudyBlock, ColorName } from "./components/mockData";
 
 export function formatDuration(minutes: number): string {
     const h = Math.floor(minutes / 60);
@@ -14,7 +14,7 @@ export function getDayName(date: Date): string {
     return days[getDay(date)];
 }
 export const COLOR_MAP: Record<
-    SubjectColor,
+    ColorName,
     { bg: string; text: string; border: string; badge: string }
 > = {
     emerald: {
@@ -203,3 +203,12 @@ export const getBlockTimelineMetrics = (
         heightPx: Math.max(bottomPx - topPx, 20),
     };
 };
+
+export function normalizeSubjectName(subject: string): string {
+    return subject
+        .normalize("NFD")
+        .replace(/[\u0300-\u036f]/g, "")
+        .trim()
+        .toLowerCase()
+        .replace(/\s+/g, " ");
+}

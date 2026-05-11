@@ -7,12 +7,12 @@ export interface StudyBlock {
     type?: BlockType;
     startTime: string; // "HH:MM"
     endTime: string;   // "HH:MM"
-    color: SubjectColor;
+    color: ColorName;
     dayIndex: number; // 0=Monday, ..., 6=Sunday
     status: "todo" | "done";
 }
 
-export type SubjectColor =
+export type ColorName =
     | "blue"
     | "amber"
     | "rose"

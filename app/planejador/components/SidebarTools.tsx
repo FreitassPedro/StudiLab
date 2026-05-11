@@ -1,10 +1,11 @@
 import { cn } from "@/lib/utils";
-import { COLOR_MAP, formatDuration } from "../utils";
+import { COLOR_MAP, formatDuration, normalizeSubjectName } from "../utils";
 import { Separator } from "@/components/ui/separator";
 import { useMemo, useState } from "react";
 import { usePlannerActions } from "./PlannerActionsContext";
 import { Button } from "@/components/ui/button";
 import { LayoutList, Plus } from "lucide-react";
+import { usePlannerState } from "../usePlannerState";
 
 function ProgressBar({ progress }: { progress: number }) {
     return (
@@ -26,6 +27,10 @@ export function SidebarTools() {
         allBlocks,
         openAddModal
     } = usePlannerActions();
+
+    const {
+        subjects
+    } = usePlannerState();
 
     const [isCollapsed, setIsCollapsed] = useState(false);
 
@@ -57,7 +62,6 @@ export function SidebarTools() {
     }, [allBlocks]);
 
     return (
-       
         <aside className={cn("border-l bg-muted/10 flex flex-col h-full p-4 transition-transform duration-300  ",
             isCollapsed ? "w-16" : "md:w-64 lg:w-100")}
         >
@@ -81,23 +85,7 @@ export function SidebarTools() {
                                             <div className={cn("w-2 h-4 rounded-full shrink-0", colors.badge)}></div>
                                             <span className="font-sm font-semibold truncate">{subject}</span>
                                         </div>
-                                        <span className="text-[10px] ">{formatDuration(doneMinutes)} / {formatDuration(plannedMinutes)}</span>
-                                    </div>
-                                    <ProgressBar progress={progress} />
-                                </div>
-                            );
-                        })}
-                        {subjectsSummary.map(({ subject, plannedMinutes, doneMinutes, color }) => {
-                            const progress = plannedMinutes > 0 ? (doneMinutes / plannedMinutes) * 100 : 0;
-                            const colors = COLOR_MAP[color];
-                            return (
-                                <div key={subject}>
-                                    <div className="flex justify-between items-center font-semibold text-sm">
-                                        <div className="flex flex-row items-center gap-2">
-                                            <div className={cn("w-2 h-4 rounded-full shrink-0", colors.badge)}></div>
-                                            <span className="font-sm font-semibold truncate">{subject}</span>
-                                        </div>
-                                        <span className="text-[10px] ">{formatDuration(doneMinutes)} / {formatDuration(plannedMinutes)}</span>
+                                        <span className="text-[11px] ">{formatDuration(doneMinutes)} / {formatDuration(plannedMinutes)}</span>
                                     </div>
                                     <ProgressBar progress={progress} />
                                 </div>
@@ -109,7 +97,6 @@ export function SidebarTools() {
                         )}
                     </div>
 
-                    <Separator />
                     <Separator />
 
                     <section>
@@ -125,7 +112,7 @@ export function SidebarTools() {
 
                 </div>
             )}
-            
+
         </aside>
     )
 }

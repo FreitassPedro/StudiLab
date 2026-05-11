@@ -1,6 +1,6 @@
 import { useCallback, useMemo } from "react";
-import { BlockType, StudyBlock, SubjectColor } from "./mockData";
-import { COLOR_MAP, formatDuration, getBlockTimelineMetrics, parseTimeToMinutes } from "../utils";
+import { BlockType, StudyBlock, ColorName } from "./mockData";
+import { COLOR_MAP, formatDuration, getBlockTimelineMetrics, normalizeSubjectName, parseTimeToMinutes } from "../utils";
 import { CheckCircle2, Circle, Clock, GripVertical, MoreHorizontal, Pencil, Trash2, Trash2Icon } from "lucide-react";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
@@ -13,6 +13,7 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuGroup, DropdownMenuItem,
 import { Button } from "@/components/ui/button";
 import { usePlannerActions } from "./PlannerActionsContext";
 import { Combobox, ComboboxContent, ComboboxInput, ComboboxItem, ComboboxList } from "@/components/ui/combobox";
+import { usePlannerState } from "../usePlannerState";
 
 
 interface BlockCardProps {
@@ -196,28 +197,23 @@ export function BlockCard({
 }
 // ── Color picker ────────────────────────────────────────────────────────────
 
-const COLOR_OPTIONS: SubjectColor[] = [
+const COLOR_OPTIONS: ColorName[] = [
     "blue", "emerald", "violet", "amber", "rose", "orange", "teal", "pink",
 ];
 
-function normalizeSubjectName(subject: string): string {
-    return subject
-        .normalize("NFD")
-        .replace(/[\u0300-\u036f]/g, "")
-        .trim()
-        .toLowerCase()
-        .replace(/\s+/g, " ");
-}
+
 
 function ColorPicker({
     value,
     onChange,
+    disabled,
 }: {
     value?: string;
-    onChange: (c: SubjectColor) => void;
+    onChange: (c: ColorName) => void;
+    disabled?: boolean;
 }) {
 
-    const colorDots: Record<SubjectColor, string> = {
+    const colorDots: Record<ColorName, string> = {
         blue: "bg-blue-400",
         emerald: "bg-emerald-400",
         violet: "bg-violet-400",
@@ -229,7 +225,7 @@ function ColorPicker({
     };
 
     return (
-        <div className="flex gap-2 flex-wrap">
+        <div className={cn("flex gap-2 flex-wrap", disabled && "pointer-events-none opacity-50")}>
             {COLOR_OPTIONS.map((c) => (
                 <button
                     key={c}
@@ -268,75 +264,31 @@ export function NewBlockFormModal({
     isEditing?: boolean;
 }) {
 
-    const { allBlocks } = usePlannerActions();
+    const {
+        subjects
+    } = usePlannerState();
 
-    const savedSubjects: Map<string, SubjectColor> = useMemo(() => {
-        const map = new Map<string, SubjectColor>();
-        for (const block of allBlocks) {
-            const normalizedSubject = normalizeSubjectName(block.subject);
-            if (!normalizedSubject || map.has(normalizedSubject)) {
-                continue;
-            }
-            map.set(normalizedSubject, block.color);
-        }
-
-        console.log("Saved subjects map:", map);
-        return map;
-    }, [allBlocks]);
-
-    const subjectOptions: string[] = useMemo(() => {
-
-        const map = new Map<string, string>();
-
-        for (const block of allBlocks) {
-
-            const trimmed = block.subject.trim();
-
-            if (!trimmed) continue;
-
-            const normalized = normalizeSubjectName(trimmed);
-
-            if (map.has(normalized)) continue;
-
-            map.set(normalized, trimmed);
-        }
-
-        return Array.from(map.values()).sort((a, b) =>
-            a.localeCompare(b, "pt-BR", {
-                sensitivity: "base",
-            })
-        );
-
-    }, [allBlocks]);
+    console.log("subjects in modal", subjects);
+    const normalizedFormSubject = normalizeSubjectName(form.subject ?? "");
 
     const filteredOptions = useMemo(() => {
+        const query = normalizedFormSubject;
 
-        const query = normalizeSubjectName(form.subject ?? "");
-
-        if (!query) {
-            return subjectOptions.slice(0, 10);
-        }
-
-        return subjectOptions
-            .filter(option =>
-                normalizeSubjectName(option).includes(query)
+        return Array.from(subjects.values())
+            .filter((subj) => !query || subj.label.toLowerCase().includes(query)
             )
-            .slice(0, 10);
 
-    }, [form.subject, subjectOptions]);
+    }, [normalizedFormSubject, subjects]);
 
     const handleSubjectChange = useCallback((subject: string) => {
-        const normalizedSubject = normalizeSubjectName(subject);
-
-        const matchedColor = savedSubjects.get(normalizedSubject);
+        const normalized = normalizeSubjectName(subject);
+        const matchedColor = subjects.get(normalized);
 
         onFormChange({
             subject,
-            color: matchedColor ?? form.color ?? "blue",
+            color: matchedColor?.colorName ?? "blue",
         });
-    }, [savedSubjects, onFormChange, form.color]);
-
-
+    }, [subjects, onFormChange]);
 
 
     return (
@@ -355,8 +307,8 @@ export function NewBlockFormModal({
                         <Label className="text-xs text-muted-foreground mb-1">Matéria</Label>
                         <Combobox
                             items={filteredOptions}
-                            value={form.subject ?? ""}
-                            inputValue={form.subject ?? ""}
+                            value={form.subject}
+                            inputValue={form.subject}
                             onValueChange={(value) => handleSubjectChange(value ?? "")}
                             onInputValueChange={(value) => handleSubjectChange(value ?? "")}
                         >
@@ -365,18 +317,16 @@ export function NewBlockFormModal({
                             />
                             <ComboboxContent>
                                 <ComboboxList>
-                                    {(item) => (
-                                        <ComboboxItem key={item} value={item}>
+                                    {(sbj: { label: string, colorName: ColorName }) => (
+                                        <ComboboxItem key={sbj.label} value={sbj.label}>
                                             <div>
-                                                <div className="w-2.5 h-2.5 rounded-full bg-current opacity-70 mr-2 inline-block"
-                                                    style={{ backgroundColor: savedSubjects.get(normalizeSubjectName(item)) ?? "blue" }}
+                                                <div className={cn("w-2.5 h-2.5 rounded-full bg-current opacity-70 mr-2 inline-block", COLOR_MAP[sbj.colorName]?.badge ?? COLOR_MAP.blue.badge)}
                                                 />
-                                                {item}
+                                                {sbj.label}
                                             </div>
                                         </ComboboxItem>
                                     )}
                                 </ComboboxList>
-
                             </ComboboxContent>
                         </Combobox>
                     </div>
@@ -450,12 +400,27 @@ export function NewBlockFormModal({
 
                     <div>
                         <Label className="text-xs text-muted-foreground mb-1 block">Cor</Label>
-                        <ColorPicker
-                            value={form.color as SubjectColor}
-                            onChange={(c) => onFormChange({ color: c })}
-                        />
+                        <div className="flex justify-between items-center gap-2">
+                            <ColorPicker
+                                value={form.color as ColorName}
+                                onChange={(c) => onFormChange({ color: c })}
+                                disabled={subjects.has(normalizeSubjectName(form.subject ?? ""))}
+                            />
+                            {subjects.has(normalizeSubjectName(form.subject ?? "")) && (
+                                <Button
+                                    variant="outline"
+                                    onChange={(e) => onFormChange({ color: e.target.value as ColorName })}
+                                >
+                                    <div className={cn("w-2.5 h-2.5 rounded-full inline-block",
+                                        COLOR_MAP[form.color as ColorName]?.badge)}
+                                    />
+                                    {form.subject ?? "Sem matéria"}
+                                </Button>
+                            )}
+                        </div>
                     </div>
                 </div>
+
 
                 <DialogFooter className="flex items-center justify-between mt-1">
                     <div>
@@ -481,7 +446,7 @@ export function NewBlockFormModal({
                     </div>
                 </DialogFooter>
             </DialogContent>
-        </Dialog>
+        </Dialog >
     );
 }
 

@@ -1,9 +1,9 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
-import { BlockType, MOCK_BLOCKS, StudyBlock, SubjectColor } from "./components/mockData";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { BlockType, MOCK_BLOCKS, StudyBlock, ColorName } from "./components/mockData";
 import { generateId } from "../teste/4/components/planner-utils";
-import { parseTimeToMinutes } from "./utils";
+import { normalizeSubjectName, parseTimeToMinutes } from "./utils";
 
 const PLANNER_BLOCKS_STORAGE_KEY = "planner.blocks.v1";
 
@@ -13,7 +13,7 @@ export interface NewBlockForm {
     startTime: string;
     endTime: string;
     type: BlockType;
-    color: SubjectColor;
+    color: ColorName;
     dayIndex: number;
 }
 
@@ -40,7 +40,6 @@ export function usePlannerState() {
 
     // 2. Transição de Estado Assíncrona: Delegação da leitura do cache para a fase pós-hidratação.
     useEffect(() => {
-        
         const stored = localStorage.getItem(PLANNER_BLOCKS_STORAGE_KEY);
         if (stored) {
             try {
@@ -71,6 +70,28 @@ export function usePlannerState() {
 
     // Used to detect single-click vs drag
     const dragMovedRef = useRef(false);
+
+
+    const subjects = useMemo(() => {
+        const subjectsMap = new Map<string, { colorName: ColorName, label: string }>();
+
+        for (const block of blocks) {
+            const label = normalizeSubjectName(block.subject);
+
+            if (!label) continue;
+            if (subjectsMap.has(label)) continue;
+
+            subjectsMap.set(label,
+                {
+                    colorName: block.color,
+                    label: block.subject
+                });
+        }
+
+        return subjectsMap;
+    }, [blocks]);
+
+
 
     const openAddModal = useCallback((dayIndex: number, startTime?: string) => {
         setEditingBlock(null);
@@ -113,7 +134,7 @@ export function usePlannerState() {
     const saveBlock = useCallback(() => {
         if (editingBlock) {
             setBlocks((prev) => prev.map((b) => b.id === editingBlock.id ? { ...b, ...newBlockForm } : b));
-        } 
+        }
         else {
             if (!newBlockForm.subject) {
                 alert("O campo 'Matéria' é obrigatório.");
@@ -218,6 +239,7 @@ export function usePlannerState() {
         isLoaded,
         form: newBlockForm,
         setForm: setNewBlockForm,
+        subjects,
         draggedId,
         setDraggedId,
         dragMovedRef,
