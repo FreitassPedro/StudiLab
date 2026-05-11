@@ -31,6 +31,7 @@ export function BlockCard({
         resizingId,
         openEditBlock,
         removeBlock,
+        duplicateBlock,
         handleDragStart,
         handleResizeStart,
         toggleBlockStatus,
@@ -148,8 +149,10 @@ export function BlockCard({
                 </DropdownMenuTrigger>
                 <DropdownMenuContent>
                     <DropdownMenuGroup>
-                        <DropdownMenuItem>
-                            Editar
+                        <DropdownMenuItem
+                            onClick={() => duplicateBlock(block.id)}
+                        >
+                            Duplicar
                         </DropdownMenuItem>
                         <DropdownMenuItem variant="destructive"
                             onClick={() => removeBlock(block.id)}

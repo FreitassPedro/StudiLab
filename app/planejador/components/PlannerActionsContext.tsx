@@ -11,6 +11,7 @@ interface PlannerActionsContextValue {
     openAddModal: (dayIndex: number, startTime?: string) => void;
     openEditBlock: (block: StudyBlock) => void;
     removeBlock: (blockId: string) => void;
+    duplicateBlock: (blockId: string) => void;
     handleDragStart: (id: string, offsetY: number) => void;
     handleResizeStart: (id: string, e: React.MouseEvent) => void;
     toggleBlockStatus: (id: string) => void;

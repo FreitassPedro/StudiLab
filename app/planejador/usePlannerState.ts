@@ -131,6 +131,20 @@ export function usePlannerState() {
         setBlocks((prev) => prev.filter((b) => b.id !== blockId));
     }, []);
 
+    const duplicateBlock = useCallback((blockId: string) => {
+        const block = blocks.find((b) => b.id === blockId);
+        if (!block) return;
+
+        const newblock = {
+            ...block,
+            id: generateId(),
+            startTime: minutesToTimeStr(parseTimeToMinutes(block.startTime) + 60),
+            endTime: minutesToTimeStr(parseTimeToMinutes(block.endTime) + 60),
+        };
+        setBlocks((prev) => [...prev, newblock]);
+    }, [blocks]);
+
+
     const saveBlock = useCallback(() => {
         if (editingBlock) {
             setBlocks((prev) => prev.map((b) => b.id === editingBlock.id ? { ...b, ...newBlockForm } : b));
@@ -250,6 +264,7 @@ export function usePlannerState() {
         editingBlock,
         modalOpen,
         removeBlock,
+        duplicateBlock,
         openAddModal,
         openEditBlock,
         closeModal,
