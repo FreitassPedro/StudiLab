@@ -4,7 +4,7 @@ import { Separator } from "@/components/ui/separator";
 import { useMemo, useState } from "react";
 import { usePlannerActions } from "./PlannerActionsContext";
 import { Button } from "@/components/ui/button";
-import { LayoutList, Plus, Trash2 } from "lucide-react";
+import { Calendar, ChevronRight, ChevronsLeft, ChevronsRight, LayoutList, Plus, Trash2 } from "lucide-react";
 import { usePlannerState } from "../usePlannerState";
 
 function ProgressBar({ progress }: { progress: number }) {
@@ -61,15 +61,43 @@ export function SidebarTools() {
             .sort((a, b) => b.plannedMinutes - a.plannedMinutes);
     }, [allBlocks]);
 
+
+    if (isCollapsed) {
+        return (
+            <aside className="border-l flex flex-col w-14 items-center py-4 gap-4">
+                <Button
+                    variant={"ghost"}
+                    size="icon"
+                    onClick={() => setIsCollapsed(false)}
+                >
+                    <ChevronsLeft className="w-4 h-4 shrink-0" />
+
+                </Button>
+
+                <Separator ></Separator>
+
+                <Button
+                    variant={"ghost"}
+                    size="icon"
+                    className="relative w-8 h-8"
+                    onClick={() => setIsCollapsed(false)}
+                >
+                    <Calendar />
+                </Button>
+            </aside>
+        )
+    }
     return (
         <aside className={cn("border-l bg-muted/10 flex flex-col h-full p-4 transition-transform duration-300  ",
             isCollapsed ? "w-16" : "md:w-64 lg:w-100")}
         >
             <div>
-                <Button variant="outline" className="flex" onClick={() => setIsCollapsed(prev => !prev)}>
-                    <LayoutList
-                        className={cn("w-16 h-16 transition-transform border border-border", isCollapsed && "rotate-180")}
-                    />
+                <Button
+                    variant="outline"
+                    className=""
+                    onClick={() => setIsCollapsed(prev => !prev)}>
+                    <ChevronsRight className="w-4 h-4 shrink-0" />
+
                 </Button>
             </div>
             {!isCollapsed && (
@@ -85,9 +113,13 @@ export function SidebarTools() {
                                     <div className="flex justify-between items-center font-semibold text-sm">
                                         <div className="flex flex-row items-center gap-2">
                                             <div className={cn("w-2 h-4 rounded-full shrink-0", colors.badge)}></div>
-                                            <span className="font-sm font-semibold truncate">{subject}</span>
+                                            <span className="text-sx font-semibold truncate">{subject}</span>
                                         </div>
-                                        <span className="text-[11px] ">{formatDuration(doneMinutes)} / {formatDuration(plannedMinutes)}</span>
+                                        <div>
+                                            <span className="text-[11px] text-muted-foreground/60 ">{formatDuration(doneMinutes)} /</span>
+                                            <span className="text-[11px] text-muted-foreground">{formatDuration(plannedMinutes)}</span>
+
+                                        </div>
                                     </div>
                                     <ProgressBar progress={progress} />
                                 </div>
