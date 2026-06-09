@@ -198,19 +198,10 @@ export function Cronometer() {
         <>
             <CronometerTitleSync />
 
-            <Card className="shadow-lg border-border/60 bg-card/95">
-                <CardContent className="p-4 space-y-2">
+            <Card className="shadow-lg border-border/60 bg-card/95 py-2">
+                <CardContent className="px-4 py-2  space-y-2">
 
-                    <Button
-                        type={"button"}
-                        variant="outline"
-                        size="sm"
-                        className={cn("rounded-full w-full h-8 text-xs text-muted-foreground hover:text-foreground focus-visible:ring-primary/40")}
-                        onClick={() => setIsFocusModeOpen(true)}
-                        title="Entrar no modo focado"
-                    >
-                        Modo foco <Maximize2 className="h-3.5 w-3.5 ml-1.5 text-primary" />
-                    </Button>
+
 
                     {/* Time Mode Tabs */}
                     <Tabs
@@ -283,6 +274,16 @@ export function Cronometer() {
                                     >
                                         Resetar
                                     </Button>
+                                    <Button
+                                        type={"button"}
+                                        variant="outline"
+                                        size="sm"
+                                        className={cn("rounded-full h-8 text-xs text-muted-foreground hover:text-foreground focus-visible:ring-primary/40")}
+                                        onClick={() => setIsFocusModeOpen(true)}
+                                        title="Entrar no modo focado"
+                                    >
+                                        Modo foco <Maximize2 className="h-3.5 w-3.5 ml-1.5 text-primary" />
+                                    </Button>
                                 </div>
                             </div>
                         </TabsContent>
@@ -294,7 +295,19 @@ export function Cronometer() {
 
 
                     {/* Start / End Time */}
-                    <div className="grid grid-cols-2 gap-2">
+                    <div className="grid grid-cols-3 gap-2">
+                        <div className="space-y-1 mr-4">
+                            <Label htmlFor="study_date" className="text-[10px] font-medium text-foreground/80">
+                                Data
+                            </Label>
+                            <Input
+                                id="study_date"
+                                type="date"
+                                value={formatDateForInputLocal(form.study_date)}
+                                className="h-8 text-xs bg-background/60 focus-visible:ring-primary/40"
+                                onChange={(e) => handleStudyDateChange(e.target.value)}
+                            />
+                        </div>
                         {/* Hora Início */}
                         <div className="space-y-1">
                             <Label htmlFor="start_time" className="text-[10px] font-medium text-foreground/80">
@@ -370,18 +383,7 @@ export function Cronometer() {
                     )}
 
                     {/* Date */}
-                    <div className="space-y-1">
-                        <Label htmlFor="study_date" className="text-[10px] font-medium text-foreground/80">
-                            Data
-                        </Label>
-                        <Input
-                            id="study_date"
-                            type="date"
-                            value={formatDateForInputLocal(form.study_date)}
-                            className="h-8 text-xs bg-background/60 focus-visible:ring-primary/40"
-                            onChange={(e) => handleStudyDateChange(e.target.value)}
-                        />
-                    </div>
+
                 </CardContent>
             </Card>
 
@@ -473,11 +475,6 @@ export function Cronometer() {
                                     </Button>
                                 </div>
                             </div>
-
-
-
-
-
                         </CardContent>
                     </Card>
                 </div>
