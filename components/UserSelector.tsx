@@ -106,71 +106,74 @@ export function UserSelector() {
     }
 
     return (
-        <div className="fixed inset-0 bg-background/80 backdrop-blur-sm z-50 mx-auto flex items-center justify-center">
-            <Card >
+        <div className="fixed  inset-0 bg-background/80 backdrop-blur-sm mx-auto z-999 p-4 flex items-center justify-center">
+            <Card className="w-full max-w-lg max-h-[85vh]">
                 <CardHeader>
                     <CardTitle>Identificação</CardTitle>
                     <CardDescription>Selecione seu nome para continuar</CardDescription>
                 </CardHeader>
-                <CardContent className="space-y-3">
-                    {!isCreatingAccount ? (
-                        users.map((u) => (
-                            <Button
-                                key={u.id}
-                                onClick={handleUSerSelect(u)}
-                                variant="outline"
-                                className="w-full justify-start text-lg h-14"
-                            >
-                                {u.name || u.email}
-                            </Button>
-                        ))) : (
-                        <div className="text-center gap-2 flex flex-col">
-                            <p className="text-muted-foreground">
-                                Insira o nome para criar uma nova conta.
-                            </p>
-                            <Input
-                                placeholder="Nome"
-                                className=""
-                                value={newUserName}
-                                onChange={(e) => setNewUserName(e.target.value)}
-                            />
+                <CardContent className="flex flex-col min-h-0">
+                    <div className="overflow-y-auto overscroll-contain pr-2 space-y-3 flex-1 min-h-0">
+                        {!isCreatingAccount ? (
+                            users.map((u) => (
+                                <Button
+                                    key={u.id}
+                                    onClick={handleUSerSelect(u)}
+                                    variant="outline"
+                                    className="w-full justify-start text-lg h-14"
+                                >
+                                    {u.name || u.email}
+                                </Button>
+                            ))) : (
+                            <div className="text-center gap-2 flex flex-col">
+                                <p className="text-muted-foreground">
+                                    Insira o nome para criar uma nova conta.
+                                </p>
+                                <Input
+                                    placeholder="Nome"
+                                    value={newUserName}
+                                    onChange={(e) => setNewUserName(e.target.value)}
+                                />
 
-                        </div>
-                    )}
+                            </div>
+                        )}
+                    </div>
                     <Separator className="my-4" />
-                    {isCreatingAccount ? (
-                        <>
-                            <Button variant={"default"} size="sm" className="w-full " onClick={handleCreateAccount}>
-                                <User2Icon name="plus" className="mr-2" size={16} />
-                                Registrar conta
-                            </Button>
-                            <Button variant={"outline"} className="w-full justify-center" onClick={() => setIsCreatingAccount(false)}>
-                                Voltar
-                            </Button>
-                        </>
-                    ) : (
-                        <>
-                            <Button variant={"default"} size="lg" className="w-full" onClick={handleCreateAccount}>
-                                <User2Icon name="plus" className="mr-2" size={16} />
-                                Criar nova conta
-                            </Button>
-                            <Button
-                                variant="secondary"
-                                size="sm"
-                                onClick={() => {
-                                    setUser({
-                                        id: "guest",
-                                        name: "Visitante",
-                                        email: "",
-                                    });
-                                }}
-                                className="w-full"
-                            >
-                                Continuar como visitante
-                            </Button>
-                        </>
-                    )}
 
+                    <div className="space-y-2">
+                        {isCreatingAccount ? (
+                            <>
+                                <Button variant={"default"} size="sm" className="w-full " onClick={handleCreateAccount}>
+                                    <User2Icon name="plus" className="mr-2" size={16} />
+                                    Registrar conta
+                                </Button>
+                                <Button variant={"outline"} className="w-full justify-center" onClick={() => setIsCreatingAccount(false)}>
+                                    Voltar
+                                </Button>
+                            </>
+                        ) : (
+                            <>
+                                <Button variant={"default"} size="lg" className="w-full" onClick={handleCreateAccount}>
+                                    <User2Icon name="plus" className="mr-2" size={16} />
+                                    Criar nova conta
+                                </Button>
+                                <Button
+                                    variant="secondary"
+                                    size="sm"
+                                    onClick={() => {
+                                        setUser({
+                                            id: "guest",
+                                            name: "Visitante",
+                                            email: "",
+                                        });
+                                    }}
+                                    className="w-full"
+                                >
+                                    Continuar como visitante
+                                </Button>
+                            </>
+                        )}
+                    </div>
                 </CardContent>
             </Card>
         </div>
