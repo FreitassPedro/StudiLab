@@ -106,7 +106,6 @@ export function StudySessionForm() {
     const router = useRouter();
     const createStudyLog = useCreateStudyLog();
 
-    const topicsMap = useTopicsMap();
     const sessionForm = useSessionFormStore((state) => state.form);
 
     const updateSelectionForm = useSessionFormStore((state) => state.updateForm);

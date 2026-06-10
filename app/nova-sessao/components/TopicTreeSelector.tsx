@@ -2,11 +2,12 @@
 
 import { TopicNode } from "@/types/types";
 import { useMemo, useState, memo, useCallback, createContext, useContext } from "react";
-import { ChevronDown, ChevronRight, FileText, Folder, FolderOpen, Network, Search } from "lucide-react";
+import { ChevronDown, ChevronRight, FileText, Folder, FolderOpen, Network, Search, SortAsc } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { useTopicsTree, useTopicsMap } from "@/hooks/useTopics";
 import { Input } from "@/components/ui/input";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 // Context to avoid prop drilling and help with optimization
 const TopicSelectionContext = createContext<{
@@ -116,15 +117,14 @@ export function TopicTreeSelector({
     onTopicSelect,
 }: TopicTreeSelectorProps) {
     const [searchQuery, setSearchQuery] = useState("");
+    const [sortByAlphabet, setSortByAlphabet] = useState(false);
 
-    const filteredNodes = useMemo(() => {
-        if (!searchQuery) return nodes;
-
+    const filteredAndSortedNodes = useMemo(() => {
         // Simple filter: if a node or any of its descendants matches the search
-        const filterTree = (nodes: TopicNode[]): TopicNode[] => {
-            return nodes.reduce((acc: TopicNode[], node) => {
-                const matches = node.name.toLowerCase().includes(searchQuery.toLowerCase());
-                const childrenMatches = filterTree(node.children);
+        const processTree = (nodes: TopicNode[]): TopicNode[] => {
+            let processed = nodes.reduce((acc: TopicNode[], node) => {
+                const matches = !searchQuery || node.name.toLowerCase().includes(searchQuery.toLowerCase());
+                const childrenMatches = processTree(node.children);
 
                 if (matches || childrenMatches.length > 0) {
                     acc.push({
@@ -134,10 +134,16 @@ export function TopicTreeSelector({
                 }
                 return acc;
             }, []);
+
+            if (sortByAlphabet) {
+                processed = [...processed].sort((a, b) => a.name.localeCompare(b.name));
+            }
+
+            return processed;
         };
 
-        return filterTree(nodes);
-    }, [nodes, searchQuery]);
+        return processTree(nodes);
+    }, [nodes, searchQuery, sortByAlphabet]);
 
     const contextValue = useMemo(() => ({
         selectedTopicId,
@@ -147,18 +153,37 @@ export function TopicTreeSelector({
     return (
         <TopicSelectionContext.Provider value={contextValue}>
             <div className="space-y-4 flex w-full flex-col">
-                <div className="relative top-0 bg-background z-10">
-                    <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-                    <Input
-                        placeholder="Buscar tópico..."
-                        className="pl-9 h-9"
-                        value={searchQuery}
-                        onChange={(e) => setSearchQuery(e.target.value)}
-                    />
+                <div className="flex gap-2 sticky top-0 bg-background z-10 pb-2">
+                    <div className="relative flex-1">
+                        <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+                        <Input
+                            placeholder="Buscar tópico..."
+                            className="pl-9 h-9"
+                            value={searchQuery}
+                            onChange={(e) => setSearchQuery(e.target.value)}
+                        />
+                    </div>
+                    <TooltipProvider>
+                        <Tooltip>
+                            <TooltipTrigger asChild>
+                                <Button
+                                    variant={sortByAlphabet ? "default" : "outline"}
+                                    size="icon"
+                                    className="h-9 w-9 shrink-0"
+                                    onClick={() => setSortByAlphabet(!sortByAlphabet)}
+                                >
+                                    <SortAsc className="h-4 w-4" />
+                                </Button>
+                            </TooltipTrigger>
+                            <TooltipContent>
+                                <p>{sortByAlphabet ? "Remover ordem alfabética" : "Ordenar por nome"}</p>
+                            </TooltipContent>
+                        </Tooltip>
+                    </TooltipProvider>
                 </div>
                 <div className="overflow-y-auto ">
-                    {filteredNodes.length > 0 ? (
-                        filteredNodes.map((node) => (
+                    {filteredAndSortedNodes.length > 0 ? (
+                        filteredAndSortedNodes.map((node) => (
                             <TopicNodeItem
                                 key={node.id}
                                 node={node}
