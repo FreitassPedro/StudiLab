@@ -62,7 +62,7 @@ export function NewTopicDialog({
     return (
         <Dialog open={open} onOpenChange={setOpen}>
             {children ? <DialogTrigger asChild>{children}</DialogTrigger> : null}
-            <DialogContent>
+            <DialogContent aria-describedby={undefined}>
                 <DialogHeader>
                     <DialogTitle>Novo tópico em &quot;{subject.name}&quot;</DialogTitle>
                 </DialogHeader>

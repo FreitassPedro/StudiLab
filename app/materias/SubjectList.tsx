@@ -4,17 +4,11 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useDeleteSubject, useSubjectTree } from "@/hooks/useSubjects";
 import { Button } from "@/components/ui/button";
 import { ChevronDown, ChevronRight, FileText, Folder, FolderOpen, Plus, Settings, Trash2 } from "lucide-react";
-import { useCreateTopic, useDeleteTopic, useTopicsMap } from "@/hooks/useTopics";
-import { SubjectTree, Topic, TopicNode } from "@/types/types";
-import { ChangeEvent, FormEvent, Fragment, useState } from "react";
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { Label } from "@/components/ui/label";
-import { Input } from "@/components/ui/input";
+import { SubjectTree, TopicNode } from "@/types/types";
+import { Fragment, useState } from "react";
 import { toast } from "sonner";
 import { NewTopicDialog } from "./components/NewTopicDialog";
-import { EditSubjectDialog } from "./components/EditSubjectDialog";
-
-
+import { EditSubjectDialog, EditTopicDialog } from "./components/EditSubjectDialog";
 
 function NodeRow({
     node,
@@ -23,73 +17,11 @@ function NodeRow({
     node: TopicNode;
     level: number;
 }) {
-    const topicsMap = useTopicsMap();
-    const createTopic = useCreateTopic();
-
     const hasChildren = node.children && node.children.length > 0;
     const [isCollapsed, setIsCollapsed] = useState(level > 1 ? true : false);
 
-    const [newTopicName, setNewTopicName] = useState("");
-    const [isOpenDialog, setIsOpenDialog] = useState(false);
-
-    const [errorMessage, setErrorMessage] = useState<string | null>(null);
-
-    const parentTopic: Topic | null = topicsMap?.[node?.parentId || ""] || null;
-
     const toggleCollapse = () => {
         setIsCollapsed((prev) => !prev);
-    }
-
-    const deleteTopic = useDeleteTopic();
-
-    const handleDeleteTopic = async () => {
-        if (!confirm(`Tem certeza que deseja excluir o tópico "${node.name}"? Esta ação não pode ser desfeita.`)) {
-            return;
-        }
-        try {
-            await deleteTopic.mutateAsync(node.id);
-            toast.info("Tópico removido com sucesso.");
-        } catch {
-            toast.error("Erro ao remover tópico.");
-        }
-    };
-
-    const getCreateTopicErrorMessage = (error: unknown) => {
-        const errorMessage = error instanceof Error ? error.message.toLowerCase() : "";
-
-        if (
-            errorMessage.includes("unique constraint") ||
-            errorMessage.includes("parentid") ||
-            errorMessage.includes("duplicate")
-        ) {
-            setErrorMessage("Já existe um tópico com esse nome neste nível. Selecione outro nome.");
-            return "Ja existe um topico com esse nome neste nivel. Selecione outro nome.";
-        }
-
-        return "Erro ao criar topico.";
-    };
-
-    const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
-        e.preventDefault();
-
-        const topicName = newTopicName.trim();
-
-        if (!topicName || topicName.length === 0) {
-            toast.error("Informe um nome para o topico.");
-            return;
-        }
-
-        try {
-            await createTopic.mutateAsync({ name: topicName, subjectId: node.subjectId, parentId: node.id });
-            setNewTopicName("");
-            setIsOpenDialog(false);
-
-            toast.success(`Topico "${topicName}" criado!`);
-        } catch (error) {
-            console.error("Erro ao criar tópico:", error);
-            toast.error(getCreateTopicErrorMessage(error));
-
-        }
     }
 
     return (
@@ -118,53 +50,15 @@ function NodeRow({
                             : <FileText size={13} className="text-muted-foreground/50 shrink-0" />
                         }
                         <span className={`text-foreground ${level === 0 ? 'font-medium' : ''}`}>{node.name}</span>
-                        {/* New Children topic dialog */}
-                        <Dialog open={isOpenDialog} onOpenChange={setIsOpenDialog}>
-                            <DialogTrigger asChild>
-                                <Button
-                                    variant="ghost"
-                                    size="icon"
-                                    className="h-9 w-9 opacity-90 pointer-events-none transition-opacity group-hover:opacity-100 group-hover:pointer-events-auto"
-                                >
-                                    <Plus className="h-4 w-4 text-muted-foreground" />
-                                </Button>
-                            </DialogTrigger>
-                            <DialogContent >
-                                <DialogHeader>
-                                    <DialogTitle>Novo tópico em &quot;{node.name}&quot;</DialogTitle>
-                                    <DialogDescription></DialogDescription>
-                                </DialogHeader>
-                                <div>
-                                    <p>{parentTopic ? `Tópico pai: ${parentTopic.name}` : ''}</p>
-                                </div>
-                                <form className="space-y-4 pt-2" onSubmit={handleSubmit}>
-                                    <div className="space-y-2">
-                                        <Label htmlFor="topic-name">Nome do tópico</Label>
-                                        <Input
-                                            id="topic-name"
-                                            placeholder="Ex: Equações diferenciais"
-                                            value={newTopicName}
-                                            onChange={(e: ChangeEvent<HTMLInputElement>) => setNewTopicName(e.target.value)}
-                                            autoFocus
-                                        />
-                                        {errorMessage && <p className="text-sm text-destructive">{errorMessage}</p>}
-                                    </div>
-                                    <div className="flex gap-2 justify-end">
-                                        <Button type="button" variant="outline" onClick={() => setIsOpenDialog(false)}>Cancelar</Button>
-                                        <Button type="submit">Criar</Button>
-                                    </div>
-                                </form>
-                            </DialogContent>
-                        </Dialog>
-
-                        <Button
-                            variant="ghost"
-                            size="icon"
-                            className="h-9 w-9 opacity-20 pointer-events-none transition-opacity group-hover:opacity-100 group-hover:pointer-events-auto"
-                            onClick={handleDeleteTopic}
-                        >
-                            <Trash2 className="h-4 w-4 text-destructive" />
-                        </Button>
+                        <EditTopicDialog topicId={node.id}>
+                            <Button
+                                variant="ghost"
+                                size="icon"
+                                className="h-6 w-6 opacity-0 pointer-events-none transition-opacity group-hover:opacity-100 group-hover:pointer-events-auto"
+                            >
+                                <Settings className="h-4 w-4 text-muted-foreground" />
+                            </Button>
+                        </EditTopicDialog>
                     </div>
                 </td>
             </tr>
@@ -254,7 +148,7 @@ function SubjectItem({ subjectTree }: {
                             >
                                 <Trash2 className="h-4 w-4 text-destructive" />
                             </Button>
-
+                            
                             {/* Edit Subject */}
                             <EditSubjectDialog subjectId={subjectTree.subject.id}>
                                 <Button
@@ -280,25 +174,18 @@ function SubjectItem({ subjectTree }: {
                                 level={1}
                             />
                         ))
+                    ) : (
+                        <tr>
+                            <td colSpan={4} className="py-2 px-4 ">
+                                <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                                    <Folder size={13} className="shrink-0" />
+                                    <span>Nenhum tópico cadastrado</span>
+                                </div>
+                            </td>
+                        </tr>
                     )
-                        : (
-                            <tr>
-                                <td colSpan={4} className="py-2 px-4 ">
-                                    <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                                        <Folder size={13} className="shrink-0" />
-                                        <span>Nenhum tópico cadastrado</span>
-                                    </div>
-                                </td>
-                            </tr>
-                        )
                 )
-
-
             }
-
-
-
-
 
         </Fragment >
     );
