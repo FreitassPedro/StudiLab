@@ -6,7 +6,6 @@ import { toast } from "sonner";
 import {
     Circle,
     Plus,
-    Network,
     BookOpen,
     RotateCcw,
     Pencil,
@@ -30,21 +29,13 @@ import {
     SelectTrigger,
     SelectValue,
 } from "@/components/ui/select";
-import {
-    Dialog,
-    DialogContent,
-    DialogHeader,
-    DialogTitle,
-    DialogTrigger,
-} from "@/components/ui/dialog";
 
 import { useSubjects } from "@/hooks/useSubjects";
-import { useTopicsMap, useTopicsTree } from "@/hooks/useTopics";
+import { useTopicsMap } from "@/hooks/useTopics";
 import { useCreateStudyLog, useLastStudyLog } from "@/hooks/useStudyLogs";
 import { StudyLogInput } from "@/server/actions/studyLogs.action";
 import { NewTopicDialog } from "../../materias/components/NewTopicDialog";
-import { TopicTreeSelector } from "./TopicTreeSelector";
-import { TopicNode } from "@/types/types";
+import { TopicSelector } from "./TopicTreeSelector";
 import useSessionFormStore from "@/store/useSessionFormStore";
 import useCronometerStore from "@/store/useCronometerStore";
 import { getLocalDateForToday } from "@/lib/utils";
@@ -75,12 +66,7 @@ const getFormSubmitError = (form: FormData): string | null => {
     return null;
 };
 
-const getTopicTreeForSubject = (
-    topicsTree: TopicNode[],
-    subjectId: string
-): TopicNode[] => {
-    return topicsTree?.filter((node) => node.subjectId === subjectId) || [];
-};
+
 
 // --- Form State ---
 
@@ -131,12 +117,11 @@ export function StudySessionForm() {
     const isCronometerRunning = useCronometerStore((state) => state.cronometer.isRunning);
     const resetCronometer = useCronometerStore((state) => state.resetCronometer);
 
-    const { data: topicsTree = [], isLoading: loadingTopicsTree } = useTopicsTree();
     const { data: subjects = [], isLoading: loadingSubjects } = useSubjects();
     const { data: lastLog } = useLastStudyLog();
 
     const [newTopicDialogOpen, setNewTopicDialogOpen] = useState(false);
-    const [topicTreePopoverOpen, setTopicTreePopoverOpen] = useState(false);
+    const [topicSelectOpen, setTopicSelectOpen] = useState(false);
 
     const [hiddenLastLogId, setHiddenLastLogId] = useState<string | null>(null);
     const [isSubmitting, setIsSubmitting] = useState(false);
@@ -144,11 +129,6 @@ export function StudySessionForm() {
     // New UI-only state
     const [studyMode, setStudyMode] = useState<StudyMode>("teoria");
 
-
-    const currentSubjectTopics = useMemo(
-        () => getTopicTreeForSubject(topicsTree, selectionForm.subjectId),
-        [topicsTree, selectionForm.subjectId]
-    );
 
     const showResume = !!lastLog && hiddenLastLogId !== lastLog.id;
 
@@ -213,17 +193,9 @@ export function StudySessionForm() {
     };
 
     const handleTopicChange = (topicId: string) => {
-        setTopicTreePopoverOpen(false);
+        setTopicSelectOpen(false);
         setSelectionForm((prev) => ({ ...prev, topicId }));
         updateSelectionForm({ topicId });
-    };
-
-    const getSelectedTopicName = (): string => {
-        if (!selectionForm.topicId) return "Selecione um tópico";
-
-        const topic = topicsMap[selectionForm?.topicId];
-
-        return topic ? topic.name : "Tópico desconhecido";
     };
 
 
@@ -399,45 +371,15 @@ export function StudySessionForm() {
                                             <Label className="text-xs font-medium text-foreground/80">Tópico Estudado</Label>
                                             <div className="flex items-center gap min-w-0">
                                                 <div className="flex-1 min-w-0">
-                                                    <Dialog
-                                                        open={topicTreePopoverOpen}
-                                                        onOpenChange={setTopicTreePopoverOpen}
-                                                    >
-                                                        <DialogTrigger asChild>
-                                                            <Button
-                                                                variant="outline"
-                                                                type="button"
-                                                                className={`h-9 w-full justify-between font-normal bg-background/60 hover:bg-background/80 focus-visible:ring-primary/40 ${!selectionForm.topicId ? "text-muted-foreground" : "text-foreground"
-                                                                    }`}
-                                                                disabled={!selectionForm.subjectId || loadingTopicsTree}
-                                                            >
-                                                                <span className="truncate text-sm">{getSelectedTopicName()}</span>
-                                                                <Network className="h-3.5 w-3.5 ml-2 shrink-0 text-muted-foreground" />
-                                                            </Button>
-                                                        </DialogTrigger>
-                                                        <DialogContent className="max-w-md">
-                                                            <DialogHeader>
-                                                                <DialogTitle>Selecione um tópico</DialogTitle>
-                                                            </DialogHeader>
-                                                            {loadingTopicsTree ? (
-                                                                <div className="p-4 text-center text-sm text-muted-foreground">
-                                                                    Carregando tópicos...
-                                                                </div>
-                                                            ) : currentSubjectTopics.length === 0 ? (
-                                                                <div className="p-4 text-center text-sm text-muted-foreground">
-                                                                    Nenhum tópico cadastrado
-                                                                </div>
-                                                            ) : (
-                                                                <div className="max-h-96 overflow-y-auto">
-                                                                    <TopicTreeSelector
-                                                                        nodes={currentSubjectTopics}
-                                                                        selectedTopicId={selectionForm.topicId}
-                                                                        onTopicSelect={handleTopicChange}
-                                                                    />
-                                                                </div>
-                                                            )}
-                                                        </DialogContent>
-                                                    </Dialog>
+                                                    
+                                                    <TopicSelector
+                                                        open={topicSelectOpen}
+                                                        onOpenChange={setTopicSelectOpen}
+                                                        subjectId={selectionForm.subjectId}
+                                                        selectedTopicId={selectionForm.topicId}
+                                                        onTopicSelect={(topicId) => handleTopicChange(topicId)}
+                                                    />
+                                                    
                                                 </div>
                                                 <Button
                                                     type="button"
@@ -518,7 +460,7 @@ export function StudySessionForm() {
                                 <Button
                                     type="submit"
                                     disabled={createStudyLog.isPending || !isFormReadyToSubmit}
-                                    className="w-full font-semibold h-10 shadow-md"
+                                    className="w-full  font-semibold h-10 shadow-md"
                                     size="default"
                                 >
                                     {createStudyLog.isPending ? (
