@@ -32,3 +32,14 @@
 # Geral
 - [ ] Criar ferramentas de Tasks
 - [ ] Criar calendário de provas
+
+## Sugestões dos Issues (GitHub)
+- [ ] (#1) Criar página de perfil para visualizar dados do usuário (horas estudadas, estatísticas gerais, status atual, matéria favorita e objetivo)
+- [ ] (#2) Criar filtro de pesquisa para logs de estudo por matéria, assunto, tag ou palavra-chave
+- [ ] (#3) Permitir agrupamento hierárquico e movimentação livre dos tópicos
+- [ ] (#4) Implementar sistema de pausas catalogadas entre matérias
+- [ ] (#5) Exportar StudyLogs para Google Calendar como eventos
+- [ ] (#9) Adicionar botão de retomar estudos copiando o último studylog do dia
+- [ ] (#10) Criar labels rápidas na descrição do formulário de estudos
+- [ ] (#13) Exibir card flutuante de estudo em andamento em todas as páginas
+- [ ] (#16) Conectar Spotify no perfil para compartilhar o que está ouvindo
