@@ -31,8 +31,9 @@ export const HistoryCharts = () => {
 
     return (
         <>
-            
+
             <div className="grid gap-4 md:grid-cols-2">
+                <BarHeatMap />
                 <Suspense fallback={<ChartSkeleton />}>
                     <StudyBarChart />
                 </Suspense>

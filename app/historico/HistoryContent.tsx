@@ -25,7 +25,7 @@ export function HistoryContent() {
       <HistoryCharts />
       <TimelineLogs />
       <Suspense fallback={<div>Loading logs...</div>}>
-      <LogsHistory />
+        <LogsHistory />
       </Suspense>
     </div>
   )
