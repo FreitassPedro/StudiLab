@@ -2,8 +2,7 @@
 
 import { Card } from "@/components/ui/card";
 import { useTodayStudyLogs } from "@/hooks/useStudyLogs";
-import { BookOpen, Clock, LayoutDashboard } from "lucide-react";
-import React from "react";
+import { Clock, LayoutDashboard } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
 
 export function TodaySummaryMini() {
@@ -88,7 +87,7 @@ export function TodaySummaryMini() {
             {subjectsList.length > 0 && (
                 <div className="space-y-3">
                     <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Por Matéria</h4>
-                    <div className="space-y-2">
+                    <div className="space-y-1">
                         {subjectsList.map((subject, index) => (
                             <div key={index} className="flex items-center justify-between p-2 rounded-md bg-muted/30 border border-border/50">
                                 <div className="flex items-center gap-2 overflow-hidden">

@@ -6,7 +6,6 @@ import { toast } from "sonner";
 import {
     Circle,
     Plus,
-    Network,
     BookOpen,
     RotateCcw,
     Pencil,
@@ -30,21 +29,13 @@ import {
     SelectTrigger,
     SelectValue,
 } from "@/components/ui/select";
-import {
-    Dialog,
-    DialogContent,
-    DialogHeader,
-    DialogTitle,
-    DialogTrigger,
-} from "@/components/ui/dialog";
 
 import { useSubjects } from "@/hooks/useSubjects";
-import { useTopicsMap, useTopicsTree } from "@/hooks/useTopics";
+import { useTopicsMap } from "@/hooks/useTopics";
 import { useCreateStudyLog, useLastStudyLog } from "@/hooks/useStudyLogs";
 import { StudyLogInput } from "@/server/actions/studyLogs.action";
 import { NewTopicDialog } from "../../materias/components/NewTopicDialog";
-import { TopicTreeSelector } from "./TopicTreeSelector";
-import { TopicNode } from "@/types/types";
+import { TopicSelector } from "./TopicTreeSelector";
 import useSessionFormStore from "@/store/useSessionFormStore";
 import useCronometerStore from "@/store/useCronometerStore";
 import { getLocalDateForToday } from "@/lib/utils";
@@ -75,12 +66,7 @@ const getFormSubmitError = (form: FormData): string | null => {
     return null;
 };
 
-const getTopicTreeForSubject = (
-    topicsTree: TopicNode[],
-    subjectId: string
-): TopicNode[] => {
-    return topicsTree?.filter((node) => node.subjectId === subjectId) || [];
-};
+
 
 // --- Form State ---
 
@@ -120,7 +106,6 @@ export function StudySessionForm() {
     const router = useRouter();
     const createStudyLog = useCreateStudyLog();
 
-    const topicsMap = useTopicsMap();
     const sessionForm = useSessionFormStore((state) => state.form);
 
     const updateSelectionForm = useSessionFormStore((state) => state.updateForm);
@@ -131,12 +116,11 @@ export function StudySessionForm() {
     const isCronometerRunning = useCronometerStore((state) => state.cronometer.isRunning);
     const resetCronometer = useCronometerStore((state) => state.resetCronometer);
 
-    const { data: topicsTree = [], isLoading: loadingTopicsTree } = useTopicsTree();
     const { data: subjects = [], isLoading: loadingSubjects } = useSubjects();
     const { data: lastLog } = useLastStudyLog();
 
     const [newTopicDialogOpen, setNewTopicDialogOpen] = useState(false);
-    const [topicTreePopoverOpen, setTopicTreePopoverOpen] = useState(false);
+    const [topicSelectOpen, setTopicSelectOpen] = useState(false);
 
     const [hiddenLastLogId, setHiddenLastLogId] = useState<string | null>(null);
     const [isSubmitting, setIsSubmitting] = useState(false);
@@ -144,11 +128,6 @@ export function StudySessionForm() {
     // New UI-only state
     const [studyMode, setStudyMode] = useState<StudyMode>("teoria");
 
-
-    const currentSubjectTopics = useMemo(
-        () => getTopicTreeForSubject(topicsTree, selectionForm.subjectId),
-        [topicsTree, selectionForm.subjectId]
-    );
 
     const showResume = !!lastLog && hiddenLastLogId !== lastLog.id;
 
@@ -213,17 +192,9 @@ export function StudySessionForm() {
     };
 
     const handleTopicChange = (topicId: string) => {
-        setTopicTreePopoverOpen(false);
+        setTopicSelectOpen(false);
         setSelectionForm((prev) => ({ ...prev, topicId }));
         updateSelectionForm({ topicId });
-    };
-
-    const getSelectedTopicName = (): string => {
-        if (!selectionForm.topicId) return "Selecione um tópico";
-
-        const topic = topicsMap[selectionForm?.topicId];
-
-        return topic ? topic.name : "Tópico desconhecido";
     };
 
 
@@ -301,7 +272,7 @@ export function StudySessionForm() {
                         {/* LEFT COLUMN — Subject, Topic, Material, Notes */}
                         <div className="space-y-4">
                             {lastLog && showResume && (
-                                <Card className="border-primary/20 bg-primary/5 shadow-sm overflow-hidden transition-all hover:border-primary/30">
+                                <Card className="border-primary/20 bg-primary/5 shadow-sm overflow-hidden transition-all hover:border-primary/30 py-2">
                                     <CardContent className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
                                         <div className="flex items-center gap-3">
                                             <div className="p-2 bg-primary/10 rounded-full shrink-0">
@@ -339,115 +310,88 @@ export function StudySessionForm() {
                                 </Card>
                             )}
 
-                            <Card className="shadow-lg border-border/60 bg-card/95">
-                                <CardHeader className="border-b border-border/40">
-                                    <CardTitle className="text-sm font-semibold flex  items-center gap-2 text-foreground">
+                            <Card className="shadow-lg border-border/60 bg-card/95 py-3">
+                                <CardHeader className=" ">
+                                    <CardTitle className="text-lg font-semibold flex items-center gap-2 text-foreground">
                                         <BookOpen className="h-4 w-4 text-primary" />
-                                        Conteúdo Estudado
+                                        Formulário de Registro
                                     </CardTitle>
                                 </CardHeader>
                                 <CardContent className="px-4 space-y-3">
                                     {/* Matéria */}
-                                    <div className="space-y-1">
-                                        <Label className="text-xs font-medium text-foreground/80">Matéria</Label>
-                                        <div className="flex items-center gap-2 min-w-0">
-                                            <Select value={selectionForm.subjectId} onValueChange={handleSubjectChange}>
-                                                <SelectTrigger className="h-9 min-w-0 flex-1 focus-visible:ring-primary/40 bg-background/60">
-                                                    <SelectValue placeholder="Selecione uma matéria" />
-                                                </SelectTrigger>
-                                                <SelectContent>
-                                                    {loadingSubjects ? (
-                                                        <SelectItem value="loading" disabled>
-                                                            Carregando...
-                                                        </SelectItem>
-                                                    ) : subjects.length === 0 ? (
-                                                        <SelectItem value="empty" disabled>
-                                                            Nenhuma matéria cadastrada
-                                                        </SelectItem>
-                                                    ) : (
-                                                        subjects.map((subject) => (
-                                                            <SelectItem key={subject.id} value={subject.id}>
-                                                                <span className="flex items-center gap-2 text-sm">
-                                                                    <span
-                                                                        className="w-2.5 h-2.5 rounded-full inline-block shrink-0"
-                                                                        style={{ backgroundColor: subject.color }}
-                                                                    />
-                                                                    {subject.name}
-                                                                </span>
+                                    <div className="space-y-1 grid grid-cols-2 gap-4">
+                                        <div className="">
+                                            <Label className="text-xs font-medium text-foreground/80">Matéria</Label>
+                                            <div className="flex items-center gap-1' min-w-0">
+                                                <Select value={selectionForm.subjectId} onValueChange={handleSubjectChange}>
+                                                    <SelectTrigger className="h-9 min-w-0 flex-1 focus-visible:ring-primary/40 bg-background/60">
+                                                        <SelectValue placeholder="Selecione uma matéria" />
+                                                    </SelectTrigger>
+                                                    <SelectContent>
+                                                        {loadingSubjects ? (
+                                                            <SelectItem value="loading" disabled>
+                                                                Carregando...
                                                             </SelectItem>
-                                                        ))
-                                                    )}
-                                                </SelectContent>
-                                            </Select>
-                                            <Button
-                                                type="button"
-                                                variant="outline"
-                                                size="icon"
-                                                onClick={() => router.push("/materias")}
-                                                title="Cadastrar matéria"
-                                                className="h-9 w-9 shrink-0 text-muted-foreground hover:text-foreground"
-                                            >
-                                                <Plus className="h-4 w-4" />
-                                            </Button>
-                                        </div>
-                                    </div>
-
-                                    {/* Tópico */}
-                                    <div className="space-y-1">
-                                        <Label className="text-xs font-medium text-foreground/80">Tópico Estudado</Label>
-                                        <div className="flex items-center gap-2 min-w-0">
-                                            <div className="flex-1 min-w-0">
-                                                <Dialog
-                                                    open={topicTreePopoverOpen}
-                                                    onOpenChange={setTopicTreePopoverOpen}
-                                                >
-                                                    <DialogTrigger asChild>
-                                                        <Button
-                                                            variant="outline"
-                                                            type="button"
-                                                            className={`h-9 w-full justify-between font-normal bg-background/60 hover:bg-background/80 focus-visible:ring-primary/40 ${!selectionForm.topicId ? "text-muted-foreground" : "text-foreground"
-                                                                }`}
-                                                            disabled={!selectionForm.subjectId || loadingTopicsTree}
-                                                        >
-                                                            <span className="truncate text-sm">{getSelectedTopicName()}</span>
-                                                            <Network className="h-3.5 w-3.5 ml-2 shrink-0 text-muted-foreground" />
-                                                        </Button>
-                                                    </DialogTrigger>
-                                                    <DialogContent className="max-w-md">
-                                                        <DialogHeader>
-                                                            <DialogTitle>Selecione um tópico</DialogTitle>
-                                                        </DialogHeader>
-                                                        {loadingTopicsTree ? (
-                                                            <div className="p-4 text-center text-sm text-muted-foreground">
-                                                                Carregando tópicos...
-                                                            </div>
-                                                        ) : currentSubjectTopics.length === 0 ? (
-                                                            <div className="p-4 text-center text-sm text-muted-foreground">
-                                                                Nenhum tópico cadastrado
-                                                            </div>
+                                                        ) : subjects.length === 0 ? (
+                                                            <SelectItem value="empty" disabled>
+                                                                Nenhuma matéria cadastrada
+                                                            </SelectItem>
                                                         ) : (
-                                                            <div className="max-h-96 overflow-y-auto">
-                                                                <TopicTreeSelector
-                                                                    nodes={currentSubjectTopics}
-                                                                    selectedTopicId={selectionForm.topicId}
-                                                                    onTopicSelect={handleTopicChange}
-                                                                />
-                                                            </div>
+                                                            subjects.map((subject) => (
+                                                                <SelectItem key={subject.id} value={subject.id}>
+                                                                    <span className="flex items-center gap-2 text-sm">
+                                                                        <span
+                                                                            className="w-2.5 h-2.5 rounded-full inline-block shrink-0"
+                                                                            style={{ backgroundColor: subject.color }}
+                                                                        />
+                                                                        {subject.name}
+                                                                    </span>
+                                                                </SelectItem>
+                                                            ))
                                                         )}
-                                                    </DialogContent>
-                                                </Dialog>
+                                                    </SelectContent>
+                                                </Select>
+                                                <Button
+                                                    type="button"
+                                                    variant="outline"
+                                                    size="icon"
+                                                    onClick={() => router.push("/materias")}
+                                                    title="Cadastrar matéria"
+                                                    className="h-9 w-9 shrink-0 text-muted-foreground hover:text-foreground"
+                                                >
+                                                    <Plus className="h-4 w-4" />
+                                                </Button>
                                             </div>
-                                            <Button
-                                                type="button"
-                                                variant="outline"
-                                                size="icon"
-                                                onClick={() => setNewTopicDialogOpen(true)}
-                                                className="h-9 w-9 shrink-0 text-muted-foreground hover:text-foreground"
-                                                disabled={!selectionForm.subjectId}
-                                                title="Novo tópico"
-                                            >
-                                                <Plus className="h-4 w-4" />
-                                            </Button>
+                                        </div>
+
+
+                                        {/* Tópico */}
+                                        <div className="gap-1">
+                                            <Label className="text-xs font-medium text-foreground/80">Tópico Estudado</Label>
+                                            <div className="flex items-center gap min-w-0">
+                                                <div className="flex-1 min-w-0">
+                                                    
+                                                    <TopicSelector
+                                                        open={topicSelectOpen}
+                                                        onOpenChange={setTopicSelectOpen}
+                                                        subjectId={selectionForm.subjectId}
+                                                        selectedTopicId={selectionForm.topicId}
+                                                        onTopicSelect={(topicId) => handleTopicChange(topicId)}
+                                                    />
+                                                    
+                                                </div>
+                                                <Button
+                                                    type="button"
+                                                    variant="outline"
+                                                    size="icon"
+                                                    onClick={() => setNewTopicDialogOpen(true)}
+                                                    className="h-9 w-9 shrink-0 text-muted-foreground hover:text-foreground"
+                                                    disabled={!selectionForm.subjectId}
+                                                    title="Novo tópico"
+                                                >
+                                                    <Plus className="h-4 w-4" />
+                                                </Button>
+                                            </div>
                                         </div>
                                     </div>
 
@@ -470,7 +414,7 @@ export function StudySessionForm() {
                                                     />
                                                     <Label
                                                         htmlFor={`mode-${mode.value}`}
-                                                        className={`flex flex-col items-center justify-center gap-1 rounded-lg border-2 px-2 py-2 cursor-pointer text-[10px] font-medium transition-all select-none
+                                                        className={`flex flex-col items-center justify-center gap-1 rounded-lg border-2 px-1 py-1 cursor-pointer text-[8px] font-medium transition-all select-none
                                                             ${studyMode === mode.value
                                                                 ? "border-primary bg-primary/10 text-primary"
                                                                 : "border-border/60 bg-background/40 text-muted-foreground hover:border-border hover:text-foreground"
@@ -495,7 +439,7 @@ export function StudySessionForm() {
                                             placeholder="Resumo, pontos-chave, dúvidas..."
                                             rows={3}
                                             value={selectionForm.notes}
-                                            className="text-sm bg-background/60 focus-visible:ring-primary/40 resize-none"
+                                            className="text-sm bg-background/40 focus-visible:ring-primary/40 resize-none"
                                             onChange={(e) =>
                                                 setSelectionForm((prev) => ({ ...prev, notes: e.target.value }))
                                             }
@@ -515,7 +459,7 @@ export function StudySessionForm() {
                                 <Button
                                     type="submit"
                                     disabled={createStudyLog.isPending || !isFormReadyToSubmit}
-                                    className="w-full font-semibold h-10 shadow-md"
+                                    className="w-full  font-semibold h-10 shadow-md"
                                     size="default"
                                 >
                                     {createStudyLog.isPending ? (

@@ -1,291 +1,250 @@
 "use client";
+
+import { useState } from "react";
+import { useInfiniteQuery } from "@tanstack/react-query";
+import { BookOpen, ChevronRight, Loader2, History } from "lucide-react";
+
 import { Card } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
-import { getRecentLogsBySubjectAction, getRecentLogsByTopicAction } from "@/server/actions/studyLogs.action";
-import useSessionFormStore from "@/store/useSessionFormStore";
-import { useQuery } from "@tanstack/react-query";
-import { BookOpen, ChevronRight } from "lucide-react";
-import React from "react";
-import { parseDateAsLocal } from "@/lib/utils";
-import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { useTopicsBySubject } from "@/hooks/useTopics";
-import { useSubjects } from "@/hooks/useSubjects";
-import { Topic } from "@/types/types";
 import { Button } from "@/components/ui/button";
-import { Dialog, DialogClose, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import {
+    Dialog,
+    DialogClose,
+    DialogContent,
+    DialogFooter,
+    DialogHeader,
+    DialogTitle,
+    DialogTrigger,
+} from "@/components/ui/dialog";
+
+import { getRecentLogsBySubjectAction, getRecentLogsByTopicAction } from "@/server/actions/studyLogs.action";
+import { useSubjects } from "@/hooks/useSubjects";
+import { useTopicsBySubject } from "@/hooks/useTopics";
+import useSessionFormStore from "@/store/useSessionFormStore";
+import { parseDateAsLocal } from "@/lib/utils";
+
+// --- Helpers ---
 
 const diffInDays = (date1: Date, date2: Date) => {
-    const diffTime = Math.abs(date2.getTime() - date1.getTime());
-    return Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+    const d1 = new Date(date1.getFullYear(), date1.getMonth(), date1.getDate());
+    const d2 = new Date(date2.getFullYear(), date2.getMonth(), date2.getDate());
+    return Math.round((d2.getTime() - d1.getTime()) / (1000 * 60 * 60 * 24));
 };
 
-
 const daysAgo = (date: Date) => {
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-    const diff = diffInDays(today, date);
+    const diff = diffInDays(date, new Date());
     if (diff === 0) return "Hoje";
     if (diff === 1) return "Ontem";
     return `${diff} dias atrás`;
-}
+};
+
+// --- Sub-components ---
 
 export const LogCard = ({ name, date, notes }: { name: string; date: Date | string; notes?: string }) => {
     const localDate = parseDateAsLocal(date);
     return (
-        <Card className="p-3 space-y-2 bg-muted/50 border-none ">
-            <div className="flex justify-between items-center">
-                <div className="text-sm font-semibold text-foreground">
-                    {name}
-                </div>
-                <div className="text-xs font-medium text-foreground">
-                    <span>{localDate.toLocaleDateString('pt-BR')}</span>
-                    -
-                    <span className="text-muted-foreground">{daysAgo(localDate)}</span>
+        <Card className="p-3 gap-0 space-y-2 bg-muted/50 border-none transition-all hover:bg-muted/70">
+            <div className="flex justify-between items-center gap-2">
+                <span className="text-sm font-semibold text-foreground truncate">{name}</span>
+                <div className="text-[10px] font-medium whitespace-nowrap text-right">
+                    <span className="text-foreground">{localDate.toLocaleDateString('pt-BR')}</span>
+                    <span className="text-muted-foreground ml-1">({daysAgo(localDate)})</span>
                 </div>
             </div>
-            {notes && <div className="text-xs text-muted-foreground whitespace-pre-line">{notes}</div>}
+            {notes && <p className="text-xs text-muted-foreground ">{notes}</p>}
         </Card>
-    )
+    );
 };
 
-export const EmptyLog = () => {
+export const EmptyLog = ({ message = "Nenhuma sessão encontrada." }: { message?: string }) => (
+    <div className="p-8 border border-dashed rounded-lg bg-muted/5 text-center">
+        <p className="text-xs text-muted-foreground italic">{message}</p>
+    </div>
+);
+
+const LogSectionHeader = ({
+    title,
+    type,
+    isOpen,
+    onToggle
+}: {
+    title: string,
+    type: string,
+    isOpen: boolean,
+    onToggle(): void;
+}) => {
+
     return (
-        <div className="p-3 space-y-2 border-none bg-muted/5 text-center">
-            <div className="text-xs text-muted-foreground">Comece uma nova sessão para visualizar aqui</div>
+        <div className="flex flex-col gap-2">
+            <div className="flex items-center justify-between group">
+                <div className="flex items-center gap-2">
+                    <BookOpen className="w-4 h-4 text-primary/60" />
+                    <h3 className="text-sm font-semibold text-foreground">
+                        {title}
+                    </h3>
+                </div>
+                <Button
+                    variant="ghost"
+                    size="icon"
+                    className="h-7 w-7 rounded-full hover:bg-primary/10"
+                    onClick={onToggle}
+                >
+                    <ChevronRight className={`w-4 h-4 transition-transform duration-300 ${isOpen ? "rotate-90" : ""}`} />
+                </Button>
+            </div>
         </div>
     )
 }
-interface LogsListProps {
-    logs: Array<{ id: string; name: string; date: Date; notes?: string }>;
-}
-export const LogsList = ({ logs }: LogsListProps) => {
-    return (
-        <div className="space-y-3">
-            {logs.map((log) => (
-                <LogCard
-                    key={log.id}
-                    name={log.name}
-                    date={log.date}
-                    notes={log.notes}
-                />
-            ))}
-        </div>
-    )
+// --- Main Component ---
+function useRecentLogs(
+    type: "topic" | "subject",
+    targetId: string | null
+) {
+    const PAGE_SIZE = 4;
+
+    return useInfiniteQuery({
+        queryKey: ["studyLogs", "recent", type, targetId],
+        queryFn: ({ pageParam = 0 }) => {
+            if (!targetId) return Promise.resolve([]);
+
+            return type === "subject" ? getRecentLogsBySubjectAction(targetId, PAGE_SIZE, pageParam) : getRecentLogsByTopicAction(targetId, PAGE_SIZE, pageParam)
+        },
+
+        initialPageParam: 0,
+        getNextPageParam: (lastPage, allPages) =>
+            lastPage.length === PAGE_SIZE
+                ? allPages.length * PAGE_SIZE : undefined,
+
+        enabled: !!targetId,
+    })
 }
 export const LogSection = ({ type }: { type: 'topic' | 'subject' }) => {
-    const PAGE_SIZE = 3;
+    const PAGE_SIZE = 4;
+    const [isOpen, setIsOpen] = useState(true);
 
-    const [isOpen, setIsOpen] = React.useState(true);
     const selectedSubjectId = useSessionFormStore((state) => state.form.subjectId);
     const selectedTopicId = useSessionFormStore((state) => state.form.topicId);
 
     const { data: subjects = [] } = useSubjects();
-    const selectedSubject = React.useMemo(
-        () => subjects.find((subject) => subject.id === selectedSubjectId),
-        [selectedSubjectId, subjects]
-    );
-
     const { data: topics = [] } = useTopicsBySubject(selectedSubjectId || undefined);
-    const [sidebarTopic, setSidebarTopic] = React.useState<Topic | null>(null);
 
-    const [logsHistory, setLogsHistory] = React.useState<Array<{ id: string; study_date: Date; notes: string | null; topic: { name: string } }>>([]);
-    const [isLoadingMore, setIsLoadingMore] = React.useState(false);
-    const [hasMoreLogs, setHasMoreLogs] = React.useState(true);
+    const currentSubject = subjects.find(s => s.id === selectedSubjectId);
 
-
-    const recentLogs = useQuery({
-        queryKey: ['studyLogs', type, 'recent', type === 'topic' ? sidebarTopic?.id : selectedSubject?.id],
-        queryFn: () => {
-            switch (type) {
-                case 'topic':
-                    return sidebarTopic?.id ? getRecentLogsByTopicAction(sidebarTopic.id, PAGE_SIZE, 0) : Promise.resolve([]);
-
-                case 'subject':
-                    return selectedSubject?.id ? getRecentLogsBySubjectAction(selectedSubject.id, PAGE_SIZE, 0) : Promise.resolve([]);
-
-                default:
-                    return Promise.resolve([]);
-            }
-        },
-        enabled: type === 'subject' ? !!selectedSubject : !!sidebarTopic,
-        staleTime: 1000 * 60 * 4, // 4 minuto
-    });
-
-    const getLoadMoreLogs = React.useCallback(async () => {
-        if (isLoadingMore || !hasMoreLogs) return;
-
-        const currentCount = logsHistory.length;
-        setIsLoadingMore(true);
-
-        try {
-            let nextLogs: Array<{ id: string; study_date: Date; notes: string | null; topic: { name: string } }> = [];
-
-            if (type === 'topic' && sidebarTopic?.id) {
-                nextLogs = await getRecentLogsByTopicAction(sidebarTopic.id, PAGE_SIZE, currentCount);
-            }
-
-            if (type === 'subject' && selectedSubject?.id) {
-                nextLogs = await getRecentLogsBySubjectAction(selectedSubject.id, PAGE_SIZE, currentCount);
-            }
-
-            if (nextLogs.length === 0) {
-                setHasMoreLogs(false);
-                return;
-            }
-
-            setLogsHistory((prev) => {
-                const existingIds = new Set(prev.map((log) => log.id));
-                const uniqueNextLogs = nextLogs.filter((log) => !existingIds.has(log.id));
-                return [...prev, ...uniqueNextLogs];
-            });
-
-            if (nextLogs.length < PAGE_SIZE) {
-                setHasMoreLogs(false);
-            }
-        } finally {
-            setIsLoadingMore(false);
-        }
-    }, [PAGE_SIZE, hasMoreLogs, isLoadingMore, logsHistory.length, selectedSubject?.id, sidebarTopic?.id, type]);
-
-    React.useEffect(() => {
-        const initialLogs = recentLogs.data ?? [];
-        setLogsHistory(initialLogs);
-        setHasMoreLogs(initialLogs.length === PAGE_SIZE);
-    }, [PAGE_SIZE, recentLogs.data]);
+    const currentTopic = topics.find(t => t.id === selectedTopicId);
 
 
+    const effectiveTopicId = type === 'topic' ? selectedTopicId : null;
 
+    const targetId = type === 'subject' ? selectedSubjectId : effectiveTopicId;
 
-    // Atualiza o tópico do sidebar quando o tópico selecionado na sessão mudar
-    React.useEffect(() => {
-        if (type !== 'topic') return;
-        if (!selectedTopicId) {
-            setSidebarTopic(null);
-            return;
-        }
+    const logsQUery = useRecentLogs(type, targetId);
 
-        setSidebarTopic(topics.find(topic => topic.id === selectedTopicId) || null);
-    }, [selectedTopicId, topics, type]);
-    if (type === 'topic' && !selectedTopicId) {
-        return null; // Não renderiza nada se for seção de tópico e nenhum tópico estiver selecionado
-    }
+    const allLogs = logsQUery.data?.pages.flat() ?? [];
 
+    const recentLogs = allLogs.slice(0, 3);
 
+    const hasNextPage = logsQUery.hasNextPage;
+    const isFetchingNextPage = logsQUery.isFetchingNextPage;
+    const fetchNextPage = logsQUery.fetchNextPage;
 
-    // Skeleton
-    if (recentLogs.isLoading) {
-        return (
-            <div className="space-y-3 animate-pulse">
-                <div className="flex items-center gap-2 text-sm font-semibold text-foreground">
-                    <BookOpen className="w-4 h-4 text-muted-foreground" />
-                    <span>Recentes: {type === "subject" ? selectedSubject?.name : ''}</span>
-                </div>
-                <Separator className="my-2" />
-                {Array.from({ length: 3 }).map((_, i) => (
-                    <Card key={i} className="p-3 space-y-2 bg-muted/50 border-none ">
-                        <div className="flex justify-between items-center">
-                            <div className="h-4 bg-muted-foreground rounded w-1/3" />
-                            <div className="h-3 bg-muted-foreground rounded w-1/4" />
-                        </div>
-                        <div className="h-3 bg-muted-foreground rounded w-full" />
-                    </Card>
-                ))}
-            </div>
-        )
-    }
+    const isLoading = logsQUery.isLoading;
+
+    if (type === 'topic' && !selectedTopicId && !selectedTopicId) return null;
+    if (!selectedSubjectId) return null;
 
     return (
-        <>
-            <div className="space-y-3 transition-all duration-300 ease-in-out">
+        <div className="space-y-4">
+            {/* Header */}
 
-                <div className="flex flex-col items-center gap-2 text-sm font-semibold text-foreground">
-                    <div className="flex flex-row justify-between w-full items-center">
-                        <BookOpen className="w-4 h-4 text-muted-foreground" />
-                        <span>Recentes: {type === "subject" ? selectedSubject?.name : ''}</span>
+            <LogSectionHeader
+                type={type}
+                title={type == "subject" ? currentSubject?.name ?? "" : currentTopic?.name ?? ""}
+                isOpen={isOpen}
+                onToggle={() => setIsOpen(!isOpen)}
+            />
 
-                        <div className="p-1.5 bg-primary/10 rounded-md text-primary">
-                            <ChevronRight
-                                size={18}
-                                onClick={() => setIsOpen(!isOpen)}
-                                className={`${isOpen ? "rotate-90" : "rotate-0"
-                                    } transition-transform duration-300 ease-in-out`}
-
-                            />
+            {isOpen && (
+                <div className="space-y-4 animate-in fade-in slide-in-from-top-1 duration-300">
+                    {isLoading ? (
+                        <div className="space-y-3">
+                            {[1, 2, 3].map(i => (
+                                <Card key={i} className="p-3 space-y-2 bg-muted/30 border-none animate-pulse">
+                                    <div className="flex justify-between">
+                                        <div className="h-4 bg-muted rounded w-1/3" />
+                                        <div className="h-3 bg-muted rounded w-1/4" />
+                                    </div>
+                                    <div className="h-3 bg-muted rounded w-full" />
+                                </Card>
+                            ))}
                         </div>
+                    ) : recentLogs.length > 0 ? (
+                        <div className="space-y-2">
+                            {recentLogs.map(log => (
+                                <LogCard
+                                    key={log.id}
+                                    name={log.topic.name}
+                                    date={log.study_date}
+                                    notes={log.notes || undefined}
+                                />
+                            ))}
 
-                    </div>
-                    {selectedSubject && recentLogs.data && (
-                        <Dialog>
-                            <DialogTrigger asChild>
-                                <Button className="w-full" size={"sm"}>Ver todos</Button>
-                            </DialogTrigger>
-                            <DialogContent>
-                                <DialogHeader>
-                                    <DialogTitle>Logs Recentes de {selectedSubject.name}</DialogTitle>
-                                </DialogHeader>
-                                <div className="space-y-2 overflow-y-auto max-h-100">
-                                    {logsHistory.map(log => (
-                                        <div key={log.id} className="p-2 border-b">
-                                            <h2 className="font-semibold">{log.topic.name}</h2>
-                                            
-                                            <span className="text-muted-foreground text-sm">{log.study_date.toLocaleDateString()} - {daysAgo(log.study_date)}</span>
-                                            {log.notes && <p className="text-sm mt-1 whitespace-pre-line text-muted-foreground ">{log.notes}</p>}
-                                        </div>
-                                    ))}
-                                </div>
-                                <Button
-                                    variant="outline"
-                                    className="mt-4"
-                                    onClick={getLoadMoreLogs}
-                                    disabled={isLoadingMore || !hasMoreLogs}
-                                >
-                                    {isLoadingMore ? 'Carregando...' : hasMoreLogs ? 'Ver mais' : 'Sem mais logs'}
-                                </Button>
-                                <DialogFooter>
-                                    <DialogClose asChild>
-                                        <Button type="button" variant="outline" className="mt-4" onClick={() => setIsOpen(false)}>Fechar</Button>
-                                    </DialogClose>
-                                </DialogFooter>
-                            </DialogContent>
+                            <Dialog>
+                                <DialogTrigger asChild>
+                                    <Button variant="ghost" className="w-full border-dotted border text-xs text-muted-foreground hover:text-primary hover:bg-primary/5 ">
+                                        Ver mais
+                                    </Button>
+                                </DialogTrigger>
+                                <DialogContent className="max-w-md max-h-[80vh] flex flex-col">
+                                    <DialogHeader>
+                                        <DialogTitle className="flex items-center gap-2">
+                                            <History className="w-4 h-4 text-primary" />
+                                            Histórico: {type === 'subject' ? currentSubject?.name : currentTopic?.name}
+                                        </DialogTitle>
+                                    </DialogHeader>
+                                    <div className="flex-1 overflow-y-auto  space-y-2 py-2">
+                                        {allLogs.map(log => (
+                                            <div key={log.id} className="group relative pl-4 border-l-2 border-primary/20 hover:border-primary transition-colors py-2">
+                                                <div className="flex justify-between items-start mb-1">
+                                                    <h4 className="text-sm font-bold leading-none">{log.topic.name}</h4>
 
-                        </Dialog>
-                    )}
-                    {type === 'topic' && (
-                        <Select value={sidebarTopic?.id ?? ""} onValueChange={(value) => {
-                            const selected = topics.find(t => t.id === value);
-                            setSidebarTopic(selected || null);
-                        }}>
-                            <SelectTrigger>
-                                <SelectValue placeholder="Selecione" />
-                            </SelectTrigger>
-                            <SelectContent>
-                                <SelectGroup>
-                                    {topics?.map(topic => (
-                                        <SelectItem key={topic.id} value={topic.id}>{topic.name}</SelectItem>
-                                    ))}
-                                </SelectGroup>
-                            </SelectContent>
+                                                    <div className="text-[10px] font-medium whitespace-nowrap text-right">
+                                                        <span className="text-foreground">{daysAgo(new Date(log.study_date))}</span>
+                                                        -
+                                                        <span className="text-muted-foreground">
+                                                            {new Date(log.study_date).toLocaleDateString()}
+                                                        </span>
+                                                    </div>
 
-                        </Select>
+                                                </div>
+                                                {log.notes && <p className="text-xs text-foreground/80 leading-relaxed bg-muted/30 p-2 rounded">{log.notes}</p>}
+                                            </div>
+                                        ))}
+
+                                        {hasNextPage && (
+                                            <Button
+                                                variant="outline"
+                                                className="w-full h-9 text-xs"
+                                                onClick={() => fetchNextPage()}
+                                                disabled={isFetchingNextPage}
+                                            >
+                                                {isFetchingNextPage ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : "Carregar mais"}
+                                            </Button>
+                                        )}
+                                    </div>
+                                    <DialogFooter>
+                                        <DialogClose asChild>
+                                            <Button variant="secondary" className="w-full sm:w-auto">Fechar</Button>
+                                        </DialogClose>
+                                    </DialogFooter>
+                                </DialogContent>
+                            </Dialog>
+                        </div>
+                    ) : (
+                        <EmptyLog message={type === 'subject' ? "Nenhum log para esta matéria." : "Nenhum log para este tópico."} />
                     )}
                 </div>
-                <Separator className="my-2" />
-
-                {recentLogs.data && recentLogs.data.length > 0 ? (
-                    <LogsList
-                        logs={recentLogs.data.map(log => ({
-                            id: log.id,
-                            name: log.topic.name,
-                            date: log.study_date,
-                            notes: log.notes ?? undefined,
-                        }))}
-                    />
-                ) : (
-                    <EmptyLog />
-                )}
-            </div>
-
-        </>
-    )
-
-}
+            )}
+            <Separator className="opacity-50" />
+        </div>
+    );
+};
