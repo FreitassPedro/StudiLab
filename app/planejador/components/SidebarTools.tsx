@@ -4,7 +4,7 @@ import { Separator } from "@/components/ui/separator";
 import { useMemo, useState } from "react";
 import { usePlannerActions } from "./PlannerActionsContext";
 import { Button } from "@/components/ui/button";
-import { Calendar, ChevronRight, ChevronsLeft, ChevronsRight, LayoutList, Plus, Trash2 } from "lucide-react";
+import { Calendar, ChevronRight, ChevronsLeft, ChevronsRight, LayoutList, Plus, Trash, Trash2 } from "lucide-react";
 import { usePlannerState } from "../usePlannerState";
 
 function ProgressBar({ progress }: { progress: number }) {
@@ -25,6 +25,7 @@ function ProgressBar({ progress }: { progress: number }) {
 export function SidebarTools() {
     const {
         allBlocks,
+        removeBlock,
         openAddModal
     } = usePlannerActions();
 
@@ -144,6 +145,18 @@ export function SidebarTools() {
                         </Button>
                     </section>
 
+                    <Button
+                        variant={"outline"}
+                        onClick={() => {
+                            if (confirm("Tem certeza que deseja limpar todo o planejamento? Esta ação não pode ser desfeita.")) {
+                                allBlocks.forEach(block => removeBlock(block.id));
+                            }
+                        }}
+                    >
+                        <Trash2 className="w-4 h-4" />
+                        <span className="font-medium">Limpar Planejamento</span>
+
+                    </Button>
                 </div>
             )}
 
