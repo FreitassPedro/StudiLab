@@ -1,14 +1,14 @@
 "use client";
 
 import { cn } from "@/lib/utils";
-import { COLOR_MAP, formatDuration } from "../utils";
+import { COLOR_MAP, formatDuration } from "./utils";
 import { Separator } from "@/components/ui/separator";
 import { useMemo, useState } from "react";
-import { usePlannerActions } from "./PlannerActionsContext";
+import { usePlannerActions } from "./components/PlannerActionsContext";
 import { Button } from "@/components/ui/button";
 import { Plus, Settings, ChevronDown, ChevronUp } from "lucide-react";
-import { usePlannerState } from "../usePlannerState";
-import { PlannerAnalytics } from "../plannerAnalytics";
+import { usePlannerState } from "./usePlannerState";
+import { PlannerAnalytics } from "./plannerAnalytics";
 
 // ── Progress bar ──────────────────────────────────────────────────────────────
 
@@ -21,10 +21,10 @@ function ProgressBar({ progress }: { progress: number }) {
           progress >= 100
             ? "bg-emerald-500"
             : progress > 60
-            ? "bg-emerald-500"
-            : progress > 30
-            ? "bg-amber-500"
-            : "bg-rose-500"
+              ? "bg-emerald-500"
+              : progress > 30
+                ? "bg-amber-500"
+                : "bg-rose-500"
         )}
         style={{ width: `${Math.min(100, progress)}%` }}
       />
@@ -76,8 +76,8 @@ function SubjectCard({
                 efficiencyPct >= 80
                   ? "text-emerald-600 dark:text-emerald-400"
                   : efficiencyPct >= 40
-                  ? "text-amber-600 dark:text-amber-400"
-                  : "text-rose-600 dark:text-rose-400"
+                    ? "text-amber-600 dark:text-amber-400"
+                    : "text-rose-600 dark:text-rose-400"
               )}
             >
               {efficiencyPct}%
@@ -141,8 +141,8 @@ export function SidebarTools() {
               stats.overallEfficiency >= 70
                 ? "text-emerald-600 dark:text-emerald-400"
                 : stats.overallEfficiency >= 40
-                ? "text-amber-600 dark:text-amber-400"
-                : "text-rose-600 dark:text-rose-400"
+                  ? "text-amber-600 dark:text-amber-400"
+                  : "text-rose-600 dark:text-rose-400"
             )}
           >
             {stats.overallEfficiency}%
