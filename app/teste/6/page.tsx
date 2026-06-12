@@ -2,31 +2,34 @@
 
 import { Suspense, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { DayColumn } from "./components/DayColumn";
-import { getMondayOfCurrentWeek, getWeekDates } from "../teste/4/components/planner-utils";
-import { Clock, ChevronLeft, ChevronRight } from "lucide-react";
+
+import { Clock, ChevronLeft, ChevronRight, BarChart3 } from "lucide-react";
 import { usePlannerState } from "./usePlannerState";
 import { SidebarTools } from "./components/SidebarTools";
+import { AnalyticsSidebar } from "./components/AnalyticsSidebar";
 import { buildHourHeights, formatDuration, parseTimeToMinutes } from "./utils";
 import { Button } from "@/components/ui/button";
 import { addWeeks } from "date-fns";
 import { PlannerActionsProvider } from "./components/PlannerActionsContext";
 import { NewBlockFormModal } from "./components/Blocks";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { cn } from "@/lib/utils";
+import { getMondayOfCurrentWeek, getWeekDates } from "../4/components/planner-utils";
 
 function formatHourLabel(hour: number) {
     return `${String(hour).padStart(2, "0")}:00`;
 }
 
+type SidebarMode = "subjects" | "analytics";
+
 export default function Page() {
     const {
         blocks,
-        subjects,
-        subjectsSummary,
-        toggleViewSubject,
-        hiddenSubjects,
         isLoaded,
         form,
         setForm,
         draggedId,
+        subjects,
         setDraggedId,
         dragMovedRef,
         resizingId,
@@ -36,6 +39,8 @@ export default function Page() {
         editingBlock,
         modalOpen,
         removeBlock,
+        editingSubjects,
+        openEditSubjects,
         duplicateBlock,
         openAddModal,
         openEditBlock,
@@ -52,6 +57,9 @@ export default function Page() {
         return weekOffset === 0 ? base : addWeeks(base, weekOffset);
     }, [weekOffset]);
     const weekDates = useMemo(() => getWeekDates(monday), [monday]);
+
+    // ── Sidebar mode ─────────────────────────────────────────────────────────
+    const [sidebarMode, setSidebarMode] = useState<SidebarMode>("subjects");
 
     // ── Timeline metrics ─────────────────────────────────────────────────────
     const hourHeights = useMemo(() => buildHourHeights(blocks), [blocks]);
@@ -75,7 +83,6 @@ export default function Page() {
         dragMovedRef.current = false;
     }, [setDraggedId, dragMovedRef]);
 
-    // Global mousemove: track which day column the cursor is over
     useEffect(() => {
         if (!draggedId && !resizingId) return;
 
@@ -83,7 +90,6 @@ export default function Page() {
             dragMovedRef.current = true;
 
             if (resizingId) {
-                // Find column for the resizing block
                 const block = blocks.find((b) => b.id === resizingId);
                 if (!block) return;
                 const timelineEl = timelineRefs.current[block.dayIndex];
@@ -96,17 +102,13 @@ export default function Page() {
 
         const handleMouseUp = (e: MouseEvent) => {
             if (draggedId && dragMovedRef.current) {
-                // Find which column the cursor is over
                 let targetDay = -1;
                 let relY = 0;
                 for (let i = 0; i < 7; i++) {
                     const timelineEl = timelineRefs.current[i];
                     if (!timelineEl) continue;
                     const rect = timelineEl.getBoundingClientRect();
-                    if (
-                        e.clientX >= rect.left &&
-                        e.clientX <= rect.right
-                    ) {
+                    if (e.clientX >= rect.left && e.clientX <= rect.right) {
                         targetDay = i;
                         relY = e.clientY - rect.top;
                         break;
@@ -116,7 +118,6 @@ export default function Page() {
                     moveBlockByPixel(draggedId, targetDay, relY - dragOffsetY, hourHeights);
                 }
             }
-
             setDraggedId(null);
             setResizingId(null);
         };
@@ -136,39 +137,6 @@ export default function Page() {
         },
         [setResizingId]
     );
-
-    // ── Memoized Context & Data ──
-    const actionsValue = useMemo(() => ({
-        allBlocks: blocks,
-        subjects,
-        hiddenSubjects,
-        subjectsSummary,
-        draggedId,
-        resizingId,
-        dragOffsetY,
-        openAddModal,
-        openEditBlock,
-        removeBlock,
-        duplicateBlock,
-        handleDragStart,
-        handleResizeStart,
-        toggleBlockStatus,
-        toggleViewSubject,
-    }), [
-        blocks, subjects, hiddenSubjects, subjectsSummary, draggedId, resizingId,
-        dragOffsetY, openAddModal, openEditBlock, removeBlock, duplicateBlock,
-        handleDragStart, handleResizeStart, toggleBlockStatus, toggleViewSubject
-    ]);
-
-    const blocksByDay = useMemo(() => {
-        const result = Array.from({ length: 7 }, () => [] as typeof blocks);
-        blocks.forEach(b => {
-            if (b.dayIndex >= 0 && b.dayIndex < 7) {
-                result[b.dayIndex].push(b);
-            }
-        });
-        return result;
-    }, [blocks]);
 
     // ── Stats ────────────────────────────────────────────────────────────────
     const totalMinutes = useMemo(
@@ -197,7 +165,22 @@ export default function Page() {
     }
 
     return (
-        <PlannerActionsProvider value={actionsValue}>
+        <PlannerActionsProvider
+            value={{
+                allBlocks: blocks,
+                draggedId,
+                resizingId,
+                dragOffsetY,
+                openAddModal,
+                openEditBlock,
+                openEditSubjects,
+                removeBlock,
+                duplicateBlock,
+                handleDragStart,
+                handleResizeStart,
+                toggleBlockStatus,
+            }}
+        >
             <div
                 className="flex flex-col h-screen"
                 style={{ cursor: draggedId ? "grabbing" : resizingId ? "ns-resize" : undefined }}
@@ -238,15 +221,38 @@ export default function Page() {
                         </div>
                     </div>
 
-                    <div className="flex items-center gap-2 text-muted-foreground">
-                        <Clock size={14} />
-                        <span className="text-xs">
-                            Total: <strong className="text-foreground">{formatDuration(totalMinutes)}</strong>
-                        </span>
+                    <div className="flex items-center gap-3">
+                        {/* Sidebar toggle */}
+                        <div className="flex items-center gap-1 rounded-md border p-0.5">
+                            <Button
+                                variant={sidebarMode === "subjects" ? "secondary" : "ghost"}
+                                size="sm"
+                                className="h-6 px-2 text-xs"
+                                onClick={() => setSidebarMode("subjects")}
+                            >
+                                Matérias
+                            </Button>
+                            <Button
+                                variant={sidebarMode === "analytics" ? "secondary" : "ghost"}
+                                size="sm"
+                                className="h-6 px-2 text-xs gap-1"
+                                onClick={() => setSidebarMode("analytics")}
+                            >
+                                <BarChart3 className="w-3 h-3" />
+                                Análise
+                            </Button>
+                        </div>
+
+                        <div className="flex items-center gap-2 text-muted-foreground">
+                            <Clock size={14} />
+                            <span className="text-xs">
+                                Total: <strong className="text-foreground">{formatDuration(totalMinutes)}</strong>
+                            </span>
+                        </div>
                     </div>
                 </div>
 
-                <div className="flex  overflow-hidden relative">
+                <div className="flex overflow-hidden relative flex-1">
                     {/* ── Main planner ── */}
                     <div className="flex flex-1 min-w-0 bg-background m-4 mr-0 rounded-2xl flex-col">
                         <div className="flex-1 overflow-auto">
@@ -278,7 +284,7 @@ export default function Page() {
                                     {weekDates.map((date, dayIndex) => (
                                         <div key={dayIndex}>
                                             <DayColumn
-                                                blocks={blocksByDay[dayIndex]}
+                                                blocks={blocks.filter((b) => b.dayIndex === dayIndex)}
                                                 date={date}
                                                 dayIndex={dayIndex}
                                                 hourHeights={hourHeights}
@@ -292,18 +298,32 @@ export default function Page() {
                         </div>
                     </div>
 
-                    <SidebarTools />
+                    {/* ── Right sidebar ── */}
+                    {sidebarMode === "subjects" ? (
+                        <SidebarTools />
+                    ) : (
+                        <AnalyticsSidebar />
+                    )}
                 </div>
 
                 <NewBlockFormModal
                     open={modalOpen}
                     form={form}
                     isEditing={!!editingBlock}
-                    onFormChange={(updatedFields) => setForm((f) => ({ ...f, ...updatedFields }))}
+                    onFormChange={(patch) => setForm({ ...form, ...patch })}
                     onSave={saveBlock}
                     onDelete={editingBlock ? () => deleteBlock(editingBlock.id) : undefined}
                     onCloseModal={closeModal}
                 />
+
+                <Dialog open={editingSubjects} onOpenChange={(v) => !v && openEditSubjects()}>
+                    <DialogHeader>
+                        <DialogTitle>Editar Matérias</DialogTitle>
+                    </DialogHeader>
+                    <DialogContent>
+                        {/* Subject editor content here */}
+                    </DialogContent>
+                </Dialog>
             </div>
         </PlannerActionsProvider>
     );
