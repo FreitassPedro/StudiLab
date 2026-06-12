@@ -122,3 +122,70 @@ export async function getSubjectsTrees(userId: string): Promise<SubjectTree[]> {
         return subject;
     }
 
+export async function createBulkSubjectsWithTopicsAction(data: {
+    userId: string;
+    subjects: {
+        name: string;
+        color: string;
+        topics: string[];
+    }[]
+}) {
+    try {
+        const results = [];
+        for (const subjectData of data.subjects) {
+            // Check if subject already exists for this user
+            const existingSubject = await prisma.subject.findFirst({
+                where: {
+                    name: subjectData.name,
+                    userId: data.userId
+                }
+            });
+
+            if (existingSubject) {
+                // If subject exists, add topics that don't exist yet
+                const existingTopics = await prisma.topic.findMany({
+                    where: {
+                        subjectId: existingSubject.id,
+                        parentId: null
+                    }
+                });
+
+                const existingTopicNames = new Set(existingTopics.map(t => t.name));
+                const topicsToCreate = subjectData.topics.filter(tName => !existingTopicNames.has(tName));
+
+                if (topicsToCreate.length > 0) {
+                    await prisma.topic.createMany({
+                        data: topicsToCreate.map(name => ({
+                            name,
+                            subjectId: existingSubject.id,
+                        }))
+                    });
+                }
+                results.push(existingSubject);
+            } else {
+                // Create new subject with topics
+                const subject = await prisma.subject.create({
+                    data: {
+                        name: subjectData.name,
+                        color: subjectData.color,
+                        userId: data.userId,
+                        topics: {
+                            create: subjectData.topics.map(topicName => ({
+                                name: topicName,
+                            }))
+                        }
+                    },
+                    include: {
+                        topics: true
+                    }
+                });
+                results.push(subject);
+            }
+        }
+        return results;
+    } catch (error) {
+        console.error("Bulk creation error:", error);
+        throw new Error("Erro ao criar matérias em lote");
+    }
+}
+

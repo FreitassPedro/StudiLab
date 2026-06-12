@@ -9,7 +9,8 @@ import React, { useState } from 'react';
 import { toast } from 'sonner';
 import { useCreateSubject } from '@/hooks/useSubjects';
 import { useRouter } from 'next/navigation';
- 
+import { EnemSuggestionsDialog } from './EnemSuggestionsDialog';
+
 const PRESET_COLORS = [
     '#3B82F6', '#EF4444', '#10B981', '#F59E0B', '#8B5CF6',
     '#EC4899', '#06B6D4', '#84CC16', '#F97316', '#6366F1',
@@ -58,8 +59,10 @@ export function NewSubject() {
 
     return (
         <Card>
-            <CardHeader>
+            <CardHeader className="flex items-center justify-between">
                 <CardTitle>Nova Matéria</CardTitle>
+                <EnemSuggestionsDialog />
+
             </CardHeader>
             <CardContent>
                 <form onSubmit={handleCreate} className="space-y-4">
