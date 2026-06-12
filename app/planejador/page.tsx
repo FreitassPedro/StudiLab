@@ -19,6 +19,10 @@ function formatHourLabel(hour: number) {
 export default function Page() {
     const {
         blocks,
+        subjects,
+        subjectsSummary,
+        toggleViewSubject,
+        hiddenSubjects,
         isLoaded,
         form,
         setForm,
@@ -133,6 +137,39 @@ export default function Page() {
         [setResizingId]
     );
 
+    // ── Memoized Context & Data ──
+    const actionsValue = useMemo(() => ({
+        allBlocks: blocks,
+        subjects,
+        hiddenSubjects,
+        subjectsSummary,
+        draggedId,
+        resizingId,
+        dragOffsetY,
+        openAddModal,
+        openEditBlock,
+        removeBlock,
+        duplicateBlock,
+        handleDragStart,
+        handleResizeStart,
+        toggleBlockStatus,
+        toggleViewSubject,
+    }), [
+        blocks, subjects, hiddenSubjects, subjectsSummary, draggedId, resizingId,
+        dragOffsetY, openAddModal, openEditBlock, removeBlock, duplicateBlock,
+        handleDragStart, handleResizeStart, toggleBlockStatus, toggleViewSubject
+    ]);
+
+    const blocksByDay = useMemo(() => {
+        const result = Array.from({ length: 7 }, () => [] as typeof blocks);
+        blocks.forEach(b => {
+            if (b.dayIndex >= 0 && b.dayIndex < 7) {
+                result[b.dayIndex].push(b);
+            }
+        });
+        return result;
+    }, [blocks]);
+
     // ── Stats ────────────────────────────────────────────────────────────────
     const totalMinutes = useMemo(
         () =>
@@ -160,21 +197,7 @@ export default function Page() {
     }
 
     return (
-        <PlannerActionsProvider
-            value={{
-                allBlocks: blocks,
-                draggedId,
-                resizingId,
-                dragOffsetY,
-                openAddModal,
-                openEditBlock,
-                removeBlock,
-                duplicateBlock,
-                handleDragStart,
-                handleResizeStart,
-                toggleBlockStatus,
-            }}
-        >
+        <PlannerActionsProvider value={actionsValue}>
             <div
                 className="flex flex-col h-screen"
                 style={{ cursor: draggedId ? "grabbing" : resizingId ? "ns-resize" : undefined }}
@@ -255,7 +278,7 @@ export default function Page() {
                                     {weekDates.map((date, dayIndex) => (
                                         <div key={dayIndex}>
                                             <DayColumn
-                                                blocks={blocks.filter((b) => b.dayIndex === dayIndex)}
+                                                blocks={blocksByDay[dayIndex]}
                                                 date={date}
                                                 dayIndex={dayIndex}
                                                 hourHeights={hourHeights}
@@ -275,8 +298,9 @@ export default function Page() {
                 <NewBlockFormModal
                     open={modalOpen}
                     form={form}
+                    subjects={subjects}
                     isEditing={!!editingBlock}
-                    onFormChange={(patch) => setForm({ ...form, ...patch })}
+                    onFormChange={(updatedFields) => setForm((f) => ({ ...f, ...updatedFields }))}
                     onSave={saveBlock}
                     onDelete={editingBlock ? () => deleteBlock(editingBlock.id) : undefined}
                     onCloseModal={closeModal}

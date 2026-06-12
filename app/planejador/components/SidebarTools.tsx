@@ -4,8 +4,9 @@ import { Separator } from "@/components/ui/separator";
 import { useMemo, useState } from "react";
 import { usePlannerActions } from "./PlannerActionsContext";
 import { Button } from "@/components/ui/button";
-import { Calendar, ChevronRight, ChevronsLeft, ChevronsRight, LayoutList, Plus, Trash, Trash2 } from "lucide-react";
+import { Calendar, ChevronRight, ChevronsLeft, ChevronsRight, Circle, LayoutList, Plus, Trash, Trash2 } from "lucide-react";
 import { usePlannerState } from "../usePlannerState";
+import { ColorName } from "./mockData";
 
 function ProgressBar({ progress }: { progress: number }) {
     return (
@@ -25,43 +26,15 @@ function ProgressBar({ progress }: { progress: number }) {
 export function SidebarTools() {
     const {
         allBlocks,
+        subjects,
+        subjectsSummary,
+        hiddenSubjects,
+        toggleViewSubject,
         removeBlock,
-        openAddModal
+        openAddModal,
     } = usePlannerActions();
 
-    const {
-        subjects
-    } = usePlannerState();
-
     const [isCollapsed, setIsCollapsed] = useState(false);
-
-
-    const subjectsSummary = useMemo(() => {
-        const summary = new Map<string, { plannedMinutes: number; doneMinutes: number; color: keyof typeof COLOR_MAP }>();
-
-        for (const block of allBlocks) {
-            const [startH, startM] = block.startTime.split(":").map(Number);
-            const [endH, endM] = block.endTime.split(":").map(Number);
-            const minutes = Math.max(0, (endH * 60 + endM) - (startH * 60 + startM));
-
-            const current = summary.get(block.subject) ?? {
-                plannedMinutes: 0,
-                doneMinutes: 0,
-                color: block.color,
-            };
-
-            current.plannedMinutes += minutes;
-            if (block.status === "done") {
-                current.doneMinutes += minutes;
-            }
-            summary.set(block.subject, current);
-        }
-
-        return Array.from(summary.entries())
-            .map(([subject, values]) => ({ subject, ...values }))
-            .sort((a, b) => b.plannedMinutes - a.plannedMinutes);
-    }, [allBlocks]);
-
 
     if (isCollapsed) {
         return (
@@ -106,15 +79,28 @@ export function SidebarTools() {
                     <div className="space-y-4">
                         <h2 className="font-semibold text-xs uppercase tracking-wider text-muted-foreground  mb-4">Matérias Dedicadas</h2>
 
-                        {subjectsSummary.map(({ subject, plannedMinutes, doneMinutes, color }) => {
+                        {subjectsSummary.map(({ subjectId, plannedMinutes, doneMinutes }) => {
+                            const subject = subjects.find(s => s.id === subjectId);
                             const progress = plannedMinutes > 0 ? (doneMinutes / plannedMinutes) * 100 : 0;
-                            const colors = COLOR_MAP[color];
+                            const colors = COLOR_MAP[subject?.color as ColorName] || COLOR_MAP["blue"];
+                            const isHidden = hiddenSubjects.has(subjectId);
+                            console.log({ subjectId, isHidden });
                             return (
-                                <div key={subject}>
+                                <div key={subjectId} className={cn("transition-opacity", isHidden && "opacity-40")}>
                                     <div className="flex justify-between items-center font-semibold text-sm">
                                         <div className="flex flex-row items-center gap-2">
-                                            <div className={cn("w-2 h-4 rounded-full shrink-0", colors.badge)}></div>
-                                            <span className="text-sx font-semibold truncate">{subject}</span>
+                                            <div className={cn("flex items-center p-1 rounded-full shrink-0", colors.badge)}>
+                                                <button
+                                                    onClick={(e) => {
+                                                        e.stopPropagation();
+                                                        toggleViewSubject(subjectId);
+                                                    }}
+                                                >
+                                                    <Circle className="w-3.5 h-3.5 " />
+                                                </button>
+                                            </div>
+
+                                            <span className="text-sx font-light truncate">{subject?.name ?? subjectId}</span>
                                         </div>
                                         <div>
                                             <span className="text-[11px] text-muted-foreground/60 ">{formatDuration(doneMinutes)} /</span>

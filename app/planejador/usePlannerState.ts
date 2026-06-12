@@ -1,14 +1,14 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { BlockType, MOCK_BLOCKS, StudyBlock, ColorName } from "./components/mockData";
+import { BlockType, MOCK_BLOCKS, StudyBlock, ColorName, Subject, MOCK_SUBJECTS } from "./components/mockData";
 import { generateId } from "../teste/4/components/planner-utils";
 import { normalizeSubjectName, parseTimeToMinutes } from "./utils";
 
 const PLANNER_BLOCKS_STORAGE_KEY = "planner.blocks.v1";
 
 export interface NewBlockForm {
-    subject: string;
+    subjectId: string;
     topic: string;
     startTime: string;
     endTime: string;
@@ -18,7 +18,7 @@ export interface NewBlockForm {
 }
 
 const DEFAULT_FORM: NewBlockForm = {
-    subject: "",
+    subjectId: "",
     topic: "",
     startTime: "09:00",
     endTime: "10:00",
@@ -36,6 +36,8 @@ export function minutesToTimeStr(minutes: number): string {
 
 export function usePlannerState() {
     const [blocks, setBlocks] = useState<StudyBlock[]>(MOCK_BLOCKS);
+    const [subjects, setSubjects] = useState<Subject[]>(MOCK_SUBJECTS); // Derivado dos blocos, mas pode ser enriquecido com dados adicionais
+    const [hiddenSubjects, setHiddenSubjects] = useState<Set<string>>(new Set());
     const [isLoaded, setIsLoaded] = useState(false);
 
     // 2. Transição de Estado Assíncrona: Delegação da leitura do cache para a fase pós-hidratação.
@@ -67,37 +69,40 @@ export function usePlannerState() {
     const [draggedId, setDraggedId] = useState<string | null>(null);
     const [resizingId, setResizingId] = useState<string | null>(null);
 
-
     // Used to detect single-click vs drag
     const dragMovedRef = useRef(false);
 
 
-    const subjects = useMemo(() => {
-        const subjectsMap = new Map<string, { colorName: ColorName, label: string }>();
+    const subjectsSummary = useMemo(() => {
+        const summary = new Map<string, { plannedMinutes: number; doneMinutes: number }>();
 
         for (const block of blocks) {
-            const label = normalizeSubjectName(block.subject);
+            const [startH, startM] = block.startTime.split(":").map(Number);
+            const [endH, endM] = block.endTime.split(":").map(Number);
+            const minutes = Math.max(0, (endH * 60 + endM) - (startH * 60 + startM));
 
-            if (!label) continue;
-            if (subjectsMap.has(label)) continue;
+            const current = summary.get(block.subjectId) ?? {
+                plannedMinutes: 0,
+                doneMinutes: 0,
+            };
 
-            subjectsMap.set(label,
-                {
-                    colorName: block.color,
-                    label: block.subject
-                });
+            current.plannedMinutes += minutes;
+            if (block.status === "done") {
+                current.doneMinutes += minutes;
+            }
+            summary.set(block.subjectId, current);
         }
 
-        return subjectsMap;
+        return Array.from(summary.entries())
+            .map(([subjectId, values]) => ({ subjectId, ...values }))
+            .sort((a, b) => b.plannedMinutes - a.plannedMinutes);
     }, [blocks]);
-
-
 
     const openAddModal = useCallback((dayIndex: number, startTime?: string) => {
         setEditingBlock(null);
         setNewBlockForm((prev) => ({
             ...prev,
-            subject: "",
+            subjectId: "",
             topic: "",
             dayIndex,
             startTime: startTime ?? "09:00",
@@ -110,8 +115,9 @@ export function usePlannerState() {
 
     const openEditBlock = useCallback((block: StudyBlock) => {
         setEditingBlock(block);
+        const subject = subjects.find(s => s.id === block.subjectId);
         setNewBlockForm({
-            subject: block.subject,
+            subjectId: subject?.name ?? block.subjectId,
             topic: block.topic ?? "",
             startTime: block.startTime,
             endTime: block.endTime,
@@ -120,7 +126,7 @@ export function usePlannerState() {
             dayIndex: block.dayIndex,
         });
         setModalOpen(true);
-    }, []);
+    }, [subjects]);
 
     const closeModal = useCallback(() => {
         setModalOpen(false);
@@ -129,6 +135,14 @@ export function usePlannerState() {
 
     const removeBlock = useCallback((blockId: string) => {
         setBlocks((prev) => prev.filter((b) => b.id !== blockId));
+        // Se for ultimo bloco da matéria, remova-la também
+        const block = blocks.find(b => b.id === blockId);
+        if (block) {
+            const hasOther = blocks.some(b => b.subjectId === block.subjectId && b.id !== blockId);
+            if (!hasOther) {
+                setSubjects((prev) => prev.filter(s => s.id !== block.subjectId));
+            }
+        }
     }, []);
 
     const duplicateBlock = useCallback((blockId: string) => {
@@ -146,23 +160,36 @@ export function usePlannerState() {
 
 
     const saveBlock = useCallback(() => {
+        console.log("Saving block with form data", newBlockForm);
+        if (!newBlockForm.subjectId.trim()) {
+            alert("O campo 'Matéria' é obrigatório.");
+            return;
+        }
+
+        const subject = subjects.find(s => normalizeSubjectName(s.name) === normalizeSubjectName(newBlockForm.subjectId)) || {
+            id: normalizeSubjectName(newBlockForm.subjectId),
+            name: newBlockForm.subjectId,
+            color: newBlockForm.color,
+            isVisible: true,
+        };
+
+        const blockData: Partial<StudyBlock> = {
+            subjectId: subject.id,
+            topic: newBlockForm.topic,
+            startTime: newBlockForm.startTime,
+            endTime: newBlockForm.endTime,
+            color: subject.color,
+            dayIndex: newBlockForm.dayIndex,
+            type: newBlockForm.type,
+        };
+
         if (editingBlock) {
-            setBlocks((prev) => prev.map((b) => b.id === editingBlock.id ? { ...b, ...newBlockForm } : b));
+            setBlocks((prev) => prev.map((b) => b.id === editingBlock.id ? { ...b, ...blockData } : b));
         }
         else {
-            if (!newBlockForm.subject) {
-                alert("O campo 'Matéria' é obrigatório.");
-                return;
-            }
             const newBlock: StudyBlock = {
                 id: generateId(),
-                subject: newBlockForm.subject,
-                topic: newBlockForm.topic,
-                startTime: newBlockForm.startTime,
-                endTime: newBlockForm.endTime,
-                color: newBlockForm.color,
-                dayIndex: newBlockForm.dayIndex,
-                type: newBlockForm.type,
+                ...blockData,
                 status: "todo",
             };
 
@@ -170,7 +197,7 @@ export function usePlannerState() {
             setBlocks((prev) => [...prev, newBlock]);
         }
         closeModal();
-    }, [newBlockForm, closeModal, editingBlock]);
+    }, [newBlockForm, closeModal, editingBlock, subjects]);
 
     const deleteBlock = useCallback((blockId: string) => {
         setBlocks((prev) => prev.filter((b) => b.id !== blockId));
@@ -187,6 +214,22 @@ export function usePlannerState() {
         );
     }, []);
 
+    // Tres modo: Normal, Foquem e Oculto
+    const toggleViewSubject = useCallback((subject: string) => {
+        console.log("Toggling subject visibility", subject);
+        const normalized = normalizeSubjectName(subject);
+        if (!normalized) return;
+
+        setHiddenSubjects((prev) => {
+            const newSet = new Set(prev);
+            if (newSet.has(normalized)) {
+                newSet.delete(normalized);
+            } else {
+                newSet.add(normalized);
+            }
+            return newSet;
+        });
+    }, []);
     /**
      * Move a block to a new day + pixel offset within the timeline.
      * pixelTop: distance from top of timeline container (px).
@@ -243,9 +286,7 @@ export function usePlannerState() {
                         : b
                 );
             });
-        },
-        []
-    );
+        }, []);
 
 
     return {
@@ -254,6 +295,9 @@ export function usePlannerState() {
         form: newBlockForm,
         setForm: setNewBlockForm,
         subjects,
+        toggleViewSubject,
+        hiddenSubjects,
+        subjectsSummary,
         draggedId,
         setDraggedId,
         dragMovedRef,

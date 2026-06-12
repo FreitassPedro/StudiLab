@@ -3,8 +3,13 @@
 import { createContext, useContext } from "react";
 import { StudyBlock } from "./mockData";
 
+import { Subject } from "./mockData";
+
 interface PlannerActionsContextValue {
     allBlocks: StudyBlock[];
+    subjects: Subject[];
+    hiddenSubjects: Set<string>;
+    subjectsSummary: { subjectId: string; plannedMinutes: number; doneMinutes: number }[];
     draggedId: string | null;
     resizingId: string | null;
     dragOffsetY: number;
@@ -14,7 +19,8 @@ interface PlannerActionsContextValue {
     duplicateBlock: (blockId: string) => void;
     handleDragStart: (id: string, offsetY: number) => void;
     handleResizeStart: (id: string, e: React.MouseEvent) => void;
-    toggleBlockStatus: (id: string) => void;
+    toggleBlockStatus: (blockId: string) => void;
+    toggleViewSubject: (subjectId: string) => void;
 }
 
 const PlannerActionsContext = createContext<PlannerActionsContextValue | null>(null);
