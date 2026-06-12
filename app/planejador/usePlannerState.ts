@@ -189,7 +189,13 @@ export function usePlannerState() {
         else {
             const newBlock: StudyBlock = {
                 id: generateId(),
-                ...blockData,
+                subjectId: subject.id,
+                topic: newBlockForm.topic,
+                startTime: newBlockForm.startTime,
+                endTime: newBlockForm.endTime,
+                color: subject.color,
+                dayIndex: newBlockForm.dayIndex,
+                type: newBlockForm.type,
                 status: "todo",
             };
 
@@ -215,17 +221,15 @@ export function usePlannerState() {
     }, []);
 
     // Tres modo: Normal, Foquem e Oculto
-    const toggleViewSubject = useCallback((subject: string) => {
-        console.log("Toggling subject visibility", subject);
-        const normalized = normalizeSubjectName(subject);
-        if (!normalized) return;
+    const toggleViewSubject = useCallback((subjectId: string) => {
+        if (!subjectId) return;
 
         setHiddenSubjects((prev) => {
             const newSet = new Set(prev);
-            if (newSet.has(normalized)) {
-                newSet.delete(normalized);
+            if (newSet.has(subjectId)) {
+                newSet.delete(subjectId);
             } else {
-                newSet.add(normalized);
+                newSet.add(subjectId);
             }
             return newSet;
         });

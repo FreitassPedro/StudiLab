@@ -33,12 +33,9 @@ export function BlockCard({
         handleDragStart,
         handleResizeStart,
         toggleBlockStatus,
-    } = usePlannerActions();
-
-    const {
         hiddenSubjects,
         subjects,
-    } = usePlannerState();
+    } = usePlannerActions();
 
     const subject = subjects.find(s => s.id === block.subjectId);
 
@@ -74,6 +71,7 @@ export function BlockCard({
     if (hiddenSubjects.has(block.subjectId)) {
         return null;
     }
+
 
     return (
         <div
@@ -306,7 +304,6 @@ export function NewBlockFormModal({
             subjectId: subjectId,
             color: matchedSubject?.color ?? "blue",
         });
-        console.log("handleSubjectChange updated form", { subjectId, color: matchedSubject?.color ?? "blue" });
     }, [subjects, onFormChange]);
 
 
@@ -330,13 +327,11 @@ export function NewBlockFormModal({
 
                             // Acionado ao digitar
                             onInputValueChange={(value) => {
-                                console.log("Combobox onInputValueChange", value);
                                 setSubjectNameInput(value ?? "");
                                 handleSubjectChange(value ?? "");
                             }}
                             // Acionado ao selecionar
                             onValueChange={(value) => {
-                                console.log("Combobox onValueChange", value);
                                 handleSubjectChange(value ?? "");
                             }}
                         >

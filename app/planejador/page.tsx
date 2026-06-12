@@ -298,7 +298,6 @@ export default function Page() {
                 <NewBlockFormModal
                     open={modalOpen}
                     form={form}
-                    subjects={subjects}
                     isEditing={!!editingBlock}
                     onFormChange={(updatedFields) => setForm((f) => ({ ...f, ...updatedFields }))}
                     onSave={saveBlock}
