@@ -1,9 +1,11 @@
-import { useCallback, useMemo, useState } from "react";
-import { BlockType, StudyBlock, ColorName, Subject } from "./mockData";
+import { useCallback, useMemo } from "react";
+import { BlockType, StudyBlock, ColorName } from "./mockData";
 import { COLOR_MAP, formatDuration, getBlockTimelineMetrics, normalizeSubjectName, parseTimeToMinutes } from "../utils";
 import { CheckCircle2, Circle, Clock, GripVertical, MoreHorizontal, Pencil, Trash2, Trash2Icon } from "lucide-react";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
+
+
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
@@ -33,11 +35,7 @@ export function BlockCard({
         handleDragStart,
         handleResizeStart,
         toggleBlockStatus,
-        hiddenSubjects,
-        subjects,
     } = usePlannerActions();
-
-    const subject = subjects.find(s => s.id === block.subjectId);
 
     const colors = COLOR_MAP[block.color];
     const isDragging = draggedId === block.id;
@@ -67,11 +65,6 @@ export function BlockCard({
     }, [block.startTime, block.endTime]);
 
     const compact = heightPx < 48;
-
-    if (hiddenSubjects.has(block.subjectId)) {
-        return null;
-    }
-
 
     return (
         <div
@@ -118,7 +111,7 @@ export function BlockCard({
                 </button>
 
                 <h3 className={cn("font-semibold truncate leading-tight text-xs", colors.text)}>
-                    {subject?.name ?? block.subjectId}
+                    {block.subject}
                 </h3>
 
                 {!compact && block.topic && (
@@ -149,23 +142,13 @@ export function BlockCard({
                     <Button
                         variant="ghost"
                         size="icon"
-                        className="absolute top-1 right-1 opacity-0 group-hover:opacity-100 transition-opacity w-5 h-5 rounded-full"
+                        className="absolute top-1 right-6 opacity-0 group-hover:opacity-100 transition-opacity w-5 h-5 rounded-full"
                     >
                         <MoreHorizontal className="w-2.5 h-2.5" />
                     </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent>
                     <DropdownMenuGroup>
-                        {/* Edit button */}
-                        <DropdownMenuItem
-                            onSelect={(e) => {
-                                e.preventDefault();
-                                openEditBlock(block);
-                            }}
-                        >
-                            Editar
-                            <Pencil className="w-2.5 h-2.5" />
-                        </DropdownMenuItem>
                         <DropdownMenuItem
                             onClick={() => duplicateBlock(block.id)}
                         >
@@ -182,7 +165,19 @@ export function BlockCard({
             </DropdownMenu>
 
 
-
+            {/* Edit button */}
+            <Button
+                variant="ghost"
+                size="icon"
+                className="absolute top-1 right-1 opacity-0 group-hover:opacity-100 transition-opacity w-5 h-5 rounded-full"
+                onMouseDown={(e) => e.stopPropagation()}
+                onClick={(e) => {
+                    e.stopPropagation();
+                    openEditBlock(block);
+                }}
+            >
+                <Pencil className="w-2.5 h-2.5 text-muted-foreground" />
+            </Button>
 
             {/* Resize handle */}
             <div
@@ -276,38 +271,31 @@ export function NewBlockFormModal({
         subjects
     } = usePlannerState();
 
-    const [subjectNameInput, setSubjectNameInput] = useState(subjects.find(s => s.id === form.subjectId)?.name ?? "");
-
-    const subject = subjects.find(s => s.id === form.subjectId);
-
-    const normalizedFormSubject = subjectNameInput.trim().toLowerCase();
+    console.log("subjects in modal", subjects);
+    const normalizedFormSubject = normalizeSubjectName(form.subject ?? "");
 
     const filteredOptions = useMemo(() => {
-        const query = normalizedFormSubject.toLowerCase();
+        const query = normalizedFormSubject;
 
-        return subjects.filter((subj) => !query || subj.name.toLowerCase().includes(query))
+        return Array.from(subjects.values())
+            .filter((subj) => !query || subj.label.toLowerCase().includes(query)
+            )
 
     }, [normalizedFormSubject, subjects]);
 
-    const handleSubjectChange = useCallback((selectedValue: string) => {
-        console.log("handleSubjectChange called with", selectedValue);
-
-        if (!selectedValue) return;
-
-        const matchedSubject = subjects.find(s => s.name.toLowerCase() === selectedValue.toLowerCase());
-
-        const subjectId = matchedSubject ? matchedSubject.id : normalizeSubjectName(selectedValue);
-        console.log("handleSubjectChange Select", { selectedValue, subjectId, matchedSubject });
-        setSubjectNameInput(subjectId);
+    const handleSubjectChange = useCallback((subject: string) => {
+        const normalized = normalizeSubjectName(subject);
+        const matchedColor = subjects.get(normalized);
 
         onFormChange({
-            subjectId: subjectId,
-            color: matchedSubject?.color ?? "blue",
+            subject,
+            color: matchedColor?.colorName ?? "blue",
         });
     }, [subjects, onFormChange]);
 
 
     return (
+        // Use modal=false for ComboboxInput
         <Dialog open={open} onOpenChange={(v) => !v && onCloseModal()} modal={false}>
             <DialogContent className="max-w-sm">
                 <DialogHeader>
@@ -322,30 +310,22 @@ export function NewBlockFormModal({
                         <Label className="text-xs text-muted-foreground mb-1">Matéria</Label>
                         <Combobox
                             items={filteredOptions}
-                            value={subjectNameInput}
-                            inputValue={subjectNameInput}
-
-                            // Acionado ao digitar
-                            onInputValueChange={(value) => {
-                                setSubjectNameInput(value ?? "");
-                                handleSubjectChange(value ?? "");
-                            }}
-                            // Acionado ao selecionar
-                            onValueChange={(value) => {
-                                handleSubjectChange(value ?? "");
-                            }}
+                            value={form.subject}
+                            inputValue={form.subject}
+                            onValueChange={(value) => handleSubjectChange(value ?? "")}
+                            onInputValueChange={(value) => handleSubjectChange(value ?? "")}
                         >
                             <ComboboxInput
                                 placeholder="Ex: Cálculo"
                             />
                             <ComboboxContent>
                                 <ComboboxList>
-                                    {(sbj: Subject) => (
-                                        <ComboboxItem key={sbj.id} value={sbj.id}>
+                                    {(sbj: { label: string, colorName: ColorName }) => (
+                                        <ComboboxItem key={sbj.label} value={sbj.label}>
                                             <div>
-                                                <div className={cn("w-2.5 h-2.5 rounded-full bg-current opacity-70 mr-2 inline-block", COLOR_MAP[sbj.color]?.badge ?? COLOR_MAP.blue.badge)}
+                                                <div className={cn("w-2.5 h-2.5 rounded-full bg-current opacity-70 mr-2 inline-block", COLOR_MAP[sbj.colorName]?.badge ?? COLOR_MAP.blue.badge)}
                                                 />
-                                                {sbj.name}
+                                                {sbj.label}
                                             </div>
                                         </ComboboxItem>
                                     )}
@@ -366,7 +346,7 @@ export function NewBlockFormModal({
                     <div>
                         <Label className="text-xs text-muted-foreground mb-1 block">Tipo</Label>
                         <div className="flex gap-2 flex-wrap">
-                            {["leiture", "revision", "exercise", "resume", "exam"].map((t) => (
+                            {["study", "exercise", "review", "practice"].map((t) => (
                                 <button
                                     key={t}
                                     type="button"
@@ -385,23 +365,21 @@ export function NewBlockFormModal({
                     </div>
                     <div>
                         <Label className="text-xs text-muted-foreground mb-1 block">Dia</Label>
-                        <div className="flex gap-1 flex-wrap">
-                            {["Segunda", "Terça", "Quarta", "Quinta", "Sexta", "Sábado", "Domingo"].map((d, i) => (
-                                <button
-                                    key={d}
-                                    type="button"
-                                    onClick={() => onFormChange({ dayIndex: i })}
-                                    className={cn(
-                                        "px-3 py-1 rounded-full text-xs border transition-all",
-                                        form.dayIndex === i
-                                            ? "bg-primary text-primary-foreground border-primary"
-                                            : "border-border text-muted-foreground hover:border-primary/50"
-                                    )}
-                                >
-                                    {d}
-                                </button>
-                            ))}
-                        </div>
+                        {["Segunda", "Terça", "Quarta", "Quinta", "Sexta", "Sábado", "Domingo"].map((d, i) => (
+                            <button
+                                key={d}
+                                type="button"
+                                onClick={() => onFormChange({ dayIndex: i })}
+                                className={cn(
+                                    "px-3 py-1 rounded-full text-xs border transition-all",
+                                    form.dayIndex === i
+                                        ? "bg-primary text-primary-foreground border-primary"
+                                        : "border-border text-muted-foreground hover:border-primary/50"
+                                )}
+                            >
+                                {d}
+                            </button>
+                        ))}
                     </div>
 
                     <div className="grid grid-cols-2 gap-3">
@@ -429,17 +407,17 @@ export function NewBlockFormModal({
                             <ColorPicker
                                 value={form.color as ColorName}
                                 onChange={(c) => onFormChange({ color: c })}
-                                disabled={subjects.some(s => s.id === form.subjectId)}
+                                disabled={subjects.has(normalizeSubjectName(form.subject ?? ""))}
                             />
-                            {subject && (
+                            {subjects.has(normalizeSubjectName(form.subject ?? "")) && (
                                 <Button
                                     variant="outline"
-                                    type="button"
+                                    onChange={(e) => onFormChange({ color: e.target.value as ColorName })}
                                 >
                                     <div className={cn("w-2.5 h-2.5 rounded-full inline-block",
                                         COLOR_MAP[form.color as ColorName]?.badge)}
                                     />
-                                    {subject.name ?? "Sem matéria"}
+                                    {form.subject ?? "Sem matéria"}
                                 </Button>
                             )}
                         </div>

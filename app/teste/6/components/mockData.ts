@@ -2,7 +2,7 @@ export type BlockType = "leiture" | "revision" | "exercise" | "resume" | "exam";
 
 export interface StudyBlock {
     id: string;
-    subjectId: string;
+    subject: string;
     topic?: string;
     type?: BlockType;
     startTime: string; // "HH:MM"
@@ -11,12 +11,7 @@ export interface StudyBlock {
     dayIndex: number; // 0=Monday, ..., 6=Sunday
     status: "todo" | "done";
 }
-export interface Subject {
-    id: string;
-    name: string;
-    color: ColorName;
-    isVisible: boolean;
-}
+
 export type ColorName =
     | "blue"
     | "amber"
@@ -27,23 +22,12 @@ export type ColorName =
     | "orange"
     | "pink";
 
-export const MOCK_SUBJECTS: Subject[] = [
-    { id: "Matemática", name: "Matemática", color: "blue", isVisible: true },
-    { id: "Física", name: "Física", color: "amber", isVisible: true },
-    { id: "História", name: "História", color: "rose", isVisible: true },
-    { id: "Inglês", name: "Inglês", color: "teal", isVisible: true },
-    { id: "Química", name: "Química", color: "emerald", isVisible: true },
-    { id: "Geografia", name: "Geografia", color: "violet", isVisible: true },
-    { id: "Biologia", name: "Biologia", color: "emerald", isVisible: true },
-    { id: "Português", name: "Português", color: "orange", isVisible: true },
-    { id: "Revisão Geral", name: "Revisão Geral", color: "violet", isVisible: true },
-];
 
 export const MOCK_BLOCKS: StudyBlock[] = [
     // Monday
     {
         id: "blk-1",
-        subjectId: "Matemática",
+        subject: "Matemática",
         topic: "Cálculo Diferencial",
         startTime: "08:00",
         endTime: "10:00",
@@ -54,7 +38,7 @@ export const MOCK_BLOCKS: StudyBlock[] = [
     },
     {
         id: "blk-2",
-        subjectId: "Física",
+        subject: "Física",
         topic: "Cinemática",
         startTime: "14:00",
         endTime: "15:30",
@@ -67,7 +51,7 @@ export const MOCK_BLOCKS: StudyBlock[] = [
     // Tuesday
     {
         id: "blk-3",
-        subjectId: "História",
+        subject: "História",
         topic: "Revolução Industrial",
         startTime: "09:00",
         endTime: "11:00",
@@ -78,7 +62,7 @@ export const MOCK_BLOCKS: StudyBlock[] = [
     },
     {
         id: "blk-4",
-        subjectId: "Inglês",
+        subject: "Inglês",
         topic: "Reading Comprehension",
         startTime: "15:00",
         endTime: "16:00",
@@ -91,7 +75,7 @@ export const MOCK_BLOCKS: StudyBlock[] = [
     // Wednesday
     {
         id: "blk-5",
-        subjectId: "Matemática",
+        subject: "Matemática",
         topic: "Integrais",
         startTime: "08:00",
         endTime: "09:30",
@@ -103,7 +87,7 @@ export const MOCK_BLOCKS: StudyBlock[] = [
     },
     {
         id: "blk-6",
-        subjectId: "Química",
+        subject: "Química",
         topic: "Ligações Químicas",
         startTime: "10:00",
         endTime: "12:00",
@@ -114,7 +98,7 @@ export const MOCK_BLOCKS: StudyBlock[] = [
     },
     {
         id: "blk-7",
-        subjectId: "Geografia",
+        subject: "Geografia",
         topic: "Geopolítica",
         startTime: "14:00",
         endTime: "15:00",
@@ -127,7 +111,7 @@ export const MOCK_BLOCKS: StudyBlock[] = [
     // Thursday
     {
         id: "blk-8",
-        subjectId: "Biologia",
+        subject: "Biologia",
         topic: "Genética Mendeliana",
         startTime: "09:00",
         endTime: "11:30",
@@ -138,7 +122,7 @@ export const MOCK_BLOCKS: StudyBlock[] = [
     },
     {
         id: "blk-9",
-        subjectId: "Física",
+        subject: "Física",
         topic: "Dinâmica",
         startTime: "14:00",
         endTime: "16:00",
@@ -151,7 +135,7 @@ export const MOCK_BLOCKS: StudyBlock[] = [
     // Friday
     {
         id: "blk-10",
-        subjectId: "Português",
+        subject: "Português",
         topic: "Análise Sintática",
         startTime: "08:00",
         endTime: "09:00",
@@ -163,7 +147,7 @@ export const MOCK_BLOCKS: StudyBlock[] = [
     },
     {
         id: "blk-11",
-        subjectId: "Inglês",
+        subject: "Inglês",
         topic: "Grammar & Writing",
         startTime: "10:00",
         endTime: "11:00",
@@ -174,7 +158,7 @@ export const MOCK_BLOCKS: StudyBlock[] = [
     },
     {
         id: "blk-12",
-        subjectId: "Revisão Geral",
+        subject: "Revisão Geral",
         topic: "Flashcards da semana",
         startTime: "15:00",
         endTime: "17:00",
@@ -187,7 +171,7 @@ export const MOCK_BLOCKS: StudyBlock[] = [
     // Saturday
     {
         id: "blk-13",
-        subjectId: "Matemática",
+        subject: "Matemática",
         topic: "Exercícios ENEM",
         startTime: "09:00",
         endTime: "12:00",

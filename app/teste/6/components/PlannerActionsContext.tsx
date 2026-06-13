@@ -3,24 +3,19 @@
 import { createContext, useContext } from "react";
 import { StudyBlock } from "./mockData";
 
-import { Subject } from "./mockData";
-
 interface PlannerActionsContextValue {
     allBlocks: StudyBlock[];
-    subjects: Subject[];
-    hiddenSubjects: Set<string>;
-    subjectsSummary: { subjectId: string; plannedMinutes: number; doneMinutes: number }[];
     draggedId: string | null;
     resizingId: string | null;
     dragOffsetY: number;
+    openEditSubjects: () => void;
     openAddModal: (dayIndex: number, startTime?: string) => void;
     openEditBlock: (block: StudyBlock) => void;
     removeBlock: (blockId: string) => void;
     duplicateBlock: (blockId: string) => void;
     handleDragStart: (id: string, offsetY: number) => void;
     handleResizeStart: (id: string, e: React.MouseEvent) => void;
-    toggleBlockStatus: (blockId: string) => void;
-    toggleViewSubject: (subjectId: string) => void;
+    toggleBlockStatus: (id: string) => void;
 }
 
 const PlannerActionsContext = createContext<PlannerActionsContextValue | null>(null);
