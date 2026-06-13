@@ -38,7 +38,7 @@ function NodeRow({
                     )}
                 </td>
                 {/* Name */}
-                <td className="py-2 group">
+                <td className="py-2 w-full group">
                     <div
                         className="flex items-center gap-2 text-sm"
                         style={{ paddingLeft: `${level * 16}px` }}
@@ -114,7 +114,7 @@ function SubjectItem({ subjectTree }: {
     return (
         <Fragment key={subjectTree.subject.id}>
             <tr className="select-none">
-                <td colSpan={4} className="py-2.5 px-4 rounded-xl border border-b-2 bg-muted/40" style={{ borderColor: subjectTree.subject.color }}>
+                <td colSpan={5} className="py-2.5 px-4 rounded-xl border border-b-2 bg-muted/40" style={{ borderColor: subjectTree.subject.color }}>
                     <div className="flex w-full items-center justify-between gap-6">
                         <button onClick={() => setIsCollapsed(!isCollapsed)}
                             className={`flex items-center justify-center h-5 w-5 rounded hover:bg-accent text-muted-foreground transition-colors `}
@@ -176,7 +176,7 @@ function SubjectItem({ subjectTree }: {
                         ))
                     ) : (
                         <tr>
-                            <td colSpan={4} className="py-2 px-4 ">
+                            <td colSpan={5} className="py-2 px-4 ">
                                 <div className="flex items-center gap-2 text-sm text-muted-foreground">
                                     <Folder size={13} className="shrink-0" />
                                     <span>Nenhum tópico cadastrado</span>

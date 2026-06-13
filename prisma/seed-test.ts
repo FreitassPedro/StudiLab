@@ -2,6 +2,8 @@ import { prisma } from "@/lib/prisma";
 
 type SubjectMock = {
     name: string;
+    isOpen: boolean;
+    isArchived: boolean;
     color: string;
 };
 
@@ -20,9 +22,9 @@ type StudyLogMock = {
 };
 
 const SUBJECT_MOCKS: SubjectMock[] = [
-    { name: "Matemática", color: "#EF4444" },
-    { name: "Física", color: "#10B981" },
-    { name: "Computação", color: "#3B82F6" },
+    { name: "Matemática", color: "#EF4444", isOpen: true, isArchived: false },
+    { name: "Física", color: "#10B981", isOpen: true, isArchived: false },
+    { name: "Computação", color: "#3B82F6", isOpen: true, isArchived: false },
 ];
 
 const TOPIC_MOCKS: TopicMock[] = [
@@ -98,6 +100,8 @@ async function main() {
                 name: subject.name,
                 color: subject.color,
                 userId: user.id,
+                isOpen: subject.isOpen,
+                isArchived: subject.isArchived,
             },
         });
         subjectsByName.set(subject.name, { id: createdSubject.id });
