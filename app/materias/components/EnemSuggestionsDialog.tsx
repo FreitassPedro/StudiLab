@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { Sparkles } from "lucide-react";
+import { ArrowDown, Sparkles } from "lucide-react";
 import { useBulkCreateSubjects } from "@/hooks/useSubjects";
 import { toast } from "sonner";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -148,11 +148,11 @@ export function EnemSuggestionsDialog() {
                 </p>
 
                 <ScrollArea className="flex pr-4 overflow-y-auto">
-                    <div className="space-y-4 grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div className="space-y-2 grid grid-cols-1 sm:grid-cols-2 gap-2">
                         {ENEM_DATA.map((subject) => (
-                            <Card key={subject.name} className={cn("border rounded-lg  p-1 overflow-hidden h-min ", selectedSubjects[subject.name] ? "border-muted/20 hover:bg-muted/50" : "border-transparent bg-card/50")}>
+                            <Card key={subject.name} className={cn("border rounded-lg  p-2 overflow-hidden h-min ", selectedSubjects[subject.name] ? "border-muted/20 hover:bg-muted/50 bg-card/60" : "border-transparent bg-card/30 opacity-50")}>
                                 <CardHeader
-                                    className="flex items-center cursor-pointer hover:bg-card/80 transition-colors"
+                                    className="flex items-center cursor-pointer transition-colors"
                                     onClick={() => handleToggleSubject(subject.name)}
                                 >
                                     <input
@@ -166,6 +166,7 @@ export function EnemSuggestionsDialog() {
                                         style={{ backgroundColor: subject.color }}
                                     />
                                     <span className="font-medium flex-1">{subject.name}</span>
+                                    <ArrowDown size={16} className={cn("transition-transform", selectedSubjects[subject.name] ? "rotate-0" : "rotate-90")} />
                                 </CardHeader>
 
                                 {selectedSubjects[subject.name] && (

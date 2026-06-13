@@ -148,7 +148,7 @@ function SubjectItem({ subjectTree }: {
                             >
                                 <Trash2 className="h-4 w-4 text-destructive" />
                             </Button>
-                            
+
                             {/* Edit Subject */}
                             <EditSubjectDialog subjectId={subjectTree.subject.id}>
                                 <Button
