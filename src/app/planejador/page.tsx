@@ -7,10 +7,11 @@ import { Clock, ChevronLeft, ChevronRight } from "lucide-react";
 import { usePlannerState } from "./usePlannerState";
 import { SidebarTools } from "./components/SidebarTools";
 import { buildHourHeights, formatDuration, parseTimeToMinutes } from "./utils";
-import { Button } from "@/components/ui/button";
+
 import { addWeeks } from "date-fns";
 import { PlannerActionsProvider } from "./components/PlannerActionsContext";
 import { NewBlockFormModal } from "./components/Blocks";
+import { Button } from "@/components/ui/button";
 
 function formatHourLabel(hour: number) {
     return `${String(hour).padStart(2, "0")}:00`;
