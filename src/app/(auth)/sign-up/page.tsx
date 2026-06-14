@@ -14,10 +14,10 @@ import { LogInIcon, UserPlusIcon } from "lucide-react";
 import { useForm } from "react-hook-form";
 import Image from "next/image";
 import Link from "next/link";
+import { cn } from "@/lib/utils";
 
 const formSchema = z.object({
     name: z.string().min(2, "O nome deve ter pelo menos 2 caracteres"),
-    email: z.string().email("Endereço de e-mail inválido"),
     password: z.string().min(6, "A senha deve ter pelo menos 6 caracteres"),
 });
 
@@ -32,8 +32,7 @@ export default function SignUpPage() {
 
     const onSubmit = async (data: FormData) => {
         try {
-
-            const email = data.name.replace(/\s+/g, "").toLowerCase() + "@example.com";
+            const email = `${data.name.toLowerCase().replace(/\s+/g, "")}@example.com`;
             const { error } = await authClient.signUp.email({
                 name: data.name,
                 email: email,
@@ -128,7 +127,7 @@ export default function SignUpPage() {
                                     {errors.password && <p className="text-xs text-destructive font-medium">{errors.password.message}</p>}
                                 </div>
 
-                                <Button type="submit" className="w-full mt-2" disabled={isSubmitting}>
+                                <Button type="submit" className={cn("w-full mt-2", isSubmitting ? "opacity-50 cursor-not-allowed" : "")} disabled={isSubmitting}>
                                     {isSubmitting ? (
                                         "Criando conta..."
                                     ) : (

@@ -5,14 +5,24 @@ import { useTodayStudyLogs } from "@/hooks/useStudyLogs";
 import { BookOpen, Clock, Target } from "lucide-react";
 import { getLocalDateForToday } from "@/lib/utils";
 import { TodaySummarySkeleton } from "./Skeletons";
+import { useEffect, useState } from "react";
 
 export function TodaySummary() {
-    const today = getLocalDateForToday();
+
 
     const { data: logs, isLoading } = useTodayStudyLogs();
 
-    if (isLoading || !logs) return <TodaySummarySkeleton />;
+    const [isMounted, setIsMounted] = useState(false);
 
+    useEffect(() => {
+        
+        setIsMounted(true);
+    }, []);
+    const today = getLocalDateForToday();
+
+    if (isLoading || !logs || !isMounted) {
+        return <TodaySummarySkeleton />;
+    }
 
     const totalMinutes = logs.reduce((sum, log) => sum + log.duration_minutes, 0);
     const hours = Math.floor(totalMinutes / 60);
@@ -21,7 +31,11 @@ export function TodaySummary() {
     return (
         <Card>
             <CardHeader>
-                <CardTitle className="text-lg font-medium">Resumo de Hoje - {today.toLocaleDateString('pt-BR')}</CardTitle>
+                <CardTitle suppressHydrationWarning={true} className="text-lg font-medium">Resumo de Hoje -
+                    <span suppressHydrationWarning>
+                        Timeline do Dia - {today?.toLocaleDateString('pt-BR', { day: '2-digit', month: 'long' })}
+                    </span>
+                </CardTitle>
             </CardHeader>
             <CardContent>
                 <div className="grid gap-4 md:grid-cols-3">
