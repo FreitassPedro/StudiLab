@@ -4,11 +4,12 @@ import { BookOpen, Plus, History, FolderOpen, CheckSquare, CalendarClock, User, 
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import { useAuthStore } from '@/store/useAuthStore';
 import ThemeSwitch from './ThemeSwtich';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuGroup, DropdownMenuItem, DropdownMenuTrigger } from './ui/dropdown-menu';
 import { Separator } from './ui/separator';
+import { authClient } from '@/lib/auth-client';
 
 const navItems = [
     { href: '/dashboard', label: 'Dashboard', icon: LibraryBig, isEnabled: true },
@@ -22,10 +23,25 @@ const navItems = [
 ];
 
 export default function MainNavbar() {
+    const router = useRouter();
     const currentPath = usePathname();
+
     const { user, clearUser } = useAuthStore();
 
     const enabledItems = navItems.filter(item => item.isEnabled);
+
+    async function handleSignOut() {
+
+        await authClient.signOut({
+            fetchOptions: {
+                cache: "no-store",
+                onSuccess: () => {
+                    router.push("/sign-in");
+                }
+            },
+
+        });
+    }
 
     return (
         <header className="sticky top-0 z-50 w-full">
@@ -118,7 +134,17 @@ export default function MainNavbar() {
                                     <DropdownMenuGroup>
                                         <DropdownMenuItem variant='destructive'
                                             onSelect={() => clearUser()}
-                                        > <LogOut></LogOut> Alterar conta</DropdownMenuItem>
+                                        >
+                                            <LogOut />
+                                            Alterar conta
+                                        </DropdownMenuItem>
+                                        <DropdownMenuItem variant='destructive'
+                                            onSelect={() => handleSignOut()}
+                                        >
+                                            <LogOut />
+                                            SIgnOUt
+
+                                        </DropdownMenuItem>
                                     </DropdownMenuGroup>
                                 </DropdownMenuContent>
                             </DropdownMenu>

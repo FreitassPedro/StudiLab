@@ -5,7 +5,7 @@ export default async function AuthLayout({
 }: Readonly<{
     children: React.ReactNode;
 }>) {
-    
+
     await requireGuest();
     return <>{children}</>;
 }

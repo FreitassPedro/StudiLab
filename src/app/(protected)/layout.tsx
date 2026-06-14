@@ -5,8 +5,7 @@ export default async function ProtectedLayout({
 }: Readonly<{
     children: React.ReactNode;
 }>) {
-
+   
     await requireAuth();
-
     return <>{children}</>;
 }

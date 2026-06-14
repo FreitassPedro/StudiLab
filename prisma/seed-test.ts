@@ -24,10 +24,12 @@ type StudyLogMock = {
 const SUBJECT_MOCKS: SubjectMock[] = [
     { name: "Matemática", color: "#EF4444", isOpen: true, isArchived: false },
     { name: "Física", color: "#10B981", isOpen: true, isArchived: false },
-    { name: "Computação", color: "#3B82F6", isOpen: true, isArchived: false },
+    { name: "Português", color: "#3B82F6", isOpen: true, isArchived: false },
+    { name: "História", color: "#F59E0B", isOpen: true, isArchived: false },
 ];
 
 const TOPIC_MOCKS: TopicMock[] = [
+    // Matemática
     { key: "mat-algebra", name: "Álgebra", subjectName: "Matemática" },
     { key: "mat-eq", name: "Equações", subjectName: "Matemática", parentKey: "mat-algebra" },
     { key: "mat-eq-1", name: "1º Grau", subjectName: "Matemática", parentKey: "mat-eq" },
@@ -35,65 +37,79 @@ const TOPIC_MOCKS: TopicMock[] = [
     { key: "mat-geo", name: "Geometria", subjectName: "Matemática" },
     { key: "mat-geo-ana", name: "Geometria Analítica", subjectName: "Matemática", parentKey: "mat-geo" },
 
+    // Física
     { key: "fis-mec", name: "Mecânica", subjectName: "Física" },
     { key: "fis-newton", name: "Leis de Newton", subjectName: "Física", parentKey: "fis-mec" },
-    { key: "fis-newton-apl", name: "Aplicações", subjectName: "Física", parentKey: "fis-newton" },
+    { key: "fis-newton-1", name: "1ª Lei", subjectName: "Física", parentKey: "fis-newton" },
+    { key: "fis-newton-2", name: "2ª Lei", subjectName: "Física", parentKey: "fis-newton" },
     { key: "fis-term", name: "Termodinâmica", subjectName: "Física" },
-    { key: "fis-term-1", name: "1ª Lei", subjectName: "Física", parentKey: "fis-term" },
 
-    { key: "comp-web", name: "Web", subjectName: "Computação" },
-    { key: "comp-web-api", name: "APIs", subjectName: "Computação", parentKey: "comp-web" },
-    { key: "comp-web-rest", name: "REST", subjectName: "Computação", parentKey: "comp-web-api" },
-    { key: "comp-web-auth", name: "Autenticação", subjectName: "Computação", parentKey: "comp-web-api" },
+    // Português
+    { key: "port-gram", name: "Gramática", subjectName: "Português" },
+    { key: "port-verb", name: "Verbos", subjectName: "Português", parentKey: "port-gram" },
+    { key: "port-interp", name: "Interpretação", subjectName: "Português" },
+
+    // História
+    { key: "hist-brasil", name: "Brasil", subjectName: "História" },
+    { key: "hist-colonia", name: "Colônia", subjectName: "História", parentKey: "hist-brasil" },
+    { key: "hist-geral", name: "Geral", subjectName: "História" },
 ];
 
 const STUDY_LOG_MOCKS: StudyLogMock[] = [
     {
         topicKey: "mat-eq-1",
-        start: "2026-03-10T08:00:00.000Z",
-        end: "2026-03-10T09:00:00.000Z",
-        notes: "Resolução de listas de equações de 1º grau",
+        start: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000 - 4 * 60 * 60 * 1000).toISOString(),
+        end: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000 - 3 * 60 * 60 * 1000).toISOString(),
+        notes: "Revisão de equações lineares simples",
+    },
+    {
+        topicKey: "fis-newton-2",
+        start: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000 - 2 * 60 * 60 * 1000).toISOString(),
+        end: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000 - 1 * 60 * 60 * 1000).toISOString(),
+        notes: "F=ma e exercícios de força",
+    },
+    {
+        topicKey: "port-verb",
+        start: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000 - 5 * 60 * 60 * 1000).toISOString(),
+        end: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000 - 4 * 60 * 60 * 1000).toISOString(),
+        notes: "Tempos verbais: pretérito perfeito",
+    },
+    {
+        topicKey: "hist-colonia",
+        start: new Date(Date.now() - 4 * 60 * 60 * 1000).toISOString(),
+        end: new Date(Date.now() - 3 * 60 * 60 * 1000).toISOString(),
+        notes: "Ciclo do açúcar e economia colonial",
     },
     {
         topicKey: "mat-geo-ana",
-        start: "2026-03-10T14:00:00.000Z",
-        end: "2026-03-10T14:45:00.000Z",
-        notes: "Distância entre pontos e equação da reta",
-    },
-    {
-        topicKey: "fis-newton-apl",
-        start: "2026-03-11T10:30:00.000Z",
-        end: "2026-03-11T11:20:00.000Z",
-        notes: "Exercícios de força resultante",
-    },
-    {
-        topicKey: "comp-web-rest",
-        start: "2026-03-11T16:00:00.000Z",
-        end: "2026-03-11T17:30:00.000Z",
-        notes: "Padrões REST e versionamento de endpoints",
-    },
-    {
-        topicKey: "comp-web-auth",
-        start: "2026-03-12T09:15:00.000Z",
-        end: "2026-03-12T10:00:00.000Z",
-        notes: "Fluxos de autenticação com JWT",
+        start: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString(),
+        end: new Date(Date.now() - 1 * 60 * 60 * 1000).toISOString(),
+        notes: "Equação da reta e coeficiente angular",
     },
 ];
 
 async function main() {
-    await prisma.studyLogs.deleteMany(); // Limpa os dados existentes para evitar duplicatas
+    console.log('🧹 Cleaning database...');
+    await prisma.studyLogs.deleteMany();
     await prisma.topic.deleteMany();
     await prisma.subject.deleteMany();
+    await prisma.session.deleteMany();
+    await prisma.account.deleteMany();
     await prisma.user.deleteMany();
 
+    console.log('👤 Creating test user...');
     const user = await prisma.user.create({
         data: {
-            name: 'Test User',
-            email: 'teste@teste.com'
+            id: 'test-user-id',
+            name: 'Usuário Teste',
+            email: 'teste@teste.com',
+            emailVerified: true,
+            image: 'https://api.dicebear.com/7.x/avataaars/svg?seed=test',
         },
     });
 
     const subjectsByName = new Map<string, { id: string }>();
+    console.log('📚 Creating subjects...');
     for (const subject of SUBJECT_MOCKS) {
         const createdSubject = await prisma.subject.create({
             data: {
@@ -110,6 +126,7 @@ async function main() {
     const topicsByKey = new Map<string, { id: string }>();
     const pendingTopics = [...TOPIC_MOCKS];
 
+    console.log('🌿 Creating topics...');
     while (pendingTopics.length > 0) {
         let createdInPass = 0;
 
@@ -144,6 +161,7 @@ async function main() {
         }
     }
 
+    console.log('📝 Creating study logs...');
     for (const studyLog of STUDY_LOG_MOCKS) {
         const topic = topicsByKey.get(studyLog.topicKey);
         if (!topic) {

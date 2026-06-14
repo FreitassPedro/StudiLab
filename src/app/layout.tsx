@@ -4,6 +4,7 @@ import "./globals.css";
 import { Toaster } from "sonner";
 import QueryProvider from "./providers/QueryProvider";
 import { UserSelector } from "@/components/UserSelector";
+import { Suspense } from "react";
 
 import MainNavbar from "@/components/MainNavbar";
 import { ThemeProvider } from "@/components/theme-provider";
