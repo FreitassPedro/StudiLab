@@ -95,23 +95,22 @@ export function StudyHeatmap() {
   const range = { startDate, endDate };
 
 
-  const userId = useAuthStore((state) => state.user?.id);
   const [currentMonth, setCurrentMonth] = useState(() => new Date(startDate));
   const [currentYear, setCurrentYear] = useState(() => startDate.getFullYear());
 
   // Query para dados do mês (visualização de dia)
   const { data: heatmapMonthData, isLoading: isLoadingMonth } = useQuery({
-    queryKey: ['charts', 'heatmap', 'month', currentMonth.getFullYear(), currentMonth.getMonth(), userId],
-    queryFn: () => getHeatmapMonthDataAction(currentMonth, userId!),
-    enabled: !!userId && (!rangeType || rangeType === 'day'),
+    queryKey: ['charts', 'heatmap', 'month', currentMonth.getFullYear(), currentMonth.getMonth()],
+    queryFn: () => getHeatmapMonthDataAction(currentMonth),
+    enabled: (!rangeType || rangeType === 'day'),
     staleTime: 1000 * 60 * 5,
   });
 
   // Query para dados do ano (visualização de semana e mês)
   const { data: heatmapYearData, isLoading: isLoadingYear } = useQuery({
-    queryKey: ['charts', 'heatmap', 'year', currentYear, userId],
-    queryFn: () => getHeatmapYearDataAction(currentYear, userId!),
-    enabled: !!userId && (rangeType === 'week' || rangeType === 'month'),
+    queryKey: ['charts', 'heatmap', 'year', currentYear],
+    queryFn: () => getHeatmapYearDataAction(currentYear),
+    enabled: (rangeType === 'week' || rangeType === 'month'),
     staleTime: 1000 * 60 * 5,
   });
 

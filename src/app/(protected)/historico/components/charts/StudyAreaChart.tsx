@@ -88,12 +88,10 @@ const CustomTooltip = ({ active, payload, data }: CustomToolTipProps) => {
 
 export const StudyAreaChart = () => {
     const { startDate, endDate } = useSearchRangeStore();
-    const userId = useAuthStore((state) => state.user?.id);
 
     const { data: rawData, isLoading } = useQuery({
-        queryKey: ['charts', 'area', startDate, endDate, userId],
-        queryFn: () => getAreaChartACtion(startDate, endDate, userId!),
-        enabled: !!userId,
+        queryKey: ['charts', 'area', startDate, endDate],
+        queryFn: () => getAreaChartACtion(startDate, endDate),
         staleTime: 1000 * 60 * 5, // 5 minutos
     });
 

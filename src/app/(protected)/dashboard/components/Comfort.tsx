@@ -34,10 +34,10 @@ export function ComfortSection() {
     const { data: logs, isLoading } = useTodayStudyLogs();
     const user = useAuthStore((state) => state.user);
 
-    if (isLoading) return null; // Ou um skeleton específico para conforto, se desejar
+    if (isLoading) return null; 
 
 
-    if (user?.name !== "Laura") return null; // Se não for a Laura, não mostramos a seção de conforto
+    if (user?.name !== "Laura") return null; 
 
     const totalMinutes = logs?.reduce((sum, log) => sum + log.duration_minutes, 0) || 0;
     const level = getComfortLevel(totalMinutes);

@@ -1,6 +1,5 @@
 import { postCreateTopic, getTopicsAction, getTopicsBySubjectAction, deleteTopicAction, updateTopicAction, getTopicsTreeAction } from "@/server/actions/topic.action";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { useAuthStore } from "@/store/useAuthStore";
 import { Topic } from "@/types/types";
 
 /*
@@ -24,11 +23,9 @@ export const topicsBySubjectQueryOptions = (subjectId?: string) => ({
 });
 
 export function useTopics() {
-    const userId = useAuthStore((state) => state.user?.id);
     return useQuery({
         queryKey: topicsKeys.all,
-        queryFn: () => getTopicsAction(userId!),
-        enabled: !!userId,
+        queryFn: () => getTopicsAction(),
         select: (topics) => {
             const topicsMap: Record<string, typeof topics[number]> = {};
             topics.forEach(topic => {
@@ -49,11 +46,9 @@ export function useTopicsMap() {
 }
 
 export function useTopicsTree() {
-    const userId = useAuthStore((state) => state.user?.id);
     return useQuery({
         queryKey: topicsKeys.tree,
-        queryFn: () => getTopicsTreeAction(userId!),
-        enabled: !!userId,
+        queryFn: () => getTopicsTreeAction(),
     });
 }
 
@@ -62,7 +57,7 @@ export function useTopicsTree() {
 export function useCreateTopic() {
     const queryClient = useQueryClient();
 
-   
+
 
     return useMutation({
         mutationFn: ({ name, subjectId, parentId }: { name: string; subjectId: string, parentId: string | null }) =>
@@ -81,7 +76,7 @@ export function useCreateTopic() {
             queryClient.invalidateQueries({ queryKey: topicsKeys.all });
             queryClient.invalidateQueries({ queryKey: ["subjects", "tree"] });
         },
-        
+
     });
 }
 

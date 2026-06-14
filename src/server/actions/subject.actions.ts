@@ -3,18 +3,23 @@
 import { Subject, SubjectTree, TopicNode } from "@/types/types";
 import { prisma } from "@/lib/prisma";
 import { Prisma } from "@/app/generated/prisma/client";
+import { requireAuth } from "./requireAuth";
 
 /**
  * Actions garante que os dados do banco não quebrem a UI
  ***/
-export async function createSubjectAction(data: { name: string; color: string; userId: string }) {
+export async function createSubjectAction(data: { name: string; color: string }) {
+    const user = await requireAuth();
     try {
         return await prisma.subject.create({
             data: {
                 name: data.name,
                 color: data.color,
-                userId: data.userId,
+                userId: user.id,
+                isOpen: true,
+                isArchived: false,
             },
+
         });
     }
     catch (error) {
@@ -25,7 +30,8 @@ export async function createSubjectAction(data: { name: string; color: string; u
     }
 }
 
-export async function updateSubjectAction(data: { id: string; name: string; color: string; userId: string }) {
+export async function updateSubjectAction(data: { id: string; name: string; color: string }) {
+    await requireAuth();
     try {
         return await prisma.subject.update({
             where: { id: data.id },
@@ -48,6 +54,7 @@ export async function updateSubjectAction(data: { id: string; name: string; colo
     }
 }
 export async function deleteSubjectAction(id: string) {
+    await requireAuth();
     await prisma.subject.delete({
         where: { id },
     });
@@ -55,9 +62,10 @@ export async function deleteSubjectAction(id: string) {
     return { success: true };
 }
 
-export async function getSubjectsTrees(userId: string): Promise<SubjectTree[]> {
+export async function getSubjectsTrees(): Promise<SubjectTree[]> {
+    const user = await requireAuth();
     const subjects: { id: string; name: string; color: string; topics: { id: string; name: string; parentId: string | null; subjectId: string }[] }[] = await prisma.subject.findMany({
-        where: { userId },
+        where: { userId: user.id },
         include: {
             topics: {
                 include: {
@@ -102,34 +110,36 @@ export async function getSubjectsTrees(userId: string): Promise<SubjectTree[]> {
     });
 }
 
-    export async function getSubjectsAction(userId: string): Promise<Subject[]> {
-        return await prisma.subject.findMany({
-            where: { userId }
-        });
-    }
+export async function getSubjectsAction(): Promise<Subject[]> {
+    const user = await requireAuth();
+    return await prisma.subject.findMany({
+        where: { userId: user.id }
+    });
+}
 
-    export async function getSubjectsWithTopicsAction(userId: string) {
-        const subject = await prisma.subject.findMany({
-            where: { userId },
-            include: {
-                topics: {
-                    include: {
-                        studyLogs: false, // Evita carregar os studyLogs
-                    },
+export async function getSubjectsWithTopicsAction() {
+    const user = await requireAuth();
+    const subject = await prisma.subject.findMany({
+        where: { userId: user.id },
+        include: {
+            topics: {
+                include: {
+                    studyLogs: false, // Evita carregar os studyLogs
                 },
             },
-        });
-        return subject;
-    }
+        },
+    });
+    return subject;
+}
 
 export async function createBulkSubjectsWithTopicsAction(data: {
-    userId: string;
     subjects: {
         name: string;
         color: string;
         topics: string[];
     }[]
 }) {
+    const user = await requireAuth();
     try {
         const results = [];
         for (const subjectData of data.subjects) {
@@ -137,7 +147,7 @@ export async function createBulkSubjectsWithTopicsAction(data: {
             const existingSubject = await prisma.subject.findFirst({
                 where: {
                     name: subjectData.name,
-                    userId: data.userId
+                    userId: user.id
                 }
             });
 
@@ -168,7 +178,9 @@ export async function createBulkSubjectsWithTopicsAction(data: {
                     data: {
                         name: subjectData.name,
                         color: subjectData.color,
-                        userId: data.userId,
+                        userId: user.id,
+                        isOpen: true,
+                        isArchived: false,
                         topics: {
                             create: subjectData.topics.map(topicName => ({
                                 name: topicName,

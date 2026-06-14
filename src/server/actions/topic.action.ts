@@ -4,13 +4,15 @@
 import { Prisma } from "@/app/generated/prisma/client";
 import { prisma } from "@/lib/prisma";
 import { Topic, TopicNode } from "@/types/types";
+import { requireAuth } from "./requireAuth";
 
-export async function getTopicsAction(userId: string): Promise<Topic[]> {
+export async function getTopicsAction(): Promise<Topic[]> {
+    const user = await requireAuth();
     await new Promise(resolve => setTimeout(resolve, 20)); // Simula delay
     const topics = prisma.topic.findMany({
         where: {
             subject: {
-                userId: userId
+                userId: user.id
             }
         }
     });
@@ -19,12 +21,14 @@ export async function getTopicsAction(userId: string): Promise<Topic[]> {
 
 
 export async function getTopicsBySubjectAction(subjectId: string): Promise<Topic[]> {
+    await requireAuth();
     return prisma.topic.findMany({
         where: { subjectId },
     });
 }
 
 export async function postCreateTopic(name: string, subjectId: string, parentId: string | null): Promise<Topic> {
+    await requireAuth();
     const newTopic = await prisma.topic.create({
         data: {
             name,
@@ -35,9 +39,10 @@ export async function postCreateTopic(name: string, subjectId: string, parentId:
     return newTopic;
 }
 
-export async function getTopicsTreeAction(userId: string): Promise<TopicNode[]> {
+export async function getTopicsTreeAction(): Promise<TopicNode[]> {
+    const user = await requireAuth();
     const topics = await prisma.topic.findMany({
-        where: { subject: { userId } },
+        where: { subject: { userId: user.id } },
         select: { id: true, name: true, subjectId: true, parentId: true },
     });
 
@@ -58,6 +63,7 @@ export async function getTopicsTreeAction(userId: string): Promise<TopicNode[]> 
 }
 
 export async function deleteTopicAction(topicId: string): Promise<void> {
+    await requireAuth();
     // Verifica se existem StudyLogs vinculadas ao tópico
     const studyLogsCount = await prisma.studyLogs.count({
         where: { topicId },
@@ -75,6 +81,7 @@ export async function deleteTopicAction(topicId: string): Promise<void> {
 }
 
 export async function updateTopicAction(topicId: string, name: string): Promise<Topic> {
+    await requireAuth();
 
     try {
         return await prisma.topic.update({

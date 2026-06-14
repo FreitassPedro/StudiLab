@@ -2,6 +2,7 @@
 
 import { prisma } from "@/lib/prisma";
 import { connection } from "next/server";
+import { requireAuth } from "./requireAuth";
 
 const include = {
     topic: {
@@ -14,13 +15,12 @@ const include = {
 
 export async function getStudyLogsFeedAction({
     cursor,
-    userId,
     fromDate,
 }: {
     cursor?: string;
-    userId: string;
     fromDate?: Date | string;
 }) {
+    const user = await requireAuth();
     const limit = 10;
 
     // Normalizar data para evitar problemas de timezone ao comparar com @db.Date
@@ -32,7 +32,7 @@ export async function getStudyLogsFeedAction({
     const baseWhere = {
         topic: {
             subject: {
-                userId: userId,
+                userId: user.id,
             },
         },
     } as const;
@@ -87,16 +87,15 @@ export async function getStudyLogsFeedAction({
 export async function getStudyLogsByDateAction({
     startDate,
     endDate,
-    userId,
 }: {
     startDate: Date;
     endDate: Date;
-    userId: string;
 }) {
+    const user = await requireAuth();
     // Normalizar datas para evitar problemas de timezone ao comparar com @db.Date
     const normalizedStart = new Date(startDate);
     normalizedStart.setHours(0, 0, 0, 0);
-    
+
     const normalizedEnd = new Date(endDate);
     normalizedEnd.setHours(23, 59, 59, 999);
 
@@ -108,7 +107,7 @@ export async function getStudyLogsByDateAction({
             },
             topic: {
                 subject: {
-                    userId: userId,
+                    userId: user.id,
                 },
             },
         },
@@ -117,6 +116,7 @@ export async function getStudyLogsByDateAction({
 }
 
 export async function getStudyLogDetailsAction(logId: string) {
+    await requireAuth();
     return prisma.studyLogs.findUnique({
         where: {
             id: logId,
@@ -134,10 +134,11 @@ export async function getStudyLogDetailsAction(logId: string) {
 
 
 export async function getStudyLogsByDateRangeAction(startDate: Date, endDate: Date) {
+    const user = await requireAuth();
     // Normalizar datas para evitar problemas de timezone ao comparar com @db.Date
     const normalizedStart = new Date(startDate);
     normalizedStart.setHours(0, 0, 0, 0);
-    
+
     const normalizedEnd = new Date(endDate);
     normalizedEnd.setHours(23, 59, 59, 999);
 
@@ -146,6 +147,11 @@ export async function getStudyLogsByDateRangeAction(startDate: Date, endDate: Da
             study_date: {
                 gte: normalizedStart,
                 lte: normalizedEnd,
+            },
+            topic: {
+                subject: {
+                    userId: user.id,
+                },
             },
         },
         include,
@@ -162,6 +168,7 @@ export interface StudyLogInput {
 }
 
 export async function createStudyLogAction(data: StudyLogInput) {
+    await requireAuth();
     return prisma.studyLogs.create({
         data: {
             topicId: data.topic_id,
@@ -186,6 +193,7 @@ export interface UpdateStudyLogInput {
 }
 
 export async function updateStudyLogAction(data: UpdateStudyLogInput) {
+    await requireAuth();
     const updateData = {} as {
         topicId?: string;
         start_time?: Date;
@@ -193,14 +201,14 @@ export async function updateStudyLogAction(data: UpdateStudyLogInput) {
         duration_minutes?: number;
         notes?: string;
     };
-    
-    
+
+
     if (data.topic_id !== undefined) updateData.topicId = data.topic_id;
     if (data.start_time !== undefined) updateData.start_time = data.start_time;
     if (data.end_time !== undefined) updateData.end_time = data.end_time;
     if (data.duration_minutes !== undefined) updateData.duration_minutes = data.duration_minutes;
     if (data.notes !== undefined) updateData.notes = data.notes;
-    
+
     return prisma.studyLogs.update({
         where: { id: data.id },
         data: updateData,
@@ -209,17 +217,19 @@ export async function updateStudyLogAction(data: UpdateStudyLogInput) {
 }
 
 export async function deleteStudyLogAction(id: string) {
+    await requireAuth();
     return prisma.studyLogs.delete({
         where: { id },
     });
 }
 
-export async function getLastStudyLogAction(userId: string) {
+export async function getLastStudyLogAction() {
+    const user = await requireAuth();
     return prisma.studyLogs.findFirst({
         where: {
             topic: {
                 subject: {
-                    userId: userId,
+                    userId: user.id,
                 },
             },
         },
@@ -230,15 +240,16 @@ export async function getLastStudyLogAction(userId: string) {
     });
 }
 
-export async function getTodayStudyLogsAction(userId: string, todayDate?: Date) {
+export async function getTodayStudyLogsAction(todayDate?: Date) {
     "use server";
+    const user = await requireAuth();
     // 1. Dizemos ao Next.js: "Aguarde a requisição chegar. Isso não é estático."
     await connection();
-    
+
     // Se todayDate não for fornecido, usar a data local do servidor como fallback
     // Idealmente, o cliente deve sempre passar `todayDate` para evitar problemas de timezone
     const today = todayDate ? new Date(todayDate) : new Date();
-    
+
     // Normalizar para dia zero (meia-noite local)
     const startOfDay = new Date(
       today.getFullYear(),
@@ -246,7 +257,7 @@ export async function getTodayStudyLogsAction(userId: string, todayDate?: Date) 
       today.getDate(),
       0, 0, 0, 0
     );
-    
+
     // Normalizar para fim do dia (23:59:59:999)
     const endOfDay = new Date(
       today.getFullYear(),
@@ -263,7 +274,7 @@ export async function getTodayStudyLogsAction(userId: string, todayDate?: Date) 
             },
             topic: {
                 subject: {
-                    userId: userId,
+                    userId: user.id,
                 },
             },
         },
@@ -275,6 +286,7 @@ export async function getTodayStudyLogsAction(userId: string, todayDate?: Date) 
 }
 
 export async function getRecentLogsByTopicAction(topicId: string, take = 3, skip = 0) {
+    await requireAuth();
     return prisma.studyLogs.findMany({
         where: {
             topicId: topicId,
@@ -295,6 +307,7 @@ export async function getRecentLogsByTopicAction(topicId: string, take = 3, skip
 }
 
 export async function getRecentLogsBySubjectAction(subjectId: string, take = 3, skip = 0) {
+    await requireAuth();
     return prisma.studyLogs.findMany({
         where: {
             topic: {
@@ -332,13 +345,13 @@ export type SummaryStats = {
 
 export async function getSummaryStatsAction(
     startDate: Date,
-    endDate: Date,
-    userId: string
+    endDate: Date
 ): Promise<SummaryStats> {
+    const user = await requireAuth();
     // Normalizar datas para evitar problemas de timezone ao comparar com @db.Date
     const normalizedStart = new Date(startDate);
     normalizedStart.setHours(0, 0, 0, 0);
-    
+
     const normalizedEnd = new Date(endDate);
     normalizedEnd.setHours(23, 59, 59, 999);
 
@@ -360,11 +373,11 @@ export async function getSummaryStatsAction(
         WHERE 
             sl."study_date" >= ${normalizedStart}
             AND sl."study_date" <= ${normalizedEnd}
-            AND s."userId" = ${userId}
+            AND s."userId" = ${user.id}
     `;
 
 
-    
+
     const basicStats = basicStatsResult[0];
     const totalMinutes = Number(basicStats?.totalMinutes ?? 0);
     const totalSessions = Number(basicStats?.totalSessions ?? 0);
@@ -392,7 +405,7 @@ export async function getSummaryStatsAction(
         WHERE 
             sl."study_date" >= ${normalizedStart}
             AND sl."study_date" <= ${normalizedEnd}
-            AND s."userId" = ${userId}
+            AND s."userId" = ${user.id}
         GROUP BY s.id, s.name, s.color
         ORDER BY "totalMinutes" DESC
         LIMIT 1

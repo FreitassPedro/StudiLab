@@ -1,8 +1,9 @@
 "use server";
 
-import { AreaChartData } from "@/app/historico/components/charts/StudyAreaChart";
+import { AreaChartData } from "@/app/(protected)/historico/components/charts/StudyAreaChart";
 import { prisma } from "@/lib/prisma";
 import { formatDateKey } from "@/lib/utils";
+import { requireAuth } from "./requireAuth";
 
 
 export type PieChartData = {
@@ -18,7 +19,8 @@ export type HeatmapMonthResponse = {
     minutesByDate: Record<string, number>;
 };
 
-export async function getPieChartDataActionRaw(startDate: Date, endDate: Date, userId: string): Promise<PieChartData[]> {
+export async function getPieChartDataActionRaw(startDate: Date, endDate: Date): Promise<PieChartData[]> {
+    const user = await requireAuth();
     type RawSubjectAggregate = {
         id: string;
         name: string;
@@ -41,7 +43,7 @@ export async function getPieChartDataActionRaw(startDate: Date, endDate: Date, u
             AND sl."study_date" >= ${startDate}
             AND sl."study_date" <= ${endDate}
         WHERE
-            s."userId" = ${userId}
+            s."userId" = ${user.id}
         GROUP BY
             s.id, s.name, s.color
         ORDER BY
@@ -59,7 +61,8 @@ export async function getPieChartDataActionRaw(startDate: Date, endDate: Date, u
 };
 
 
-export async function getAreaChartACtion(startDate: Date, endDate: Date, userId: string) {
+export async function getAreaChartACtion(startDate: Date, endDate: Date) {
+    const user = await requireAuth();
     // Normalizar datas para evitar problemas de timezone
     // Quando comparamos com @db.Date, precisamos garantir que estamos comparando apenas a data
     const normalizedStart = new Date(startDate);
@@ -78,7 +81,7 @@ export async function getAreaChartACtion(startDate: Date, endDate: Date, userId:
             },
             topic: {
                 subject: {
-                    userId: userId,
+                    userId: user.id,
                 },
             },
         },
@@ -132,7 +135,8 @@ export async function getAreaChartACtion(startDate: Date, endDate: Date, userId:
     return sortedChart;
 }
 
-export async function getHeatmapMonthDataAction(monthDate: Date, userId: string): Promise<HeatmapMonthResponse> {
+export async function getHeatmapMonthDataAction(monthDate: Date): Promise<HeatmapMonthResponse> {
+    const user = await requireAuth();
     const startDate = new Date(monthDate.getFullYear(), monthDate.getMonth(), 1, 0, 0, 0, 0);
     const endDate = new Date(monthDate.getFullYear(), monthDate.getMonth() + 1, 0, 23, 59, 59, 999);
 
@@ -145,7 +149,7 @@ export async function getHeatmapMonthDataAction(monthDate: Date, userId: string)
             },
             topic: {
                 subject: {
-                    userId,
+                    userId: user.id,
                 },
             },
         },
@@ -172,7 +176,8 @@ export async function getHeatmapMonthDataAction(monthDate: Date, userId: string)
     };
 }
 
-export async function getHeatmapYearDataAction(year: number, userId: string): Promise<HeatmapMonthResponse> {
+export async function getHeatmapYearDataAction(year: number): Promise<HeatmapMonthResponse> {
+    const user = await requireAuth();
     const startDate = new Date(year, 0, 1, 0, 0, 0, 0);
     const endDate = new Date(year, 11, 31, 23, 59, 59, 999);
 
@@ -185,7 +190,7 @@ export async function getHeatmapYearDataAction(year: number, userId: string): Pr
             },
             topic: {
                 subject: {
-                    userId,
+                    userId: user.id,
                 },
             },
         },

@@ -97,12 +97,10 @@ const renderCustomLabel = ({
 
 export const StudyPieChart = () => {
     const { startDate, endDate } = useSearchRangeStore();
-    const userId = useAuthStore((state) => state.user?.id);
 
     const { data: chartData } = useQuery({
-        queryKey: ['charts', 'pie', startDate, endDate, userId],
-        queryFn: () => getPieChartDataActionRaw(startDate, endDate, userId!),
-        enabled: !!userId,
+        queryKey: ['charts', 'pie', startDate, endDate],
+        queryFn: () => getPieChartDataActionRaw(startDate, endDate),
         staleTime: 1000 * 60 * 5, // 5 minutos
     });
 
