@@ -5,21 +5,10 @@ import { prisma } from "@/lib/prisma";
 export async function requireAuth() {
     const currentUser = await getCurrentUser();
 
-    if (!currentUser?.id) {
+
+    if (!currentUser) {
         redirect("/sign-in");
     }
 
-    const user = await prisma.user.findUnique({
-        where: {
-            id: currentUser.id,
-        },
-        select: {
-            id: true,
-            name: true,
-            email: true,
-            image: true, 
-        }
-    });
-
-    return user;
+    return currentUser;
 }

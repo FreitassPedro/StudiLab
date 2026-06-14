@@ -5,7 +5,11 @@ export async function requireGuest() {
 
     const currentUser = await getCurrentUser();
 
-    if (!currentUser?.id) return null;
+    // Se já houver um usuário logado, redireciona para o dashboard
+    if (currentUser) {
+        redirect("/dashboard");
+    }
 
-    redirect("/dashboard");
+    // Se não houver usuário, permite acesso à rota
+    return null;
 }

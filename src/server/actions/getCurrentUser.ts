@@ -9,15 +9,8 @@ export async function getCurrentUser() {
         headers: await headers(),
     });
 
-    if (!session?.user.id) return null;
+    // Se não houver sessão ou usuário, retorna null
+    if (!session?.user) return null;
 
-    const user = await prisma.user.findUnique({
-        where: {
-            id: session.user.id,
-        },
-        select: {
-            id: true,
-        }
-    });
-    return user;
+    return session.user;
 }

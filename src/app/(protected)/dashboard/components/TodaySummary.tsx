@@ -8,6 +8,7 @@ import { TodaySummarySkeleton } from "./Skeletons";
 
 export function TodaySummary() {
     const { data: logs, isLoading } = useTodayStudyLogs();
+    
     if (isLoading || !logs) return <TodaySummarySkeleton />;
 
     const today = getLocalDateForToday();

@@ -3,16 +3,18 @@ import { RecentSessions } from "./components/RecentSessions";
 import { TodaySummary } from "./components/TodaySummary";
 import { TodayTimeline } from "../nova-sessao/components/TodayTimeline";
 import { TodaySummarySkeleton, RecentSessionsSkeleton } from "./components/Skeletons";
-import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 
 
 import Link from "next/link";
 import { Play } from "lucide-react";
-import Image from "next/image";
 import { ComfortSection } from "./components/Comfort";
+import { authClient } from "@/lib/auth-client";
+import { redirect } from "next/navigation";
+import { requireAuth } from "@/server/actions/requireAuth";
 
-export default function DashboardPage() {
+export default async function DashboardPage() {
+    const user = await requireAuth();
 
     return (
         <div className="container mx-auto p-4 space-y-6">
