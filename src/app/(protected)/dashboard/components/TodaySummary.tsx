@@ -15,7 +15,7 @@ export function TodaySummary() {
     const [isMounted, setIsMounted] = useState(false);
 
     useEffect(() => {
-        
+
         setIsMounted(true);
     }, []);
     const today = getLocalDateForToday();
