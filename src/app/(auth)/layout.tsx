@@ -1,11 +1,19 @@
 import { requireGuest } from "@/server/actions/requireGuest";
+import { Suspense } from "react";
 
-export default async function AuthLayout({
+async function AuthGuard({ children }: { children: React.ReactNode }) {
+    await requireGuest();
+    return <>{children}</>;
+}
+
+export default function AuthLayout({
     children,
 }: Readonly<{
     children: React.ReactNode;
 }>) {
-
-    await requireGuest();
-    return <>{children}</>;
+    return (
+        <Suspense fallback={null}>
+            <AuthGuard>{children}</AuthGuard>
+        </Suspense>
+    );
 }

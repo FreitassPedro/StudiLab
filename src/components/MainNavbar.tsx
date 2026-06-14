@@ -133,17 +133,10 @@ export default function MainNavbar() {
                                     <Separator />
                                     <DropdownMenuGroup>
                                         <DropdownMenuItem variant='destructive'
-                                            onSelect={() => clearUser()}
-                                        >
-                                            <LogOut />
-                                            Alterar conta
-                                        </DropdownMenuItem>
-                                        <DropdownMenuItem variant='destructive'
                                             onSelect={() => handleSignOut()}
                                         >
                                             <LogOut />
                                             SIgnOUt
-
                                         </DropdownMenuItem>
                                     </DropdownMenuGroup>
                                 </DropdownMenuContent>

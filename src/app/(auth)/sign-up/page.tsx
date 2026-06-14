@@ -1,20 +1,24 @@
 "use client";
 
-import FormLayout from "@/components/layout/FormLayout";
-import { Label } from "@/components/ui/label";
-
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { Input } from "@/components/ui/input";
-import { useForm } from "react-hook-form";
+import { useRouter } from "next/navigation";
 import { authClient } from "@/lib/auth-client";
 import { toast } from "sonner";
-import { useRouter } from "next/navigation";
+import { Card, CardContent, CardDescription, CardTitle, CardHeader } from "@/components/ui/card";
+import { Separator } from "@/components/ui/separator";
+import { Label } from "@/components/ui/label";
+import { Button } from "@/components/ui/button";
+import { LogInIcon, UserPlusIcon } from "lucide-react";
+import { useForm } from "react-hook-form";
+import Image from "next/image";
+import Link from "next/link";
 
 const formSchema = z.object({
-    name: z.string().min(2, "Name must be at least 2 characters long"),
-    email: z.string().email("Invalid email address"),
-    password: z.string().min(6, "Password must be at least 6 characters long"),
+    name: z.string().min(2, "O nome deve ter pelo menos 2 caracteres"),
+    email: z.string().email("Endereço de e-mail inválido"),
+    password: z.string().min(6, "A senha deve ter pelo menos 6 caracteres"),
 });
 
 type FormData = z.infer<typeof formSchema>;
@@ -27,53 +31,137 @@ export default function SignUpPage() {
     });
 
     const onSubmit = async (data: FormData) => {
-        // Here you would typically send the data to your API to create the user
-        console.log("Form submitted:", data);
-
         try {
+
+            const email = data.name.replace(/\s+/g, "").toLowerCase() + "@example.com";
             const { error } = await authClient.signUp.email({
                 name: data.name,
-                email: data.email,
+                email: email,
                 password: data.password
             });
 
             if (error) {
-                toast.error(error.message || "Failed to sign up");
+                toast.error(error.message || "Falha ao criar conta");
                 return;
             }
-            toast.success("Account created successfully! Please check your email to verify your account.");
-            router.push("/");
-            
+            toast.success("Conta criada com sucesso! Verifique seu e-mail para confirmar.");
+            router.push("/sign-in");
+
         } catch (error) {
-            toast.error("Unexpected error occurred");
+            toast.error("Ocorreu um erro inesperado");
             console.error("Unexpected error:", error);
         }
     }
 
     return (
-        <FormLayout title="Sign Up" description="Create a new account">
+        <div className="fixed inset-0 bg-linear-to-r from-background to-muted backdrop-blur-sm mx-auto z-999 p-4 flex items-center justify-center overflow-y-auto">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-center w-full max-w-5xl mx-auto py-8">
 
-            <form onSubmit={handleSubmit(onSubmit)} className="space-y-4 bg-card p-6 rounded-lg shadow-md">
-                <div className="mb-4">
-                    <Label>Name</Label>
-                    <Input className="w-full px-3 py-2 border rounded" {...register("name")} />
-                    {errors.name && <p className="text-red-500">{errors.name.message}</p>}
+                {/* Motivational Section */}
+                <div className="hidden md:flex flex-col items-center text-center md:text-left md:items-start space-y-6">
+                    <div className="space-y-2">
+                        <h1 className="text-5xl font-bold md:text-6xl text-primary">Junte-se ao StudiLab</h1>
+                        <p className="text-xl text-muted-foreground max-w-md">
+                            Comece sua jornada de aprendizado hoje mesmo. Transforme esforço em resultados reais.
+                        </p>
+                    </div>
+
+                    <div className="relative w-full max-w-sm aspect-square rounded-2xl overflow-hidden shadow-2xl border-4 border-primary/20">
+                        <Image
+                            src="/images/studyUnc.gif"
+                            alt="Incentivo aos estudos"
+                            fill
+                            className="object-cover"
+                        />
+                    </div>
+
+                    <div className="flex items-center gap-4 text-sm text-muted-foreground italic">
+                        <span className="h-px w-8 bg-muted-foreground/30"></span>
+                        &quot;O segredo do sucesso é a constância no objetivo.&quot;
+                    </div>
                 </div>
-                <div className="mb-4">
-                    <Label>Email</Label>
-                    <Input className="w-full px-3 py-2 border rounded" {...register("email")} />
-                    {errors.email && <p className="text-red-500">{errors.email.message}</p>}
+
+                {/* Form Section */}
+                <div className="w-full flex justify-center">
+                    <Card className="w-full max-w-md shadow-xl border-primary/10">
+                        <CardHeader className="space-y-1">
+                            <CardTitle className="text-2xl font-bold">Criar Conta</CardTitle>
+                            <CardDescription>
+                                Preencha os dados abaixo para começar a monitorar seus estudos.
+                            </CardDescription>
+                        </CardHeader>
+                        <CardContent>
+                            <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+                                <div className="space-y-2">
+                                    <Label htmlFor="name">Nome de Usuário</Label>
+                                    <Input
+                                        id="name"
+                                        placeholder="Seu usuário"
+                                        {...register("name")}
+                                        className={errors.name ? "border-destructive" : ""}
+                                    />
+                                    {errors.name && <p className="text-xs text-destructive font-medium">{errors.name.message}</p>}
+                                </div>
+
+                                {/*
+                                <div className="space-y-2">
+                                    <Label htmlFor="email">E-mail</Label>
+                                    <Input
+                                        id="email"
+                                        type="email"
+                                        placeholder="seu@email.com"
+                                        {...register("email")}
+                                        className={errors.email ? "border-destructive" : ""}
+                                    />
+                                    {errors.email && <p className="text-xs text-destructive font-medium">{errors.email.message}</p>}
+                                </div>
+*/}
+                                <div className="space-y-2">
+                                    <Label htmlFor="password">Senha</Label>
+                                    <Input
+                                        id="password"
+                                        type="password"
+                                        placeholder="Mínimo 6 caracteres"
+                                        {...register("password")}
+                                        className={errors.password ? "border-destructive" : ""}
+                                    />
+                                    {errors.password && <p className="text-xs text-destructive font-medium">{errors.password.message}</p>}
+                                </div>
+
+                                <Button type="submit" className="w-full mt-2" disabled={isSubmitting}>
+                                    {isSubmitting ? (
+                                        "Criando conta..."
+                                    ) : (
+                                        <>
+                                            <UserPlusIcon className="mr-2 h-4 w-4" />
+                                            Registrar Agora
+                                        </>
+                                    )}
+                                </Button>
+
+                                <Separator className="my-4" />
+
+                                <div className="text-center space-y-3">
+                                    <p className="text-sm text-muted-foreground">Já tem uma conta?</p>
+                                    <Button variant="outline" className="w-full" asChild>
+                                        <Link href="/sign-in">
+                                            <LogInIcon className="mr-2 h-4 w-4" />
+                                            Fazer Login
+                                        </Link>
+                                    </Button>
+                                </div>
+                            </form>
+                        </CardContent>
+                    </Card>
                 </div>
-                <div className="mb-4">
-                    <Label>Password</Label>
-                    <Input type="password" className="w-full px-3 py-2 border rounded" {...register("password")} />
-                    {errors.password && <p className="text-red-500">{errors.password.message}</p>}
+
+                {/* Mobile-only Motivational Text */}
+                <div className="md:hidden text-center space-y-4 pt-4">
+                    <p className="text-muted-foreground italic text-sm">
+                        &quot;O segredo do sucesso é a constância no objetivo.&quot;
+                    </p>
                 </div>
-                <button type="submit" className="w-full bg-blue-500 text-white py-2 rounded">
-                    {isSubmitting ? "Signing Up..." : "Sign Up"}
-                </button>
-            </form>
-        </FormLayout>
+            </div>
+        </div>
     );
-
 }
