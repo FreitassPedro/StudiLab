@@ -9,12 +9,8 @@ import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { Play } from "lucide-react";
 import { ComfortSection } from "./components/Comfort";
-import { authClient } from "@/lib/auth-client";
-import { redirect } from "next/navigation";
-import { requireAuth } from "@/server/actions/requireAuth";
 
 export default async function DashboardPage() {
-    const user = await requireAuth();
 
     return (
         <div className="container mx-auto p-4 space-y-6">

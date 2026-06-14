@@ -1,10 +1,9 @@
 "use client";
 
-import { BookOpen, Clock, BarChart2, CheckCircle2, TrendingUp } from "lucide-react";
+import { Clock, BarChart2, CheckCircle2, } from "lucide-react";
 import type { WeekStats } from "./planner";
 import { formatDuration } from "./planner-utils";
 import { cn } from "@/lib/utils";
-import { Badge } from "@/components/ui/badge";
 
 interface WeekStatsBarProps {
   stats: WeekStats;

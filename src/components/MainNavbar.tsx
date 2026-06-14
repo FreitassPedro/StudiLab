@@ -1,11 +1,10 @@
 "use client";
 
-import { BookOpen, Plus, History, FolderOpen, CheckSquare, CalendarClock, User, LibraryBig, LogOut, TrendingUp, ChartSpline, PencilLine, CalendarDays } from 'lucide-react';
+import { BookOpen, FolderOpen, CheckSquare, CalendarClock, User, LibraryBig, LogOut, ChartSpline, PencilLine, CalendarDays } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
-import { useAuthStore } from '@/store/useAuthStore';
 import ThemeSwitch from './ThemeSwtich';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuGroup, DropdownMenuItem, DropdownMenuTrigger } from './ui/dropdown-menu';
 import { Separator } from './ui/separator';
@@ -26,12 +25,12 @@ export default function MainNavbar() {
     const router = useRouter();
     const currentPath = usePathname();
 
-    const { user, clearUser } = useAuthStore();
+    const { data: session } = authClient.useSession();
+    const user = session?.user;
 
     const enabledItems = navItems.filter(item => item.isEnabled);
 
     async function handleSignOut() {
-
         await authClient.signOut({
             fetchOptions: {
                 cache: "no-store",
@@ -51,9 +50,9 @@ export default function MainNavbar() {
                         {/* Logo */}
                         <Link href="/" className="flex items-center gap-2 shrink-0">
                             <BookOpen className="h-5 w-5 sm:h-6 sm:w-6 text-primary" />
-                            <span className="text-base sm:text-xl font-semibold text-foreground hidden lg:block">
-                                Monitor de Estudos
-                            </span>
+                            <h1 className="text-base sm:text-xl font-semibold text-foreground hidden lg:block">
+                                StudiLab
+                            </h1>
                         </Link>
 
                         {/* Desktop Navigation */}

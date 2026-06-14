@@ -62,7 +62,7 @@ const getWeeksOfYear = (year: number) => {
   const lastDay = new Date(year, 11, 31);
 
   // Encontra a primeira segunda-feira do ano (ou o primeiro dia se for segunda)
-  let current = new Date(firstDay);
+  const current = new Date(firstDay);
   const dayOfWeek = current.getDay();
   // Ajusta para a segunda-feira (1) da primeira semana
   if (dayOfWeek !== 1) {

@@ -12,7 +12,6 @@ import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { LogInIcon, UserPlusIcon } from "lucide-react";
 import { useForm } from "react-hook-form";
-import Image from "next/image";
 import Link from "next/link";
 
 const formSchema = z.object({

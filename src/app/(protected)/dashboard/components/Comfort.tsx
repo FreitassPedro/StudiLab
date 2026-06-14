@@ -1,7 +1,7 @@
 "use client";
 
 import { useTodayStudyLogs } from "@/hooks/useStudyLogs";
-import { useAuthStore } from "@/store/useAuthStore";
+import { authClient } from "@/lib/auth-client";
 import Image from "next/image";
 
 function getComfortLevel(totalMinutes: number) {
@@ -31,13 +31,11 @@ function getComfortLevel(totalMinutes: number) {
 }
 
 export function ComfortSection() {
-    const { data: logs, isLoading } = useTodayStudyLogs();
-    const user = useAuthStore((state) => state.user);
-
-    if (isLoading) return null; 
+    const { data: logs } = useTodayStudyLogs();
+    const { data: session } = authClient.useSession();
 
 
-    if (user?.name !== "Laura") return null; 
+    if (session?.user?.name !== "Laura") return null;
 
     const totalMinutes = logs?.reduce((sum, log) => sum + log.duration_minutes, 0) || 0;
     const level = getComfortLevel(totalMinutes);

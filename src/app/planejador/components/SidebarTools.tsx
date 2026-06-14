@@ -1,11 +1,10 @@
 import { cn } from "@/lib/utils";
-import { COLOR_MAP, formatDuration, normalizeSubjectName } from "../utils";
+import { COLOR_MAP, formatDuration, } from "../utils";
 import { Separator } from "@/components/ui/separator";
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import { usePlannerActions } from "./PlannerActionsContext";
 import { Button } from "@/components/ui/button";
-import { Calendar, ChevronRight, ChevronsLeft, ChevronsRight, Circle, LayoutList, Plus, Trash, Trash2 } from "lucide-react";
-import { usePlannerState } from "../usePlannerState";
+import { Calendar,  ChevronsLeft, ChevronsRight, Circle, Plus,  Trash2 } from "lucide-react";
 import { ColorName } from "./mockData";
 
 function ProgressBar({ progress }: { progress: number }) {

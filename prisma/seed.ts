@@ -1,5 +1,4 @@
 import { prisma } from "@/lib/prisma";
-import { parseDateAsLocal } from "@/lib/utils";
 
 async function main() { 
     

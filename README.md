@@ -43,3 +43,13 @@
 - [ ] (#10) Criar labels rápidas na descrição do formulário de estudos
 - [ ] (#13) Exibir card flutuante de estudo em andamento em todas as páginas
 - [ ] (#16) Conectar Spotify no perfil para compartilhar o que está ouvindo
+
+
+
+# AUTH
+
+# useSession
+Utilize `useSession` em ClientSide para acessar os dados da sessão do usuário. Ele retorna um objeto com as informações do usuário, como nome, email e imagem de perfil.
+
+# getSession
+Use `getSession` em ServerSide para obter os dados da sessão do usuário. Ele retorna um objeto semelhante ao `useSession`, mas é usado em contextos onde o React não está disponível, como em rotas de API ou funções de servidor.
