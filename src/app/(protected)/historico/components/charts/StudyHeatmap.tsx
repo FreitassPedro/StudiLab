@@ -7,7 +7,6 @@ import { useQuery } from '@tanstack/react-query';
 import { getHeatmapMonthDataAction, getHeatmapYearDataAction } from '@/server/actions/charts.action';
 
 import useSearchRangeStore from '@/store/useSearchRangeStore';
-import { useAuthStore } from '@/store/useAuthStore';
 import { parseDateAsLocal } from '@/lib/utils';
 
 

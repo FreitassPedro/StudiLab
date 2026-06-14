@@ -28,12 +28,3 @@ export async function getUserByIdAction(userId: string) {
     return user;
 }
 
-export async function createUserAction(name: string) {
-    const user = await prisma.user.create({
-        data: {
-            name,
-            email: `${name.toLowerCase().replace(/\s+/g, '')}@example.com`, // Gerar um email fictício
-        },
-    });
-    return user;
-}

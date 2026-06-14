@@ -7,7 +7,6 @@ import { useQuery } from "@tanstack/react-query";
 import { BarChart3 } from "lucide-react";
 import { getAreaChartACtion } from "@/server/actions/charts.action";
 import useSearchRangeStore from "@/store/useSearchRangeStore";
-import { useAuthStore } from "@/store/useAuthStore";
 
 const formatTime = (minutes: number) => {
     if (minutes === 0) return "0min";

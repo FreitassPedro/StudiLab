@@ -6,7 +6,6 @@ import { PieChart as PieChartIcon } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { getPieChartDataActionRaw } from "@/server/actions/charts.action";
 import useSearchRangeStore from "@/store/useSearchRangeStore";
-import { useAuthStore } from "@/store/useAuthStore";
 
 const toNumber = (value: number | bigint) => (typeof value === "bigint" ? Number(value) : value);
 
