@@ -328,16 +328,6 @@ export type SubjectUncheckedUpdateManyInput = {
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
-export type SubjectListRelationFilter = {
-  every?: Prisma.SubjectWhereInput
-  some?: Prisma.SubjectWhereInput
-  none?: Prisma.SubjectWhereInput
-}
-
-export type SubjectOrderByRelationAggregateInput = {
-  _count?: Prisma.SortOrder
-}
-
 export type SubjectCountOrderByAggregateInput = {
   id?: Prisma.SortOrder
   name?: Prisma.SortOrder
@@ -371,6 +361,42 @@ export type SubjectMinOrderByAggregateInput = {
 export type SubjectScalarRelationFilter = {
   is?: Prisma.SubjectWhereInput
   isNot?: Prisma.SubjectWhereInput
+}
+
+export type SubjectListRelationFilter = {
+  every?: Prisma.SubjectWhereInput
+  some?: Prisma.SubjectWhereInput
+  none?: Prisma.SubjectWhereInput
+}
+
+export type SubjectOrderByRelationAggregateInput = {
+  _count?: Prisma.SortOrder
+}
+
+export type StringFieldUpdateOperationsInput = {
+  set?: string
+}
+
+export type BoolFieldUpdateOperationsInput = {
+  set?: boolean
+}
+
+export type DateTimeFieldUpdateOperationsInput = {
+  set?: Date | string
+}
+
+export type SubjectCreateNestedOneWithoutTopicsInput = {
+  create?: Prisma.XOR<Prisma.SubjectCreateWithoutTopicsInput, Prisma.SubjectUncheckedCreateWithoutTopicsInput>
+  connectOrCreate?: Prisma.SubjectCreateOrConnectWithoutTopicsInput
+  connect?: Prisma.SubjectWhereUniqueInput
+}
+
+export type SubjectUpdateOneRequiredWithoutTopicsNestedInput = {
+  create?: Prisma.XOR<Prisma.SubjectCreateWithoutTopicsInput, Prisma.SubjectUncheckedCreateWithoutTopicsInput>
+  connectOrCreate?: Prisma.SubjectCreateOrConnectWithoutTopicsInput
+  upsert?: Prisma.SubjectUpsertWithoutTopicsInput
+  connect?: Prisma.SubjectWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.SubjectUpdateToOneWithWhereWithoutTopicsInput, Prisma.SubjectUpdateWithoutTopicsInput>, Prisma.SubjectUncheckedUpdateWithoutTopicsInput>
 }
 
 export type SubjectCreateNestedManyWithoutUserInput = {
@@ -415,26 +441,60 @@ export type SubjectUncheckedUpdateManyWithoutUserNestedInput = {
   deleteMany?: Prisma.SubjectScalarWhereInput | Prisma.SubjectScalarWhereInput[]
 }
 
-export type BoolFieldUpdateOperationsInput = {
-  set?: boolean
+export type SubjectCreateWithoutTopicsInput = {
+  id?: string
+  name: string
+  color: string
+  isOpen: boolean
+  isArchived: boolean
+  created_at?: Date | string
+  user: Prisma.UserCreateNestedOneWithoutSubjectsInput
 }
 
-export type DateTimeFieldUpdateOperationsInput = {
-  set?: Date | string
+export type SubjectUncheckedCreateWithoutTopicsInput = {
+  id?: string
+  name: string
+  color: string
+  userId: string
+  isOpen: boolean
+  isArchived: boolean
+  created_at?: Date | string
 }
 
-export type SubjectCreateNestedOneWithoutTopicsInput = {
-  create?: Prisma.XOR<Prisma.SubjectCreateWithoutTopicsInput, Prisma.SubjectUncheckedCreateWithoutTopicsInput>
-  connectOrCreate?: Prisma.SubjectCreateOrConnectWithoutTopicsInput
-  connect?: Prisma.SubjectWhereUniqueInput
+export type SubjectCreateOrConnectWithoutTopicsInput = {
+  where: Prisma.SubjectWhereUniqueInput
+  create: Prisma.XOR<Prisma.SubjectCreateWithoutTopicsInput, Prisma.SubjectUncheckedCreateWithoutTopicsInput>
 }
 
-export type SubjectUpdateOneRequiredWithoutTopicsNestedInput = {
-  create?: Prisma.XOR<Prisma.SubjectCreateWithoutTopicsInput, Prisma.SubjectUncheckedCreateWithoutTopicsInput>
-  connectOrCreate?: Prisma.SubjectCreateOrConnectWithoutTopicsInput
-  upsert?: Prisma.SubjectUpsertWithoutTopicsInput
-  connect?: Prisma.SubjectWhereUniqueInput
-  update?: Prisma.XOR<Prisma.XOR<Prisma.SubjectUpdateToOneWithWhereWithoutTopicsInput, Prisma.SubjectUpdateWithoutTopicsInput>, Prisma.SubjectUncheckedUpdateWithoutTopicsInput>
+export type SubjectUpsertWithoutTopicsInput = {
+  update: Prisma.XOR<Prisma.SubjectUpdateWithoutTopicsInput, Prisma.SubjectUncheckedUpdateWithoutTopicsInput>
+  create: Prisma.XOR<Prisma.SubjectCreateWithoutTopicsInput, Prisma.SubjectUncheckedCreateWithoutTopicsInput>
+  where?: Prisma.SubjectWhereInput
+}
+
+export type SubjectUpdateToOneWithWhereWithoutTopicsInput = {
+  where?: Prisma.SubjectWhereInput
+  data: Prisma.XOR<Prisma.SubjectUpdateWithoutTopicsInput, Prisma.SubjectUncheckedUpdateWithoutTopicsInput>
+}
+
+export type SubjectUpdateWithoutTopicsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  color?: Prisma.StringFieldUpdateOperationsInput | string
+  isOpen?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  isArchived?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  user?: Prisma.UserUpdateOneRequiredWithoutSubjectsNestedInput
+}
+
+export type SubjectUncheckedUpdateWithoutTopicsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  color?: Prisma.StringFieldUpdateOperationsInput | string
+  userId?: Prisma.StringFieldUpdateOperationsInput | string
+  isOpen?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  isArchived?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
 export type SubjectCreateWithoutUserInput = {
@@ -494,62 +554,6 @@ export type SubjectScalarWhereInput = {
   isOpen?: Prisma.BoolFilter<"Subject"> | boolean
   isArchived?: Prisma.BoolFilter<"Subject"> | boolean
   created_at?: Prisma.DateTimeFilter<"Subject"> | Date | string
-}
-
-export type SubjectCreateWithoutTopicsInput = {
-  id?: string
-  name: string
-  color: string
-  isOpen: boolean
-  isArchived: boolean
-  created_at?: Date | string
-  user: Prisma.UserCreateNestedOneWithoutSubjectsInput
-}
-
-export type SubjectUncheckedCreateWithoutTopicsInput = {
-  id?: string
-  name: string
-  color: string
-  userId: string
-  isOpen: boolean
-  isArchived: boolean
-  created_at?: Date | string
-}
-
-export type SubjectCreateOrConnectWithoutTopicsInput = {
-  where: Prisma.SubjectWhereUniqueInput
-  create: Prisma.XOR<Prisma.SubjectCreateWithoutTopicsInput, Prisma.SubjectUncheckedCreateWithoutTopicsInput>
-}
-
-export type SubjectUpsertWithoutTopicsInput = {
-  update: Prisma.XOR<Prisma.SubjectUpdateWithoutTopicsInput, Prisma.SubjectUncheckedUpdateWithoutTopicsInput>
-  create: Prisma.XOR<Prisma.SubjectCreateWithoutTopicsInput, Prisma.SubjectUncheckedCreateWithoutTopicsInput>
-  where?: Prisma.SubjectWhereInput
-}
-
-export type SubjectUpdateToOneWithWhereWithoutTopicsInput = {
-  where?: Prisma.SubjectWhereInput
-  data: Prisma.XOR<Prisma.SubjectUpdateWithoutTopicsInput, Prisma.SubjectUncheckedUpdateWithoutTopicsInput>
-}
-
-export type SubjectUpdateWithoutTopicsInput = {
-  id?: Prisma.StringFieldUpdateOperationsInput | string
-  name?: Prisma.StringFieldUpdateOperationsInput | string
-  color?: Prisma.StringFieldUpdateOperationsInput | string
-  isOpen?: Prisma.BoolFieldUpdateOperationsInput | boolean
-  isArchived?: Prisma.BoolFieldUpdateOperationsInput | boolean
-  created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  user?: Prisma.UserUpdateOneRequiredWithoutSubjectsNestedInput
-}
-
-export type SubjectUncheckedUpdateWithoutTopicsInput = {
-  id?: Prisma.StringFieldUpdateOperationsInput | string
-  name?: Prisma.StringFieldUpdateOperationsInput | string
-  color?: Prisma.StringFieldUpdateOperationsInput | string
-  userId?: Prisma.StringFieldUpdateOperationsInput | string
-  isOpen?: Prisma.BoolFieldUpdateOperationsInput | boolean
-  isArchived?: Prisma.BoolFieldUpdateOperationsInput | boolean
-  created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
 export type SubjectCreateManyUserInput = {

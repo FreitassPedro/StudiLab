@@ -413,6 +413,10 @@ export type TopicUpdateManyWithoutParentNestedInput = {
   deleteMany?: Prisma.TopicScalarWhereInput | Prisma.TopicScalarWhereInput[]
 }
 
+export type NullableStringFieldUpdateOperationsInput = {
+  set?: string | null
+}
+
 export type TopicUncheckedUpdateManyWithoutParentNestedInput = {
   create?: Prisma.XOR<Prisma.TopicCreateWithoutParentInput, Prisma.TopicUncheckedCreateWithoutParentInput> | Prisma.TopicCreateWithoutParentInput[] | Prisma.TopicUncheckedCreateWithoutParentInput[]
   connectOrCreate?: Prisma.TopicCreateOrConnectWithoutParentInput | Prisma.TopicCreateOrConnectWithoutParentInput[]

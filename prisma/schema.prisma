@@ -13,22 +13,12 @@ datasource db {
   provider = "postgresql"
 }
 
-
-model User { 
-  id         String          @id @default(uuid()) 
-  email      String       @unique
-  name       String?
-  pain String
-  subjects   Subject[]
-} 
-
-
 model Subject {
   id         String   @id @default(uuid())
   name       String
   color      String
   userId     String
-  isOpen Boolean
+  isOpen     Boolean
   isArchived Boolean
   user       User     @relation(fields: [userId], references: [id])
   created_at DateTime @default(now()) @db.Timestamptz(3)
@@ -36,33 +26,94 @@ model Subject {
 }
 
 model Topic {
-  id        String      @id @default(uuid())
+  id        String                @id @default(uuid())
   name      String
   subjectId String
-  subject   Subject     @relation(fields: [subjectId], references: [id])
-  path  Unsupported("ltree")?
+  subject   Subject               @relation(fields: [subjectId], references: [id])
+  path      Unsupported("ltree")?
   parentId  String?
-  parent    Topic?      @relation("TopicChildren", fields: [parentId], references: [id])
-  children  Topic[]     @relation("TopicChildren")
+  parent    Topic?                @relation("TopicChildren", fields: [parentId], references: [id])
+  children  Topic[]               @relation("TopicChildren")
   studyLogs StudyLogs[]
 
   @@unique([parentId, name])
-  @@index([path], type: Gist) 
+  @@index([path], type: Gist)
 }
-
 
 model StudyLogs {
-    id               String   @id @default(uuid())
-    study_date       DateTime @db.Date
-    topicId          String
-    topic            Topic    @relation(fields: [topicId], references: [id])
-    start_time       DateTime @db.Timestamptz(3)
-    end_time         DateTime @db.Timestamptz(3)
-    material_type String?
-    duration_minutes Int
-    notes            String?
-    created_at       DateTime @default(now()) @db.Timestamptz(3)
-    updated_at       DateTime @updatedAt @db.Timestamptz(3)
+  id               String   @id @default(uuid())
+  study_date       DateTime @db.Date
+  topicId          String
+  topic            Topic    @relation(fields: [topicId], references: [id])
+  start_time       DateTime @db.Timestamptz(3)
+  end_time         DateTime @db.Timestamptz(3)
+  material_type    String?
+  duration_minutes Int
+  notes            String?
+  created_at       DateTime @default(now()) @db.Timestamptz(3)
+  updated_at       DateTime @updatedAt @db.Timestamptz(3)
 }
 
+model User {
+  id            String    @id
+  name          String
+  email         String
+  emailVerified Boolean   @default(false)
+  image         String?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  sessions      Session[]
+  accounts      Account[]
+  subjects   Subject[]
 
+  @@unique([email])
+  @@map("user")
+}
+
+model Session {
+  id        String   @id
+  expiresAt DateTime
+  token     String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  ipAddress String?
+  userAgent String?
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([token])
+  @@index([userId])
+  @@map("session")
+}
+
+model Account {
+  id                    String    @id
+  accountId             String
+  providerId            String
+  userId                String
+  user                  User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  accessToken           String?
+  refreshToken          String?
+  idToken               String?
+  accessTokenExpiresAt  DateTime?
+  refreshTokenExpiresAt DateTime?
+  scope                 String?
+  password              String?
+  createdAt             DateTime  @default(now())
+  updatedAt             DateTime  @updatedAt
+
+  @@index([userId])
+  @@map("account")
+}
+
+model Verification {
+  id         String   @id
+  identifier String
+  value      String
+  expiresAt  DateTime
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@index([identifier])
+  @@map("verification")
+}
