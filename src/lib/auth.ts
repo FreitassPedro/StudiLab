@@ -4,9 +4,14 @@ import { prisma } from "./prisma";
 
 
 export const auth = betterAuth({
+    trustedOrigins: [
+        "https://studilab.vercel.app",
+        "http://localhost:3000",
+    ],
     database: prismaAdapter(prisma, {
         provider: "postgresql",
     }),
+
     emailAndPassword: {
         enabled: true,
     },
