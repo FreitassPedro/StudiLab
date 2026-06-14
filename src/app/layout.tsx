@@ -6,6 +6,7 @@ import QueryProvider from "./providers/QueryProvider";
 
 import MainNavbar from "@/components/MainNavbar";
 import { ThemeProvider } from "@/components/theme-provider";
+import { Suspense } from "react";
 
 const outfit = Outfit({
   variable: "--font-outfit",
@@ -41,12 +42,16 @@ export default function RootLayout({
           defaultTheme="system"
           enableSystem
         >
+          <MainNavbar />
           <QueryProvider>
-            <MainNavbar />
-            {children}
-            <Toaster position="bottom-right" />
+            <Suspense fallback={<div className="flex items-center justify-center h-screen">Carregando...</div>}>
 
+              {children}
+            </Suspense>
           </QueryProvider>
+
+          <Toaster position="bottom-right" />
+
         </ThemeProvider>
       </body>
     </html>

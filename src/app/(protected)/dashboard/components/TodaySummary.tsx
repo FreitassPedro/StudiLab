@@ -7,11 +7,12 @@ import { getLocalDateForToday } from "@/lib/utils";
 import { TodaySummarySkeleton } from "./Skeletons";
 
 export function TodaySummary() {
+    const today = getLocalDateForToday();
+
     const { data: logs, isLoading } = useTodayStudyLogs();
-    
+
     if (isLoading || !logs) return <TodaySummarySkeleton />;
 
-    const today = getLocalDateForToday();
 
     const totalMinutes = logs.reduce((sum, log) => sum + log.duration_minutes, 0);
     const hours = Math.floor(totalMinutes / 60);
