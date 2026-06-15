@@ -2,8 +2,7 @@
 
 import { Card, CardContent } from "@/components/ui/card";
 import { useTodayStudyLogs } from "@/hooks/useStudyLogs";
-import { BookOpen, Clock, Target, Award, TrendingUp } from "lucide-react";
-import { getLocalDateForToday } from "@/lib/utils";
+import { BookOpen, Target } from "lucide-react";
 import { TodaySummarySkeleton } from "./Skeletons";
 import { useEffect, useState } from "react";
 

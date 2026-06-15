@@ -6,7 +6,7 @@ import { TodaySummarySkeleton, RecentSessionsSkeleton } from "./components/Skele
 import { BiologicalClock } from "./components/BiologicalClock";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
-import { Play, Calendar, BookOpen, Clock, Lightbulb } from "lucide-react";
+import { Play, Calendar, Clock } from "lucide-react";
 import { getCurrentUser } from "@/server/actions/getCurrentUser";
 
 export default async function DashboardPage() {
