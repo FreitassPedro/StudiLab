@@ -1,9 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
 generator client {
   provider = "prisma-client"
   output   = "../src/app/generated/prisma"
@@ -17,11 +11,11 @@ model Subject {
   id         String   @id @default(uuid())
   name       String
   color      String
-  userId     String
-  isOpen     Boolean
-  isArchived Boolean
-  user       User     @relation(fields: [userId], references: [id])
   created_at DateTime @default(now()) @db.Timestamptz(3)
+  userId     String
+  isArchived Boolean
+  isOpen     Boolean
+  user       User     @relation(fields: [userId], references: [id])
   topics     Topic[]
 }
 
@@ -29,12 +23,12 @@ model Topic {
   id        String                @id @default(uuid())
   name      String
   subjectId String
-  subject   Subject               @relation(fields: [subjectId], references: [id])
-  path      Unsupported("ltree")?
   parentId  String?
+  path      Unsupported("ltree")?
+  studyLogs StudyLogs[]
   parent    Topic?                @relation("TopicChildren", fields: [parentId], references: [id])
   children  Topic[]               @relation("TopicChildren")
-  studyLogs StudyLogs[]
+  subject   Subject               @relation(fields: [subjectId], references: [id])
 
   @@unique([parentId, name])
   @@index([path], type: Gist)
@@ -44,36 +38,35 @@ model StudyLogs {
   id               String   @id @default(uuid())
   study_date       DateTime @db.Date
   topicId          String
-  topic            Topic    @relation(fields: [topicId], references: [id])
   start_time       DateTime @db.Timestamptz(3)
   end_time         DateTime @db.Timestamptz(3)
-  material_type    String?
   duration_minutes Int
   notes            String?
   created_at       DateTime @default(now()) @db.Timestamptz(3)
   updated_at       DateTime @updatedAt @db.Timestamptz(3)
+  material_type    String?
+  topic            Topic    @relation(fields: [topicId], references: [id])
 }
 
 model User {
   id            String    @id
   name          String
-  email         String
+  email         String    @unique
   emailVerified Boolean   @default(false)
   image         String?
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
-  sessions      Session[]
+  subjects      Subject[]
   accounts      Account[]
-  subjects   Subject[]
+  sessions      Session[]
 
-  @@unique([email])
   @@map("user")
 }
 
 model Session {
   id        String   @id
   expiresAt DateTime
-  token     String
+  token     String   @unique
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   ipAddress String?
@@ -81,7 +74,6 @@ model Session {
   userId    String
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  @@unique([token])
   @@index([userId])
   @@map("session")
 }
@@ -91,7 +83,6 @@ model Account {
   accountId             String
   providerId            String
   userId                String
-  user                  User      @relation(fields: [userId], references: [id], onDelete: Cascade)
   accessToken           String?
   refreshToken          String?
   idToken               String?
@@ -101,6 +92,7 @@ model Account {
   password              String?
   createdAt             DateTime  @default(now())
   updatedAt             DateTime  @updatedAt
+  user                  User      @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId])
   @@map("account")

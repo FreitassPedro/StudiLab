@@ -80,10 +80,10 @@ export const SubjectScalarFieldEnum = {
   id: 'id',
   name: 'name',
   color: 'color',
+  created_at: 'created_at',
   userId: 'userId',
-  isOpen: 'isOpen',
   isArchived: 'isArchived',
-  created_at: 'created_at'
+  isOpen: 'isOpen'
 } as const
 
 export type SubjectScalarFieldEnum = (typeof SubjectScalarFieldEnum)[keyof typeof SubjectScalarFieldEnum]
@@ -105,11 +105,11 @@ export const StudyLogsScalarFieldEnum = {
   topicId: 'topicId',
   start_time: 'start_time',
   end_time: 'end_time',
-  material_type: 'material_type',
   duration_minutes: 'duration_minutes',
   notes: 'notes',
   created_at: 'created_at',
-  updated_at: 'updated_at'
+  updated_at: 'updated_at',
+  material_type: 'material_type'
 } as const
 
 export type StudyLogsScalarFieldEnum = (typeof StudyLogsScalarFieldEnum)[keyof typeof StudyLogsScalarFieldEnum]

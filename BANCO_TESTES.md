@@ -66,6 +66,9 @@ npm run test:studio         # Vê dados
 npm run test:db:reset       # Limpa tudo ao final
 ```
 
+npx prisma db pull # Puxa schema do banco para o prisma
+npx prisma generate # Gera client atualizado
+npx prisma migrate dev 
 ### Cenário: "Quero ver SQL sendo executado"
 ```powershell
 # USE pgAdmin para DEBUG

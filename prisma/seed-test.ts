@@ -1,3 +1,4 @@
+import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 
 type SubjectMock = {
@@ -89,24 +90,34 @@ const STUDY_LOG_MOCKS: StudyLogMock[] = [
 ];
 
 async function main() {
+    const dbUrl = process.env.DATABASE_URL || "";
+    if (!dbUrl.includes("localhost") && !dbUrl.includes("test") && !dbUrl.includes("5433")) {
+        console.error("❌ CRITICAL: Attempting to run seed-test on a non-local/non-test database!");
+        console.error("DATABASE_URL:", dbUrl);
+        process.exit(1);
+    }
+
     console.log('🧹 Cleaning database...');
     await prisma.studyLogs.deleteMany();
     await prisma.topic.deleteMany();
     await prisma.subject.deleteMany();
     await prisma.session.deleteMany();
-    await prisma.account.deleteMany();
     await prisma.user.deleteMany();
+    await prisma.account.deleteMany();
+    await prisma.verification.deleteMany();
 
     console.log('👤 Creating test user...');
-    const user = await prisma.user.create({
-        data: {
-            id: 'test-user-id',
-            name: 'Usuário Teste',
-            email: 'teste@teste.com',
-            emailVerified: true,
-            image: 'https://api.dicebear.com/7.x/avataaars/svg?seed=test',
-        },
+    const { user } = await auth.api.signUpEmail({
+        body: {
+            email: "test-user@example.com",
+            password: "test-password",
+            name: "Test User",
+        }
     });
+
+    if (!user) {
+        throw new Error("Failed to create test user");
+    }
 
     const subjectsByName = new Map<string, { id: string }>();
     console.log('📚 Creating subjects...');

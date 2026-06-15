@@ -245,6 +245,7 @@ export function StudySessionForm() {
     return (
         <>
             <div className="min-h-screen bg-linear-to-br from-background via-muted/20 to-background py-4 px-4">
+            
                 <form onSubmit={onSubmit} className="max-w-5xl mx-auto space-y-4">
 
                     {/* Header */}
@@ -445,7 +446,6 @@ export function StudySessionForm() {
 
                         {/* Time tracking */}
                         <div className="space-y-3">
-                            <Cronometer />
 
                             {/* Action Buttons */}
                             <div className="flex flex-col gap-2">

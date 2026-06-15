@@ -40,11 +40,11 @@ export type StudyLogsMinAggregateOutputType = {
   topicId: string | null
   start_time: Date | null
   end_time: Date | null
-  material_type: string | null
   duration_minutes: number | null
   notes: string | null
   created_at: Date | null
   updated_at: Date | null
+  material_type: string | null
 }
 
 export type StudyLogsMaxAggregateOutputType = {
@@ -53,11 +53,11 @@ export type StudyLogsMaxAggregateOutputType = {
   topicId: string | null
   start_time: Date | null
   end_time: Date | null
-  material_type: string | null
   duration_minutes: number | null
   notes: string | null
   created_at: Date | null
   updated_at: Date | null
+  material_type: string | null
 }
 
 export type StudyLogsCountAggregateOutputType = {
@@ -66,11 +66,11 @@ export type StudyLogsCountAggregateOutputType = {
   topicId: number
   start_time: number
   end_time: number
-  material_type: number
   duration_minutes: number
   notes: number
   created_at: number
   updated_at: number
+  material_type: number
   _all: number
 }
 
@@ -89,11 +89,11 @@ export type StudyLogsMinAggregateInputType = {
   topicId?: true
   start_time?: true
   end_time?: true
-  material_type?: true
   duration_minutes?: true
   notes?: true
   created_at?: true
   updated_at?: true
+  material_type?: true
 }
 
 export type StudyLogsMaxAggregateInputType = {
@@ -102,11 +102,11 @@ export type StudyLogsMaxAggregateInputType = {
   topicId?: true
   start_time?: true
   end_time?: true
-  material_type?: true
   duration_minutes?: true
   notes?: true
   created_at?: true
   updated_at?: true
+  material_type?: true
 }
 
 export type StudyLogsCountAggregateInputType = {
@@ -115,11 +115,11 @@ export type StudyLogsCountAggregateInputType = {
   topicId?: true
   start_time?: true
   end_time?: true
-  material_type?: true
   duration_minutes?: true
   notes?: true
   created_at?: true
   updated_at?: true
+  material_type?: true
   _all?: true
 }
 
@@ -215,11 +215,11 @@ export type StudyLogsGroupByOutputType = {
   topicId: string
   start_time: Date
   end_time: Date
-  material_type: string | null
   duration_minutes: number
   notes: string | null
   created_at: Date
   updated_at: Date
+  material_type: string | null
   _count: StudyLogsCountAggregateOutputType | null
   _avg: StudyLogsAvgAggregateOutputType | null
   _sum: StudyLogsSumAggregateOutputType | null
@@ -251,11 +251,11 @@ export type StudyLogsWhereInput = {
   topicId?: Prisma.StringFilter<"StudyLogs"> | string
   start_time?: Prisma.DateTimeFilter<"StudyLogs"> | Date | string
   end_time?: Prisma.DateTimeFilter<"StudyLogs"> | Date | string
-  material_type?: Prisma.StringNullableFilter<"StudyLogs"> | string | null
   duration_minutes?: Prisma.IntFilter<"StudyLogs"> | number
   notes?: Prisma.StringNullableFilter<"StudyLogs"> | string | null
   created_at?: Prisma.DateTimeFilter<"StudyLogs"> | Date | string
   updated_at?: Prisma.DateTimeFilter<"StudyLogs"> | Date | string
+  material_type?: Prisma.StringNullableFilter<"StudyLogs"> | string | null
   topic?: Prisma.XOR<Prisma.TopicScalarRelationFilter, Prisma.TopicWhereInput>
 }
 
@@ -265,11 +265,11 @@ export type StudyLogsOrderByWithRelationInput = {
   topicId?: Prisma.SortOrder
   start_time?: Prisma.SortOrder
   end_time?: Prisma.SortOrder
-  material_type?: Prisma.SortOrderInput | Prisma.SortOrder
   duration_minutes?: Prisma.SortOrder
   notes?: Prisma.SortOrderInput | Prisma.SortOrder
   created_at?: Prisma.SortOrder
   updated_at?: Prisma.SortOrder
+  material_type?: Prisma.SortOrderInput | Prisma.SortOrder
   topic?: Prisma.TopicOrderByWithRelationInput
 }
 
@@ -282,11 +282,11 @@ export type StudyLogsWhereUniqueInput = Prisma.AtLeast<{
   topicId?: Prisma.StringFilter<"StudyLogs"> | string
   start_time?: Prisma.DateTimeFilter<"StudyLogs"> | Date | string
   end_time?: Prisma.DateTimeFilter<"StudyLogs"> | Date | string
-  material_type?: Prisma.StringNullableFilter<"StudyLogs"> | string | null
   duration_minutes?: Prisma.IntFilter<"StudyLogs"> | number
   notes?: Prisma.StringNullableFilter<"StudyLogs"> | string | null
   created_at?: Prisma.DateTimeFilter<"StudyLogs"> | Date | string
   updated_at?: Prisma.DateTimeFilter<"StudyLogs"> | Date | string
+  material_type?: Prisma.StringNullableFilter<"StudyLogs"> | string | null
   topic?: Prisma.XOR<Prisma.TopicScalarRelationFilter, Prisma.TopicWhereInput>
 }, "id">
 
@@ -296,11 +296,11 @@ export type StudyLogsOrderByWithAggregationInput = {
   topicId?: Prisma.SortOrder
   start_time?: Prisma.SortOrder
   end_time?: Prisma.SortOrder
-  material_type?: Prisma.SortOrderInput | Prisma.SortOrder
   duration_minutes?: Prisma.SortOrder
   notes?: Prisma.SortOrderInput | Prisma.SortOrder
   created_at?: Prisma.SortOrder
   updated_at?: Prisma.SortOrder
+  material_type?: Prisma.SortOrderInput | Prisma.SortOrder
   _count?: Prisma.StudyLogsCountOrderByAggregateInput
   _avg?: Prisma.StudyLogsAvgOrderByAggregateInput
   _max?: Prisma.StudyLogsMaxOrderByAggregateInput
@@ -317,11 +317,11 @@ export type StudyLogsScalarWhereWithAggregatesInput = {
   topicId?: Prisma.StringWithAggregatesFilter<"StudyLogs"> | string
   start_time?: Prisma.DateTimeWithAggregatesFilter<"StudyLogs"> | Date | string
   end_time?: Prisma.DateTimeWithAggregatesFilter<"StudyLogs"> | Date | string
-  material_type?: Prisma.StringNullableWithAggregatesFilter<"StudyLogs"> | string | null
   duration_minutes?: Prisma.IntWithAggregatesFilter<"StudyLogs"> | number
   notes?: Prisma.StringNullableWithAggregatesFilter<"StudyLogs"> | string | null
   created_at?: Prisma.DateTimeWithAggregatesFilter<"StudyLogs"> | Date | string
   updated_at?: Prisma.DateTimeWithAggregatesFilter<"StudyLogs"> | Date | string
+  material_type?: Prisma.StringNullableWithAggregatesFilter<"StudyLogs"> | string | null
 }
 
 export type StudyLogsCreateInput = {
@@ -329,11 +329,11 @@ export type StudyLogsCreateInput = {
   study_date: Date | string
   start_time: Date | string
   end_time: Date | string
-  material_type?: string | null
   duration_minutes: number
   notes?: string | null
   created_at?: Date | string
   updated_at?: Date | string
+  material_type?: string | null
   topic: Prisma.TopicCreateNestedOneWithoutStudyLogsInput
 }
 
@@ -343,11 +343,11 @@ export type StudyLogsUncheckedCreateInput = {
   topicId: string
   start_time: Date | string
   end_time: Date | string
-  material_type?: string | null
   duration_minutes: number
   notes?: string | null
   created_at?: Date | string
   updated_at?: Date | string
+  material_type?: string | null
 }
 
 export type StudyLogsUpdateInput = {
@@ -355,11 +355,11 @@ export type StudyLogsUpdateInput = {
   study_date?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   start_time?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   end_time?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  material_type?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   duration_minutes?: Prisma.IntFieldUpdateOperationsInput | number
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  material_type?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   topic?: Prisma.TopicUpdateOneRequiredWithoutStudyLogsNestedInput
 }
 
@@ -369,11 +369,11 @@ export type StudyLogsUncheckedUpdateInput = {
   topicId?: Prisma.StringFieldUpdateOperationsInput | string
   start_time?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   end_time?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  material_type?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   duration_minutes?: Prisma.IntFieldUpdateOperationsInput | number
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  material_type?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
 }
 
 export type StudyLogsCreateManyInput = {
@@ -382,11 +382,11 @@ export type StudyLogsCreateManyInput = {
   topicId: string
   start_time: Date | string
   end_time: Date | string
-  material_type?: string | null
   duration_minutes: number
   notes?: string | null
   created_at?: Date | string
   updated_at?: Date | string
+  material_type?: string | null
 }
 
 export type StudyLogsUpdateManyMutationInput = {
@@ -394,11 +394,11 @@ export type StudyLogsUpdateManyMutationInput = {
   study_date?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   start_time?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   end_time?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  material_type?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   duration_minutes?: Prisma.IntFieldUpdateOperationsInput | number
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  material_type?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
 }
 
 export type StudyLogsUncheckedUpdateManyInput = {
@@ -407,11 +407,11 @@ export type StudyLogsUncheckedUpdateManyInput = {
   topicId?: Prisma.StringFieldUpdateOperationsInput | string
   start_time?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   end_time?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  material_type?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   duration_minutes?: Prisma.IntFieldUpdateOperationsInput | number
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  material_type?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
 }
 
 export type StudyLogsListRelationFilter = {
@@ -430,11 +430,11 @@ export type StudyLogsCountOrderByAggregateInput = {
   topicId?: Prisma.SortOrder
   start_time?: Prisma.SortOrder
   end_time?: Prisma.SortOrder
-  material_type?: Prisma.SortOrder
   duration_minutes?: Prisma.SortOrder
   notes?: Prisma.SortOrder
   created_at?: Prisma.SortOrder
   updated_at?: Prisma.SortOrder
+  material_type?: Prisma.SortOrder
 }
 
 export type StudyLogsAvgOrderByAggregateInput = {
@@ -447,11 +447,11 @@ export type StudyLogsMaxOrderByAggregateInput = {
   topicId?: Prisma.SortOrder
   start_time?: Prisma.SortOrder
   end_time?: Prisma.SortOrder
-  material_type?: Prisma.SortOrder
   duration_minutes?: Prisma.SortOrder
   notes?: Prisma.SortOrder
   created_at?: Prisma.SortOrder
   updated_at?: Prisma.SortOrder
+  material_type?: Prisma.SortOrder
 }
 
 export type StudyLogsMinOrderByAggregateInput = {
@@ -460,11 +460,11 @@ export type StudyLogsMinOrderByAggregateInput = {
   topicId?: Prisma.SortOrder
   start_time?: Prisma.SortOrder
   end_time?: Prisma.SortOrder
-  material_type?: Prisma.SortOrder
   duration_minutes?: Prisma.SortOrder
   notes?: Prisma.SortOrder
   created_at?: Prisma.SortOrder
   updated_at?: Prisma.SortOrder
+  material_type?: Prisma.SortOrder
 }
 
 export type StudyLogsSumOrderByAggregateInput = {
@@ -526,11 +526,11 @@ export type StudyLogsCreateWithoutTopicInput = {
   study_date: Date | string
   start_time: Date | string
   end_time: Date | string
-  material_type?: string | null
   duration_minutes: number
   notes?: string | null
   created_at?: Date | string
   updated_at?: Date | string
+  material_type?: string | null
 }
 
 export type StudyLogsUncheckedCreateWithoutTopicInput = {
@@ -538,11 +538,11 @@ export type StudyLogsUncheckedCreateWithoutTopicInput = {
   study_date: Date | string
   start_time: Date | string
   end_time: Date | string
-  material_type?: string | null
   duration_minutes: number
   notes?: string | null
   created_at?: Date | string
   updated_at?: Date | string
+  material_type?: string | null
 }
 
 export type StudyLogsCreateOrConnectWithoutTopicInput = {
@@ -580,11 +580,11 @@ export type StudyLogsScalarWhereInput = {
   topicId?: Prisma.StringFilter<"StudyLogs"> | string
   start_time?: Prisma.DateTimeFilter<"StudyLogs"> | Date | string
   end_time?: Prisma.DateTimeFilter<"StudyLogs"> | Date | string
-  material_type?: Prisma.StringNullableFilter<"StudyLogs"> | string | null
   duration_minutes?: Prisma.IntFilter<"StudyLogs"> | number
   notes?: Prisma.StringNullableFilter<"StudyLogs"> | string | null
   created_at?: Prisma.DateTimeFilter<"StudyLogs"> | Date | string
   updated_at?: Prisma.DateTimeFilter<"StudyLogs"> | Date | string
+  material_type?: Prisma.StringNullableFilter<"StudyLogs"> | string | null
 }
 
 export type StudyLogsCreateManyTopicInput = {
@@ -592,11 +592,11 @@ export type StudyLogsCreateManyTopicInput = {
   study_date: Date | string
   start_time: Date | string
   end_time: Date | string
-  material_type?: string | null
   duration_minutes: number
   notes?: string | null
   created_at?: Date | string
   updated_at?: Date | string
+  material_type?: string | null
 }
 
 export type StudyLogsUpdateWithoutTopicInput = {
@@ -604,11 +604,11 @@ export type StudyLogsUpdateWithoutTopicInput = {
   study_date?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   start_time?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   end_time?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  material_type?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   duration_minutes?: Prisma.IntFieldUpdateOperationsInput | number
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  material_type?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
 }
 
 export type StudyLogsUncheckedUpdateWithoutTopicInput = {
@@ -616,11 +616,11 @@ export type StudyLogsUncheckedUpdateWithoutTopicInput = {
   study_date?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   start_time?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   end_time?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  material_type?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   duration_minutes?: Prisma.IntFieldUpdateOperationsInput | number
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  material_type?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
 }
 
 export type StudyLogsUncheckedUpdateManyWithoutTopicInput = {
@@ -628,11 +628,11 @@ export type StudyLogsUncheckedUpdateManyWithoutTopicInput = {
   study_date?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   start_time?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   end_time?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  material_type?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   duration_minutes?: Prisma.IntFieldUpdateOperationsInput | number
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updated_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  material_type?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
 }
 
 
@@ -643,11 +643,11 @@ export type StudyLogsSelect<ExtArgs extends runtime.Types.Extensions.InternalArg
   topicId?: boolean
   start_time?: boolean
   end_time?: boolean
-  material_type?: boolean
   duration_minutes?: boolean
   notes?: boolean
   created_at?: boolean
   updated_at?: boolean
+  material_type?: boolean
   topic?: boolean | Prisma.TopicDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["studyLogs"]>
 
@@ -657,11 +657,11 @@ export type StudyLogsSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Ext
   topicId?: boolean
   start_time?: boolean
   end_time?: boolean
-  material_type?: boolean
   duration_minutes?: boolean
   notes?: boolean
   created_at?: boolean
   updated_at?: boolean
+  material_type?: boolean
   topic?: boolean | Prisma.TopicDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["studyLogs"]>
 
@@ -671,11 +671,11 @@ export type StudyLogsSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Ext
   topicId?: boolean
   start_time?: boolean
   end_time?: boolean
-  material_type?: boolean
   duration_minutes?: boolean
   notes?: boolean
   created_at?: boolean
   updated_at?: boolean
+  material_type?: boolean
   topic?: boolean | Prisma.TopicDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["studyLogs"]>
 
@@ -685,14 +685,14 @@ export type StudyLogsSelectScalar = {
   topicId?: boolean
   start_time?: boolean
   end_time?: boolean
-  material_type?: boolean
   duration_minutes?: boolean
   notes?: boolean
   created_at?: boolean
   updated_at?: boolean
+  material_type?: boolean
 }
 
-export type StudyLogsOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "study_date" | "topicId" | "start_time" | "end_time" | "material_type" | "duration_minutes" | "notes" | "created_at" | "updated_at", ExtArgs["result"]["studyLogs"]>
+export type StudyLogsOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "study_date" | "topicId" | "start_time" | "end_time" | "duration_minutes" | "notes" | "created_at" | "updated_at" | "material_type", ExtArgs["result"]["studyLogs"]>
 export type StudyLogsInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   topic?: boolean | Prisma.TopicDefaultArgs<ExtArgs>
 }
@@ -714,11 +714,11 @@ export type $StudyLogsPayload<ExtArgs extends runtime.Types.Extensions.InternalA
     topicId: string
     start_time: Date
     end_time: Date
-    material_type: string | null
     duration_minutes: number
     notes: string | null
     created_at: Date
     updated_at: Date
+    material_type: string | null
   }, ExtArgs["result"]["studyLogs"]>
   composites: {}
 }
@@ -1148,11 +1148,11 @@ export interface StudyLogsFieldRefs {
   readonly topicId: Prisma.FieldRef<"StudyLogs", 'String'>
   readonly start_time: Prisma.FieldRef<"StudyLogs", 'DateTime'>
   readonly end_time: Prisma.FieldRef<"StudyLogs", 'DateTime'>
-  readonly material_type: Prisma.FieldRef<"StudyLogs", 'String'>
   readonly duration_minutes: Prisma.FieldRef<"StudyLogs", 'Int'>
   readonly notes: Prisma.FieldRef<"StudyLogs", 'String'>
   readonly created_at: Prisma.FieldRef<"StudyLogs", 'DateTime'>
   readonly updated_at: Prisma.FieldRef<"StudyLogs", 'DateTime'>
+  readonly material_type: Prisma.FieldRef<"StudyLogs", 'String'>
 }
     
 
