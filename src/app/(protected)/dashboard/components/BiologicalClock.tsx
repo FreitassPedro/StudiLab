@@ -20,8 +20,20 @@ export function BiologicalClock() {
 
         logs.forEach(log => {
             const start = new Date(log.start_time);
-            const startHour = start.getHours();
-            hours[startHour].minutes += log.duration_minutes;
+            const end = new Date(log.end_time);
+            
+            let current = new Date(start);
+            while (current < end) {
+                const hour = current.getHours();
+                const nextHour = new Date(current);
+                nextHour.setHours(hour + 1, 0, 0, 0);
+                
+                const segmentEnd = nextHour < end ? nextHour : end;
+                const durationMinutes = (segmentEnd.getTime() - current.getTime()) / (1000 * 60);
+                
+                hours[hour].minutes += Math.round(durationMinutes);
+                current = segmentEnd;
+            }
         });
 
         return hours;
@@ -75,8 +87,8 @@ export function BiologicalClock() {
                                 {chartData.map((entry, index) => (
                                     <Cell
                                         key={`cell-${index}`}
-                                        fill={entry.minutes >= 60 ? "var(--primary)" : "var(--primary-muted)"}
-                                        fillOpacity={entry.minutes >= 60 ? 1 : 0.4}
+                                        fill={entry.minutes >= 60 ? "var(--primary)" : "var(--primary)/40)"}
+                                        fillOpacity={entry.minutes >= 60 ? 1 : entry.minutes >= 30 ? 0.6 : 0.4}
                                         className={entry.minutes >= 60 ? "drop-shadow-[0_0_8px_rgba(var(--primary),0.6)]" : ""}
                                     />
                                 ))}

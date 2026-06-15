@@ -32,6 +32,12 @@ export default async function DashboardPage() {
                             Iniciar Sessão
                         </Button>
                     </Link>
+                    <Link href="/nova-sessao">
+                        <Button size="lg" className="rounded-full px-8 font-bold shadow-md hover:shadow-lg transition-all gap-2">
+                            <Play className="w-5 h-5 fill-current" />
+                            Retomar Sessão
+                        </Button>
+                    </Link>
                 </div>
             </header>
 
@@ -79,16 +85,6 @@ export default async function DashboardPage() {
                     <Suspense fallback={<div className="h-48 bg-muted animate-pulse rounded-xl" />}>
                         <BiologicalClock />
                     </Suspense>
-
-                    <div className="p-5 bg-linear-to-br from-primary/10 to-transparent border border-primary/20 rounded-2xl space-y-3">
-                        <h4 className="font-bold flex items-center gap-2">
-                            <Lightbulb className="w-4 h-4" />
-                            Insight do Dia
-                        </h4>
-                        <p className="text-sm text-muted-foreground leading-relaxed">
-                            Você sabia que estudar em blocos de 50 minutos com pausas de 10 aumenta sua retenção em até 30%? Tente hoje!
-                        </p>
-                    </div>
                 </aside>
             </div>
         </div>
