@@ -291,61 +291,50 @@ export function LogCard({ log }: { log: StudyLogFeedItem }) {
 
     return (
         <>
-            <div className="group flex items-start gap-4 p-4 bg-card border border-border/40 hover:border-border rounded-lg transition-all hover:shadow-sm">
+            <div className="group relative flex items-center gap-4 p-4 bg-background border border-border/50 hover:border-primary/30 rounded-xl transition-all hover:shadow-md hover:-translate-y-0.5">
+                {/* Subject Color Indicator */}
                 <div
-                    className="w-1.5 h-full min-h-12 rounded-full shrink-0"
+                    className="w-1.5 h-12 rounded-full shrink-0 shadow-sm"
                     style={{ backgroundColor: subject?.color || "#ccc" }}
                 />
 
-                <div className="flex-1">
-                    <div className="flex justify-between items-start">
-                        <h4 className="font-semibold text-foreground truncate">
-                            {subject?.name}
-                            <span className="mx-2 text-muted-foreground font-normal" aria-hidden="true">
-                                —
-                            </span>
-                            <span className="inline-flex items-center gap-1.5 text-sm text-muted-foreground font-normal">
-                                <BookOpen className="w-3.5 h-3.5 shrink-0" aria-hidden="true" />
-                                {topic?.name}
-                            </span>
-                        </h4>
-                        <span className="text-xs font-mono text-muted-foreground bg-secondary/50 px-2 py-0.5 rounded">
-                            {new Date(log.start_time).toLocaleTimeString([], {
-                                hour: "2-digit",
-                                minute: "2-digit",
-                            })}
-                            {" - "}
-                            {new Date(log.end_time).toLocaleTimeString([], {
-                                hour: "2-digit",
-                                minute: "2-digit",
-                            })}
-                        </span>
+                <div className="flex-1 min-w-0">
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1">
+                        <div className="space-y-0.5">
+                            <h4 className="font-bold text-foreground flex items-center gap-2">
+                                {subject?.name}
+                                <ChevronRight className="w-3 h-3 text-muted-foreground" />
+                                <span className="text-sm font-medium text-muted-foreground truncate max-w-[200px]">
+                                    {topic?.name}
+                                </span>
+                            </h4>
+                            <div className="flex items-center gap-3 text-xs text-muted-foreground">
+                                <span className="flex items-center gap-1 font-mono">
+                                    <Clock className="w-3 h-3" />
+                                    {new Date(log.start_time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                                </span>
+                                <span className="w-1 h-1 rounded-full bg-border" />
+                                <span className="bg-secondary/60 px-2 py-0.5 rounded-full font-semibold text-primary/80">
+                                    {formatMinutes(log.duration_minutes)}
+                                </span>
+                            </div>
+                        </div>
                     </div>
 
-                    <p className="text-sm text-muted-foreground whitespace-pre-line">
-                        <span className="font-medium">Notas:</span>{" "}
-                        {log.notes || "Sem anotações para esta sessão."}
-                    </p>
-
-                    <div className="flex items-center gap-3 mt-2">
-                        <Badge variant="secondary" className="text-xs font-normal">
-                            <Clock className="w-3 h-3 mr-1" />
-                            {formatMinutes(log.duration_minutes)}
-                        </Badge>
-                    </div>
+                    {log.notes && (
+                        <div className="mt-2 text-sm text-muted-foreground line-clamp-2 italic bg-muted/30 px-3 py-2 rounded-lg border-l-2 border-primary/20">
+                            {log.notes}
+                        </div>
+                    )}
                 </div>
 
-                <div className="flex gap-1 opacity-100 sm:opacity-30 sm:group-hover:opacity-100 transition-opacity">
-                    <Button size="icon" variant="ghost" onClick={() => setIsDetailsOpen(true)} title="Ver detalhes">
-                        <FileText className="w-4 h-4 text-blue-500" />
+                {/* Actions */}
+                <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                    <Button size="icon" variant="ghost" className="h-8 w-8 hover:bg-primary/10 hover:text-primary" onClick={() => setIsEditOpen(true)}>
+                        <Edit2 className="w-4 h-4" />
                     </Button>
-
-                    <Button size="icon" variant="ghost" onClick={() => setIsEditOpen(true)} title="Editar">
-                        <Edit2 className="w-4 h-4 text-amber-500" />
-                    </Button>
-
-                    <Button size="icon" variant="ghost" onClick={() => setIsDeleteOpen(true)} title="Excluir">
-                        <Trash2 className="w-4 h-4 text-red-500" />
+                    <Button size="icon" variant="ghost" className="h-8 w-8 hover:bg-destructive/10 hover:text-destructive" onClick={() => setIsDeleteOpen(true)}>
+                        <Trash2 className="w-4 h-4" />
                     </Button>
                 </div>
             </div>

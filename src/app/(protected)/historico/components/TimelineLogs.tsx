@@ -101,7 +101,7 @@ export function TimelineLogs() {
                         </div>
 
                         {/* Timeline container */}
-                        <div className="relative w-full bg-slate-50 rounded-lg overflow-hidden">
+                        <div className="relative w-full rounded-lg overflow-hidden">
                             {/* Background lines */}
                             {Array.from({ length: 24 }, (_, i) => i + 1).map(hour => (
                                 <div

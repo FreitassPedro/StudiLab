@@ -272,7 +272,7 @@ export function HistoryDateNav() {
                         </Select>
 
                         <div className="relative flex items-center">
-                            <TabsTrigger className='cursor-pointer bg-primary/80 text-secondary' value="custom" onClick={handleOpenCalendarPicker}>
+                            <TabsTrigger className='cursor-pointer bg-muted text-secondary' value="custom" onClick={handleOpenCalendarPicker}>
                                 <CalendarIcon className="h-4 w-4 mr-1" />
                                 Personalizado
                             </TabsTrigger>
