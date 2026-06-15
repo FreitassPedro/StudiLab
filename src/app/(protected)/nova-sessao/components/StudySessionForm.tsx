@@ -31,7 +31,6 @@ import {
 } from "@/components/ui/select";
 
 import { useSubjects } from "@/hooks/useSubjects";
-import { useTopicsMap } from "@/hooks/useTopics";
 import { useCreateStudyLog, useLastStudyLog } from "@/hooks/useStudyLogs";
 import { StudyLogInput } from "@/server/actions/studyLogs.action";
 import { NewTopicDialog } from "../../materias/components/NewTopicDialog";
@@ -271,51 +270,45 @@ export function StudySessionForm() {
 
                         {/* LEFT COLUMN — Subject, Topic, Material, Notes */}
                         <div className="space-y-4">
-                            {lastLog && showResume && (
-                                <Card className="border-primary/20 bg-primary/5 shadow-sm overflow-hidden transition-all hover:border-primary/30 py-2">
-                                    <CardContent className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-                                        <div className="flex items-center gap-3">
-                                            <div className="p-2 bg-primary/10 rounded-full shrink-0">
-                                                <History className="h-4 w-4 text-primary" />
-                                            </div>
-                                            <div className="min-w-0">
-                                                <p className="text-xs font-semibold text-foreground">Retomar última sessão?</p>
-                                                <p className="text-[10px] text-muted-foreground truncate flex-col flex">
-                                                    <span className="text-xs">{lastLog.topic.subject.name}</span>
-                                                    <span>{lastLog.topic.name}</span>
-                                                </p>
-                                            </div>
-                                        </div>
-                                        <Button
-                                            type="button"
-                                            variant="outline"
-                                            size="sm"
-                                            onClick={handleResumeLastSession}
-                                            className="bg-background hover:bg-primary hover:text-primary-foreground border-primary/20 text-[10px] h-7 px-2 transition-colors shrink-0 self-end sm:self-auto"
-                                        >
-                                            <RotateCcw className="h-3 w-3 mr-1" />
-                                            Retomar dados
-                                        </Button>
-                                        <Button
-                                            type="button"
-                                            variant="outline"
-                                            size="icon"
-                                            onClick={() => setHiddenLastLogId(lastLog.id)}
-                                            className="text-muted-foreground h-6 w-6"
-                                            title="Fechar notificação"
-                                        >
-                                            <X className="h-3 w-3 text-muted-foreground hover:text-foreground" />
-                                        </Button>
-                                    </CardContent>
-                                </Card>
-                            )}
-
                             <Card className="shadow-lg border-border/60 bg-card/95 py-3">
-                                <CardHeader className=" ">
+                                <CardHeader className="flex flex-row items-center justify-between px-4">
                                     <CardTitle className="text-lg font-semibold flex items-center gap-2 text-foreground">
                                         <BookOpen className="h-4 w-4 text-primary" />
                                         Formulário de Registro
                                     </CardTitle>
+                                    {lastLog && showResume && (
+                                        <div className="relative">
+                                            <Button
+                                                type="button"
+                                                variant="outline"
+                                                onClick={handleResumeLastSession}
+                                                className="relative border-primary/20 bg-background shadow-sm transition-all hover:border-primary/30 h-9">
+                                                <div className="flex items-center gap-3">
+                                                    <div className="p-1 bg-primary/10 rounded-full shrink-0">
+                                                        <History className="h-4 w-4 text-primary" />
+                                                    </div>
+                                                    <div className="min-w-0">
+                                                        <p className="text-xs font-semibold text-foreground">Retomar sessão</p>
+                                                        <p className="text-[10px] text-muted-foreground truncate flex-row flex">
+                                                            <span className="text-xs">{lastLog.topic.subject.name}</span>
+                                                        </p>
+                                                    </div>
+                                                </div>
+
+
+                                            </Button>
+                                            <Button
+                                                type="button"
+                                                variant="outline"
+                                                size="icon"
+                                                onClick={() => setHiddenLastLogId(lastLog.id)}
+                                                className="text-muted-foreground bg-background/80 h-6 w-6 absolute -top-1 -right-1 z-50"
+                                                title="Fechar notificação"
+                                            >
+                                                <X className="h-3 w-3 text-muted-foreground hover:text-foreground" />
+                                            </Button>
+                                        </div>
+                                    )}
                                 </CardHeader>
                                 <CardContent className="px-4 space-y-3">
                                     {/* Matéria */}
@@ -370,7 +363,7 @@ export function StudySessionForm() {
                                             <Label className="text-xs font-medium text-foreground/80">Tópico Estudado</Label>
                                             <div className="flex items-center gap min-w-0">
                                                 <div className="flex-1 min-w-0">
-                                                    
+
                                                     <TopicSelector
                                                         open={topicSelectOpen}
                                                         onOpenChange={setTopicSelectOpen}
@@ -378,7 +371,7 @@ export function StudySessionForm() {
                                                         selectedTopicId={selectionForm.topicId}
                                                         onTopicSelect={(topicId) => handleTopicChange(topicId)}
                                                     />
-                                                    
+
                                                 </div>
                                                 <Button
                                                     type="button"

@@ -14,13 +14,15 @@ export default function NovaSessaoPage() {
         <div className="flex flex-col h-screen">
             <div className="flex flex-1 relative">
                 <div className="flex-1 scroll-smooth overflow-auto">
-                    <main className="flex-1 grid grid-cols-1 md:grid-cols-3 gap-4 px-4 py-2">
+                    <main className="flex-1 ">
                         <div className="md:col-span-2">
                             <StudySessionForm />
                         </div>
+                        {/* Temporariamente desabilitada
                         <Suspense fallback={<div className="p-4">Carregando timeline...</div>}>
                             <TodayTimeline />
                         </Suspense>
+                        */}
                     </main>
                 </div>
                 {/* Sidebar - Hidden on mobile, visible on lg+ */}

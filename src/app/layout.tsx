@@ -24,7 +24,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Monitor de Estudos",
+  title: "StudiLab - Trilhe seu Estudo",
   description: "Acompanhe suas sessões de estudo, visualize seu progresso e otimize seu tempo de aprendizado com o Monitor de Estudos. Registre suas atividades, defina metas e mantenha-se motivado para alcançar seus objetivos acadêmicos.",
 };
 
