@@ -6,24 +6,31 @@ function SkeletonBox({ className }: { className?: string }) {
 
 export function TodaySummarySkeleton() {
     return (
-        <Card>
-            <CardHeader className="pb-2">
-                <SkeletonBox className="h-5 w-36" />
-            </CardHeader>
-            <CardContent>
-                <div className="grid gap-4 md:grid-cols-3">
-                    {[0, 1, 2].map((i) => (
-                        <div key={i} className="flex items-center gap-3">
-                            <SkeletonBox className="h-9 w-9 rounded" />
-                            <div className="space-y-2">
-                                <SkeletonBox className="h-7 w-24" />
-                                <SkeletonBox className="h-4 w-28" />
-                            </div>
+        <div className="grid gap-4 md:grid-cols-4">
+            <Card className="md:col-span-2 overflow-hidden">
+                <CardContent className="p-6">
+                    <div className="flex items-center justify-between">
+                        <div className="space-y-3">
+                            <SkeletonBox className="h-4 w-32" />
+                            <SkeletonBox className="h-10 w-48" />
+                            <SkeletonBox className="h-4 w-40" />
                         </div>
-                    ))}
-                </div>
-            </CardContent>
-        </Card>
+                        <SkeletonBox className="h-24 w-24 rounded-full" />
+                    </div>
+                </CardContent>
+            </Card>
+            {[0, 1].map((i) => (
+                <Card key={i}>
+                    <CardContent className="p-6 flex flex-col justify-between h-full space-y-4">
+                        <SkeletonBox className="h-9 w-9 rounded-lg" />
+                        <div className="space-y-2">
+                            <SkeletonBox className="h-8 w-16" />
+                            <SkeletonBox className="h-4 w-24" />
+                        </div>
+                    </CardContent>
+                </Card>
+            ))}
+        </div>
     );
 }
 
