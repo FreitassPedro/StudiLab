@@ -1,4 +1,4 @@
-# Arquitetura de Data Fetching e Cache (V2 - Centralizada)
+# Arquitetura de Data Fetching e Cache (V3 - Otimizada)
 
 Este documento define a arquitetura final de busca de dados, projetada para máxima performance (Single-Pass Server Processing) e economia de banco de dados.
 
@@ -22,33 +22,60 @@ A arquitetura evoluiu de múltiplos hooks independentes para um modelo de **Aná
 Toda informação baseada em tempo (logs, médias, totais de horas, dados de gráficos) deve vir deste hook único em `src/hooks/useActivity.ts`.
 - **Por que?** O servidor busca os logs uma única vez e gera o resumo (`summary`) e os gráficos (`charts`) em uma única iteração.
 - **Uso:** Se você precisa do total de horas de hoje, NÃO calcule no frontend. Use `data.summary.totalMinutes` retornado por este hook.
+- **Hoje:** Use `useTodayActivity()` que garante estabilidade de key via `activityKeys.today()`.
 
 ### 2. Metadados e o Princípio de "Árvores Virtuais"
 Matérias e Tópicos são considerados **Metadados Estáticos** (cache de 1h).
 - **Fetch Flat**: Buscamos a lista "plana" de matérias e tópicos.
 - **Build Client-side**: Hooks como `useSubjectTree` constroem a hierarquia em memória no cliente usando `useMemo`. 
+- **Cache Compartilhado**: `useTopics()` e `useTopicsTree()` usam a **mesma query key** (`metadataKeys.topics`). A árvore é construída via `select`, não via query separada.
 - **Benefício**: Evita queries recursivas no SQL e permite que qualquer mudança em um tópico invalide instantaneamente todas as árvores em todas as telas sem novas requisições.
 
 ### 3. Gerenciamento de Chaves (`src/lib/query-keys.ts`)
 Nunca use strings puras em `useQuery`. Utilize as fábricas de chaves:
 - `activityKeys.range(start, end)`: Para qualquer dado de histórico ou dashboard.
+- `activityKeys.today()`: Para dados de hoje (key estável).
+- `activityKeys.detail(id)`: Para detalhes de um log específico.
 - `metadataKeys.subjects` / `metadataKeys.topics`: Para listas globais.
+
+### 4. Defaults Globais Agressivos (`QueryProvider`)
+O `QueryClient` em `src/app/providers/QueryProvider.tsx` configura defaults globais:
+- `staleTime: 24 horas` — dados do dashboard não mudam sem ação do usuário
+- `gcTime: 7 dias` — cache ultra agressivo para manter dados na memória
+- `refetchOnMount: false` — **CRÍTICO**: componente monta = usa cache, sem fetch
+- `refetchOnWindowFocus: false` / `refetchOnReconnect: false`
+- `retry: 1`
+
+> ⚠️ NÃO adicione `refetchOnWindowFocus: false` ou `refetchOnMount: false` em hooks individuais — já está no provider. Só sobrescreva se precisar de um valor DIFERENTE (ex: `refetchOnMount: true` para forçar refresh).
 
 ---
 
 ## 📋 Regras de Ouro para Desenvolvedores
 
 1.  **NÃO crie novos Server Actions de "Get"** se os dados já existem no modelo de `HistoryAnalysis`. Se precisar de um novo gráfico, adicione a lógica de processamento em `src/server/actions/analysis.action.ts`.
-2.  **Invalidação em Cascata**: Ao criar/deletar um Tópico, você DEVE invalidar `metadataKeys.topics` (para atualizar a lista) E `activityKeys.all` (para atualizar os gráficos que dependem daquele tópico).
+2.  **Invalidação Precisa**: 
+    - Ao criar/editar/deletar um **StudyLog**: invalide `activityKeys.all` + `["studyLogs"]`.
+    - Ao criar/deletar um **Tópico**: invalide `topicsKeys.all` + `activityKeys.all`. **NÃO invalide subjects** (tópicos não afetam a lista de matérias).
+    - Ao criar/editar/deletar uma **Matéria**: invalide `subjectsKeys.all`.
 3.  **Derivação de Dados**: Se um componente precisa de um subconjunto de dados (ex: apenas o Ritmo Circadiano), use o hook centralizado e extraia a propriedade: 
     ```tsx
     const { data } = useDashboardData();
     const clock = data?.charts.biologicalClock;
     ```
 4.  **Respeite o Cache Histórico**: Dados de datas passadas têm `staleTime: Infinity`. Eles nunca mudam a menos que um log antigo seja editado.
+5.  **NÃO use keys inline**: Nunca escreva `queryKey: ["studyLogs", "details", id]` diretamente. Use `activityKeys.detail(id)`.
+6.  **NÃO duplique queryFn em keys diferentes**: Se dois hooks chamam a mesma server action, eles DEVEM usar a mesma `queryKey` e diferenciar via `select`.
 
 ## 📂 Mapa de Responsabilidades
 - `src/server/actions/analysis.action.ts`: O "Cérebro". Processa SQL e transforma em insights.
 - `src/hooks/useActivity.ts`: O "Duto Principal". Gerencia o cache de atividades.
 - `src/hooks/useDashboard.ts`: O "Compositor". Une Atividade + Matérias + Tópicos para a Home.
 - `src/hooks/useSubjects.ts` & `useTopics.ts`: Gestores de Metadados e Construtores de Árvores.
+- `src/app/providers/QueryProvider.tsx`: Configuração global de cache.
+
+## ⚠️ Server Actions Deprecated
+As seguintes actions estão marcadas como `@deprecated` e **NÃO devem ser usadas em código novo**:
+- `getDashboardDataAction` — substituída por `useDashboardData` (composição de hooks)
+- `getTodayStudyLogsAction` — substituída por `useTodayActivity`
+- `getStudyLogsByDateAction` / `getStudyLogsByDateRangeAction` — substituídas por `getHistoryAnalysisAction`
+- `getStudyLogsFeedAction` — não é usada por nenhum hook ativo

@@ -24,10 +24,21 @@ export function useActivityAnalysis(startDate: Date, endDate: Date) {
 
 /**
  * Hook para buscar hoje. Pode ser usado no Dashboard e no Histórico.
+ * Usa activityKeys.today() diretamente para garantir estabilidade da key.
  */
 export function useTodayActivity() {
     const today = new Date();
-    return useActivityAnalysis(today, today);
+    today.setHours(0, 0, 0, 0);
+
+    return useQuery({
+        queryKey: activityKeys.today(),
+        queryFn: () => getHistoryAnalysisAction(today, today),
+        staleTime: Infinity,
+        gcTime: 1000 * 60 * 60 * 24,
+        refetchOnWindowFocus: false,
+        refetchOnReconnect: false,
+        refetchOnMount: false,
+    });
 }
 
 /**

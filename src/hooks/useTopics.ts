@@ -11,7 +11,6 @@ keys
 */
 export const topicsKeys = {
     all: metadataKeys.topics,
-    tree: metadataKeys.topicTree,
 };
 
 /// ********************
@@ -58,7 +57,7 @@ export function useTopicsMap() {
  */
 export function useTopicsTree() {
     return useQuery({
-        queryKey: topicsKeys.tree,
+        queryKey: topicsKeys.all,
         queryFn: () => getTopicsAction(),
         staleTime: STALE_TIME,
         select: (topics: Topic[]) => {
@@ -106,7 +105,6 @@ export function useCreateTopic() {
         onSuccess: () => {
             // Invalidação em cascata conforme DATA_FETCHING.md
             queryClient.invalidateQueries({ queryKey: topicsKeys.all });
-            queryClient.invalidateQueries({ queryKey: metadataKeys.subjects });
             queryClient.invalidateQueries({ queryKey: activityKeys.all });
         },
 
@@ -120,7 +118,6 @@ export function useDeleteTopic() {
         mutationFn: (topicId: string) => deleteTopicAction(topicId),
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: topicsKeys.all });
-            queryClient.invalidateQueries({ queryKey: metadataKeys.subjects });
             queryClient.invalidateQueries({ queryKey: activityKeys.all });
         },
     });
@@ -134,7 +131,6 @@ export function useUpdateTopic() {
             updateTopicAction(topicId, name),
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: topicsKeys.all });
-            queryClient.invalidateQueries({ queryKey: metadataKeys.subjects });
             queryClient.invalidateQueries({ queryKey: activityKeys.all });
         },
     });

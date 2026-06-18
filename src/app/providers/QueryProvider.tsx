@@ -10,9 +10,12 @@ export default function QueryProvider({ children }: Props) {
     const [queryClient] = React.useState(() => new QueryClient({
         defaultOptions: {
             queries: {
-                staleTime: 1000 * 60, // 1 minute
-                gcTime: 1000 * 60 * 5, // 5 minutes
-                refetchOnWindowFocus: false, // Optional: disable refetch on window focus for better performance
+                staleTime: 1000 * 60 * 60 * 24,      // 24 horas — dados não mudam sozinhos
+                gcTime: 1000 * 60 * 60 * 24 * 7,     // 7 dias — manter cache na memória
+                refetchOnWindowFocus: false,
+                refetchOnReconnect: false,
+                refetchOnMount: false,            // CRÍTICO: Não refazer query ao montar se já tem cache
+                retry: 1,
             },
         },
     }));

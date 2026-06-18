@@ -22,11 +22,7 @@ export const useSubjectsOptions = () => queryOptions({
     queryKey: subjectsKeys.list,
     queryFn: () => getSubjectsAction(),
     staleTime: STALE_TIME,
-
-    gcTime: 1000 * 60 * 30, // 30 minutos para coleta de lixo, caso não seja usado.
-    refetchOnWindowFocus: false, // Não refazemos a query ao focar a janela, pois os dados são metadados.
-    refetchOnReconnect: false, // Não refazemos a query ao reconectar, pois os dados são metadados.
-    refetchOnMount: false, // Não refazemos a query ao montar, pois os dados são metadados.
+    gcTime: 1000 * 60 * 30, // 30 minutos para coleta de lixo
 });
 
 /***

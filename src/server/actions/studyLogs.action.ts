@@ -13,107 +13,7 @@ const include = {
 } as const;
 
 
-export async function getStudyLogsFeedAction({
-    cursor,
-    fromDate,
-}: {
-    cursor?: string;
-    fromDate?: Date | string;
-}) {
-    const user = await requireAuth();
-    const limit = 10;
 
-    // Normalizar data para evitar problemas de timezone ao comparar com @db.Date
-    const parsedFromDate = fromDate ? new Date(fromDate) : undefined;
-    if (parsedFromDate) {
-        parsedFromDate.setHours(0, 0, 0, 0);
-    }
-
-    const baseWhere = {
-        topic: {
-            subject: {
-                userId: user.id,
-            },
-        },
-    } as const;
-
-    const where = {
-        ...(parsedFromDate
-            ? {
-                study_date: {
-                    gte: parsedFromDate,
-                },
-            }
-            : {}),
-        ...baseWhere,
-    } as const;
-
-    let logs = await prisma.studyLogs.findMany({
-        take: limit + 1, // Buscar um a mais para verificar se há mais páginas
-        cursor: cursor ? { id: cursor } : undefined,
-        skip: cursor ? 1 : 0,
-        where,
-        orderBy: [
-            { study_date: "desc" },
-            { start_time: "desc" },
-            { id: "desc" },
-        ],
-        include,
-    });
-
-    if (!cursor && parsedFromDate && logs.length === 0) {
-        logs = await prisma.studyLogs.findMany({
-            take: limit + 1,
-            orderBy: [
-                { study_date: "desc" },
-                { start_time: "desc" },
-                { id: "desc" },
-            ],
-            where: baseWhere,
-            include,
-        });
-    }
-
-    let nextCursor: string | undefined = undefined;
-
-    if (logs.length > limit) {
-        const nextItem = logs.pop(); // Remove o item extra
-        nextCursor = nextItem?.id; // Define o cursor para a próxima página
-    }
-
-    return { logs, nextCursor };
-}
-
-export async function getStudyLogsByDateAction({
-    startDate,
-    endDate,
-}: {
-    startDate: Date;
-    endDate: Date;
-}) {
-    const user = await requireAuth();
-    // Normalizar datas para evitar problemas de timezone ao comparar com @db.Date
-    const normalizedStart = new Date(startDate);
-    normalizedStart.setHours(0, 0, 0, 0);
-
-    const normalizedEnd = new Date(endDate);
-    normalizedEnd.setHours(23, 59, 59, 999);
-
-    return prisma.studyLogs.findMany({
-        where: {
-            study_date: {
-                gte: normalizedStart,
-                lte: normalizedEnd,
-            },
-            topic: {
-                subject: {
-                    userId: user.id,
-                },
-            },
-        },
-        include,
-    });
-}
 
 export async function getStudyLogDetailsAction(logId: string) {
     await requireAuth();
@@ -133,30 +33,7 @@ export async function getStudyLogDetailsAction(logId: string) {
 }
 
 
-export async function getStudyLogsByDateRangeAction(startDate: Date, endDate: Date) {
-    const user = await requireAuth();
-    // Normalizar datas para evitar problemas de timezone ao comparar com @db.Date
-    const normalizedStart = new Date(startDate);
-    normalizedStart.setHours(0, 0, 0, 0);
 
-    const normalizedEnd = new Date(endDate);
-    normalizedEnd.setHours(23, 59, 59, 999);
-
-    return prisma.studyLogs.findMany({
-        where: {
-            study_date: {
-                gte: normalizedStart,
-                lte: normalizedEnd,
-            },
-            topic: {
-                subject: {
-                    userId: user.id,
-                },
-            },
-        },
-        include,
-    });
-}
 export interface StudyLogInput {
     topic_id: string;
     study_date: Date;
@@ -240,50 +117,7 @@ export async function getLastStudyLogAction() {
     });
 }
 
-export async function getTodayStudyLogsAction(todayDate?: Date) {
-    "use server";
-    const user = await requireAuth();
-    // 1. Dizemos ao Next.js: "Aguarde a requisição chegar. Isso não é estático."
-    await connection();
 
-    // Se todayDate não for fornecido, usar a data local do servidor como fallback
-    // Idealmente, o cliente deve sempre passar `todayDate` para evitar problemas de timezone
-    const today = todayDate ? new Date(todayDate) : new Date();
-
-    // Normalizar para dia zero (meia-noite local)
-    const startOfDay = new Date(
-        today.getFullYear(),
-        today.getMonth(),
-        today.getDate(),
-        0, 0, 0, 0
-    );
-
-    // Normalizar para fim do dia (23:59:59:999)
-    const endOfDay = new Date(
-        today.getFullYear(),
-        today.getMonth(),
-        today.getDate(),
-        23, 59, 59, 999
-    );
-
-    return prisma.studyLogs.findMany({
-        where: {
-            study_date: {
-                gte: startOfDay,
-                lte: endOfDay,
-            },
-            topic: {
-                subject: {
-                    userId: user.id,
-                },
-            },
-        },
-        include,
-        orderBy: {
-            start_time: "asc",
-        },
-    });
-}
 
 export async function getRecentLogsByTopicAction(topicId: string, take = 3, skip = 0) {
     await requireAuth();

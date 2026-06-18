@@ -13,6 +13,7 @@ import { useUpdateStudyLog, useDeleteStudyLog, useStudyLogDetails } from "@/hook
 import { getStudyLogDetailsAction } from "@/server/actions/studyLogs.action";
 import { useHistoryAnalysis } from "@/hooks/useCharts";
 import { useQuery } from "@tanstack/react-query";
+import { activityKeys } from "@/lib/query-keys";
 import { addWeeks, endOfWeek, format, isSameWeek, subWeeks } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import {
@@ -226,10 +227,9 @@ const EditLogDialog = ({
 const LogDetailsDialog = ({ logId, isOpen, isOpenChange }: { logId: string; isOpen: boolean; isOpenChange: (isOpen: boolean) => void }) => {
 
     const { data: logDetails, isLoading } = useQuery({
-        queryKey: ["studyLogs", "details", logId],
+        queryKey: activityKeys.detail(logId),
         queryFn: () => getStudyLogDetailsAction(logId),
         enabled: !!logId && isOpen,
-        gcTime: 1000 * 60, // 1 minuto, depois destroi
     });
 
     if (!logId) return null;

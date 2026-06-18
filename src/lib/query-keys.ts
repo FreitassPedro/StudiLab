@@ -23,10 +23,4 @@ export const metadataKeys = {
     subjects: ['metadata', 'subjects'] as const,
     topics: ['metadata', 'topics'] as const,
     subjectTree: ['metadata', 'subjects', 'tree'] as const,
-    topicTree: ['metadata', 'topics', 'tree'] as const,
-};
-
-
-export const dashboardKeys = {
-    main: (date: Date) => ['dashboard', format(date, 'yyyy-MM-dd')] as const,
 };
