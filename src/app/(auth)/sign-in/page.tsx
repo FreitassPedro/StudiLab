@@ -30,7 +30,7 @@ export default function SignInPage() {
 
     async function handleSignIn(data: FormData) {
         try {
-            const email = `${data.name}@example.com`;
+            const email = `${data.name.toLowerCase().replace(/\s+/g, "")}@example.com`;
             const { error } = await authClient.signIn.email({
                 email: email,
                 password: data.password

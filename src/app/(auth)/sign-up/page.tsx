@@ -43,7 +43,7 @@ export default function SignUpPage() {
                 toast.error(error.message || "Falha ao criar conta");
                 return;
             }
-            toast.success("Conta criada com sucesso! Verifique seu e-mail para confirmar.");
+            toast.success("Conta criada com sucesso!");
             router.push("/sign-in");
 
         } catch (error) {
