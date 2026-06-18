@@ -4,7 +4,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Topic, TopicNode } from "@/types/types";
 import { activityKeys, metadataKeys } from "@/lib/query-keys";
 
-const STALE_TIME = 1000 * 60 * 60; // 1 hora para metadados
+const STALE_TIME = 1000 * 60 * 60 * 12; // 12 horas para metadados
 
 /*
 keys
@@ -29,73 +29,66 @@ export function useTopics() {
             topics.forEach(topic => {
                 topicsMap[topic.id] = topic;
             });
-            return { topics, topicsMap };
+            return {
+                topics,
+                topicsMap
+            };
         },
     });
 }
 
-/**
- * Otimizado para filtrar em memória a partir de todos os tópicos.
- * Isso garante que se já tivermos os tópicos (do dashboard, por exemplo), 
- * não faremos uma nova query ao banco.
- */
-export function useTopicsBySubject(subjectId?: string) {
-    const { data, isLoading } = useTopics();
-
-    const filteredTopics = useMemo(() => {
-        if (!data?.topics || !subjectId) return [];
-        return data.topics.filter(t => t.subjectId === subjectId);
-    }, [data?.topics, subjectId]);
-
-    return {
-        data: filteredTopics,
-        isLoading
-    };
+export function useTopicBySubject(subjectId: string) {
+    return useQuery({
+        queryKey: topicsKeys.all,
+        queryFn: () => getTopicsAction(),
+        staleTime: STALE_TIME,
+        select: (topics: Topic[]) => {
+            return topics.filter(topic => topic.subjectId === subjectId);
+        },
+    });
 }
 
 export function useTopicsMap() {
     const { data } = useTopics();
-    return (data?.topicsMap ?? {}) as Record<string, Topic>;
+    return data?.topicsMap || {};
 }
 
 /**
  * Otimizado para construir a árvore em memória a partir de todos os tópicos.
  */
 export function useTopicsTree() {
-    const { data: topicsData, isLoading } = useTopics();
+    return useQuery({
+        queryKey: topicsKeys.tree,
+        queryFn: () => getTopicsAction(),
+        staleTime: STALE_TIME,
+        select: (topics: Topic[]) => {
 
-    const tree = useMemo(() => {
-        if (!topicsData?.topics) return [];
+            if (!topics?.length) return [];
 
-        const topics = topicsData.topics;
-        const map = new Map<string, TopicNode>();
-        
-        // Primeiro criamos todos os nós
-        topics.forEach((t) => map.set(t.id, { ...t, children: [] }));
+            const map = new Map<string, TopicNode>();
 
-        const roots: TopicNode[] = [];
-        // Depois organizamos a hierarquia
-        topics.forEach((t) => {
-            const node = map.get(t.id)!;
-            if (t.parentId) {
-                const parent = map.get(t.parentId);
-                if (parent) {
-                    parent.children.push(node);
+            // Primeiro criamos todos os nós
+            topics.forEach((t) => map.set(t.id, { ...t, children: [] }));
+
+            const roots: TopicNode[] = [];
+            // Depois organizamos a hierarquia
+            topics.forEach((t) => {
+                const node = map.get(t.id)!;
+                if (t.parentId) {
+                    const parent = map.get(t.parentId);
+                    if (parent) {
+                        parent.children.push(node);
+                    } else {
+                        roots.push(node);
+                    }
                 } else {
                     roots.push(node);
                 }
-            } else {
-                roots.push(node);
-            }
-        });
+            });
 
-        return roots;
-    }, [topicsData?.topics]);
-
-    return {
-        data: tree,
-        isLoading,
-    };
+            return roots;
+        }
+    });
 }
 
 

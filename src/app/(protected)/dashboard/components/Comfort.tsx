@@ -34,7 +34,7 @@ export async function ComfortSection() {
 
     const user = await authClient.getSession(); // Garantindo que temos acesso à sessão do usuário para verificar o nome
 
-    if (user.data?.user?.name !== "Laura" || user.data?.user?.name !== "laura") return null;
+    if (user.data?.user?.name !== "Laura") return null;
 
     const level = getComfortLevel(20);
 

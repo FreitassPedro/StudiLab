@@ -3,7 +3,7 @@
 import { Label, LabelList, LabelProps, Pie, PieChart, PieSectorShapeProps, ResponsiveContainer, Sector, Tooltip } from "recharts";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { PieChart as PieChartIcon } from "lucide-react";
-import { PieChartData } from "@/server/actions/charts.action";
+import { PieChartData } from "@/types/types";
 
 const toNumber = (value: number | bigint) => (typeof value === "bigint" ? Number(value) : value);
 

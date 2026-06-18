@@ -54,7 +54,7 @@ export function TodaySummaryMini() {
         return acc;
     }, {} as Record<string, { name: string; color: string; minutes: number; sessions: number }>) || {};
 
-    const subjectsList = Object.values(subjectsData).sort((a, b) => b.minutes - a.minutes);
+    const subjectsList = (Object.values(subjectsData) as { name: string; color: string; minutes: number; sessions: number }[]).sort((a, b) => b.minutes - a.minutes);
 
     const formatDuration = (min: number) => {
         const h = Math.floor(min / 60);

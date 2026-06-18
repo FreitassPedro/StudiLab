@@ -1,6 +1,8 @@
 "use client";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { useDashboardData, useDashboardSubjectsMap, useDashboardTopicsMap } from "@/hooks/useDashboard";
+import { useTodayStudyLogs } from "@/hooks/useStudyLogs";
+import { useSubjectsMap } from "@/hooks/useSubjects";
+import { useTopicsMap } from "@/hooks/useTopics";
 import useSessionFormStore from "@/store/useSessionFormStore";
 import useCronometerStore from "@/store/useCronometerStore";
 import { Clock } from "lucide-react";
@@ -334,23 +336,9 @@ export function TodayTimeline() {
 
     const today = getLocalDateForToday();
 
-    const { data: dashboardData, isLoading: isDashboardLoading } = useDashboardData();
-    const logs = dashboardData?.logs;
-    const subjects = dashboardData?.subjects;
-    const topicsMap = dashboardData?.topicsMap || {};
-
-    // Transform subjects list to map for easier access
-    const subjectsMap = useMemo(() => {
-        if (!subjects) return {};
-        const map: Record<string, TimelineSubject> = {};
-        subjects.forEach(s => {
-            map[s.id] = { name: s.name, color: s.color };
-        });
-        return map;
-    }, [subjects]);
-
-    const isLogsLoading = isDashboardLoading;
-    const isSubjectsLoading = isDashboardLoading;
+    const { data: logs, isLoading: isLogsLoading } = useTodayStudyLogs();
+    const { data: subjectsMap, isLoading: isSubjectsLoading } = useSubjectsMap();
+    const topicsMap = useTopicsMap();
 
     const currentStartTime = useCronometerStore((state) => state.cronometer.startTime);
     const currentEndTime = useCronometerStore((state) => state.cronometer.endTime);

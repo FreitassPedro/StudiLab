@@ -19,7 +19,7 @@ import {
 
 import { getRecentLogsBySubjectAction, getRecentLogsByTopicAction } from "@/server/actions/studyLogs.action";
 import { useSubjects } from "@/hooks/useSubjects";
-import { useTopicsBySubject } from "@/hooks/useTopics";
+import { useTopicBySubject } from "@/hooks/useTopics";
 import useSessionFormStore from "@/store/useSessionFormStore";
 import { parseDateAsLocal } from "@/lib/utils";
 
@@ -126,7 +126,7 @@ export const LogSection = ({ type }: { type: 'topic' | 'subject' }) => {
     const selectedTopicId = useSessionFormStore((state) => state.form.topicId);
 
     const { data: subjects = [] } = useSubjects();
-    const { data: topics = [] } = useTopicsBySubject(selectedSubjectId || undefined);
+    const { data: topics = [] } = useTopicBySubject(selectedSubjectId || "");
 
     const currentSubject = subjects.find(s => s.id === selectedSubjectId);
 

@@ -9,8 +9,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { useUpdateStudyLog, useDeleteStudyLog } from "@/hooks/useStudyLogs";
-import { useTopicsBySubject } from "@/hooks/useTopics";
+import { useUpdateStudyLog, useDeleteStudyLog, useStudyLogDetails } from "@/hooks/useStudyLogs";
 import { getStudyLogDetailsAction } from "@/server/actions/studyLogs.action";
 import { useHistoryAnalysis } from "@/hooks/useCharts";
 import { useQuery } from "@tanstack/react-query";
@@ -28,9 +27,25 @@ import {
 import { useMemo, useState, useEffect } from "react";
 import useSearchRangeStore from "@/store/useSearchRangeStore";
 import { parseDateAsLocal } from "@/lib/utils";
+import { useTopicBySubject } from "@/hooks/useTopics";
 
-type StudyLogFeedItem = Awaited<ReturnType<typeof getStudyLogsByDateAction>>[number];
-
+type StudyLogFeedItem = {
+    id: string;
+    study_date: string | Date;
+    start_time: string | Date;
+    end_time: string | Date;
+    duration_minutes: number;
+    notes: string | null;
+    topic: {
+        id: string;
+        name: string;
+        subject: {
+            id: string;
+            name: string;
+            color: string;
+        };
+    };
+};
 const formatMinutes = (minutes: number) => {
     const hours = Math.floor(minutes / 60);
     const mins = minutes % 60;
@@ -57,8 +72,8 @@ const EditLogForm = ({
     const [endTime, setEndTime] = useState(`${String(end.getHours()).padStart(2, '0')}:${String(end.getMinutes()).padStart(2, '0')}`);
     const [notes, setNotes] = useState(logDetails.notes ?? "");
     const [topicId, setTopicId] = useState(logDetails.topic.id);
+    const { data: topics } = useTopicBySubject(logDetails.topic.subject.id);
 
-    const { data: topics } = useTopicsBySubject(logDetails.topic.subjectId);
     const updateMutation = useUpdateStudyLog();
 
     const handleSave = async () => {
@@ -176,11 +191,7 @@ const EditLogDialog = ({
     onOpenChange: (isOpen: boolean) => void;
 }) => {
 
-    const { data: logDetails, isLoading } = useQuery({
-        queryKey: ["studyLogs", "details", logId],
-        queryFn: () => getStudyLogDetailsAction(logId),
-        enabled: !!logId && isOpen,
-    });
+    const { data: logDetails, isLoading } = useStudyLogDetails(logId);
 
     if (!logId) return null;
 
@@ -463,7 +474,7 @@ export function LogsHistory() {
         }, {} as Record<string, StudyLogFeedItem[]>);
     }, [data]);
 
-    const groupedEntries = Object.entries(groupedLogs);
+    const groupedEntries = Object.entries(groupedLogs) as [string, StudyLogFeedItem[]][];
     const weekLabel = `${format(currentStart, "dd MMM", {
         locale: ptBR,
     })} - ${format(currentEnd, "dd MMM", { locale: ptBR })}`;

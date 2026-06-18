@@ -3,7 +3,7 @@
 
 import { Prisma } from "@/app/generated/prisma/client";
 import { prisma } from "@/lib/prisma";
-import { Topic, TopicNode } from "@/types/types";
+import { Topic } from "@/types/types";
 import { requireAuth } from "./requireAuth";
 
 export async function getTopicsAction(): Promise<Topic[]> {

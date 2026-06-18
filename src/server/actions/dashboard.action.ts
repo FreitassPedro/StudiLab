@@ -3,12 +3,12 @@
 import { getTodayStudyLogsAction } from "./studyLogs.action";
 import { getSubjectsAction } from "./subject.actions";
 import { getTopicsAction } from "./topic.action";
-import { Subject } from "@/types/types";
+import { Subject, Topic } from "@/types/types";
 
 export type DashboardData = {
     todayLogs: any[];
     subjects: Subject[];
-    topics: any[];
+    topics: Topic[];
 };
 
 export async function getDashboardDataAction(todayDate: Date): Promise<DashboardData> {
