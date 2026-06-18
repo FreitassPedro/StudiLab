@@ -150,7 +150,8 @@ export async function getHistoryAnalysisAction(startDate: Date, endDate: Date): 
         name: s.name,
         value: Number(s.totalMinutes),
         sessions: Number(s.totalSessions),
-        color: s.color
+        color: s.color,
+        fill: s.color ?? "#8884d8",
     }));
 
     // 5. Ordenar Area Chart por data

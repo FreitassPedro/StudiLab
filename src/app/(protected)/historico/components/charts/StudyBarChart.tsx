@@ -128,7 +128,7 @@ export const StudyBarChart = ({ data }: { data: BarChartData | undefined }) => {
                         Sem dados para exibir neste período
                     </div>
                 ) : (
-                    <ResponsiveContainer  width="100%" height="80%">
+                    <ResponsiveContainer width="100%" height="80%">
                         <BarChart data={barData} margin={{ top: 5, right: 5, left: -15, bottom: 0 }}>
                             <CartesianGrid strokeDasharray="3 3" className="opacity-30" />
                             <XAxis

@@ -9,7 +9,8 @@ export type PieChartData = {
     name: string;
     value: number;
     sessions: number;
-    color?: string;
+    color: string;
+    fill: string;
 }
 
 export interface Topic {
