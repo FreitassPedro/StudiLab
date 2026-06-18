@@ -99,7 +99,7 @@ export const StudyPieChart = ({ data: dataLoad }: { data: PieChartData[] | undef
     if (!chartData) return null;
 
     const totalMinutes = chartData.reduce((sum, item) => sum + toNumber(item.value), 0);
-
+    console.log(chartData);
     return (
         <Card>
             <CardHeader className="pb-2">

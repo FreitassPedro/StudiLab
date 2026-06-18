@@ -14,12 +14,13 @@ export function useDashboardData() {
     const isLoading = isLoadingActivity || isLoadingSubjects || isLoadingTopics;
 
     return {
-        data: activityData && subjects && topicsData ? {
-            ...activityData, // Inclui logs, summary e charts processados no servidor
-            subjects: subjects,
-            topics: topicsData.topics,
-            topicsMap: topicsData.topicsMap,
-        } : undefined,
+        data:
+            activityData && subjects && topicsData ? {
+                ...activityData, // Inclui logs, summary e charts processados no servidor
+                subjects: subjects,
+                topics: topicsData.topics,
+                topicsMap: topicsData.topicsMap,
+            } : null,
         isLoading,
     };
 }

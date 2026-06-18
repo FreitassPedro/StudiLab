@@ -1,8 +1,7 @@
 "use client";
 
 import { useDashboardData } from "@/hooks/useDashboard";
-import { useTodayStudyLogs } from "@/hooks/useStudyLogs";
-import { authClient } from "@/lib/auth-client";
+
 import Image from "next/image";
 
 function getComfortLevel(totalMinutes: number) {
@@ -31,17 +30,16 @@ function getComfortLevel(totalMinutes: number) {
     }
 }
 
-export async function ComfortSection() {
-
-    const user = await authClient.getSession(); // Garantindo que temos acesso à sessão do usuário para verificar o nome
-
-    if (user.data?.user?.name !== "Laura") return null;
-
-    const { data: dashboardData, isLoading } = useDashboardData();
-    
-    const level = getComfortLevel(dashboardData?.summary?.totalMinutes || 0);
 
 
+
+
+export function ComfortSection() {
+    const { data: dashboardData } = useDashboardData();
+
+    const minutes = dashboardData?.summary?.totalMinutes || 0;
+
+    const level = getComfortLevel(minutes);
     return (
         <div className="bg-linear-to-r h-40 from-primary/10 to-secondary/10 rounded-lg p-4 flex items-center gap-6">
             <div className="relative shrink-0 ">
@@ -60,5 +58,5 @@ export async function ComfortSection() {
                 </p>
             </div>
         </div>
-    )
+    );
 }

@@ -3,9 +3,8 @@ export interface Subject {
     name: string;
     color: string;
     isOpen: boolean;
-    isArchived: boolean;    
+    isArchived: boolean;
 }
-
 export type PieChartData = {
     name: string;
     value: number;

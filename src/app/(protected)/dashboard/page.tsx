@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { Play, Calendar, Clock } from "lucide-react";
 import { getCurrentUser } from "@/server/actions/getCurrentUser";
+import { ComfortSection } from "./components/Comfort";
 
 export default async function DashboardPage() {
     const user = await getCurrentUser();
@@ -67,6 +68,9 @@ export default async function DashboardPage() {
                         <RecentSessions />
                     </div>
 
+                    {user?.name === "Laura" && (
+                        <ComfortSection />
+                    )}
                     <div className="space-y-4">
                         <h2 className="text-xl font-bold flex items-center gap-2 px-2">
                             <Calendar className="w-5 h-5 text-primary" />
