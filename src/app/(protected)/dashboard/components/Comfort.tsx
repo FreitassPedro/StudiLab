@@ -1,5 +1,6 @@
 "use client";
 
+import { useDashboardData } from "@/hooks/useDashboard";
 import { useTodayStudyLogs } from "@/hooks/useStudyLogs";
 import { authClient } from "@/lib/auth-client";
 import Image from "next/image";
@@ -36,7 +37,9 @@ export async function ComfortSection() {
 
     if (user.data?.user?.name !== "Laura") return null;
 
-    const level = getComfortLevel(20);
+    const { data: dashboardData, isLoading } = useDashboardData();
+    
+    const level = getComfortLevel(dashboardData?.summary?.totalMinutes || 0);
 
 
     return (
