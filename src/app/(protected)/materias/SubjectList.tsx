@@ -1,7 +1,7 @@
 "use client";
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { useDeleteSubject, useSubjectTree } from "@/hooks/useSubjects";
+import { useDeleteSubject, useSubjectOpen, useSubjectTree } from "@/hooks/useSubjects";
 import { Button } from "@/components/ui/button";
 import { ChevronDown, ChevronRight, FileText, Folder, FolderOpen, Plus, Settings, Trash2 } from "lucide-react";
 import { SubjectTree, TopicNode } from "@/types/types";
@@ -98,9 +98,10 @@ export const SubjectsSkeleton = () => {
 function SubjectItem({ subjectTree }: {
     subjectTree: SubjectTree;
 }) {
-    const [isCollapsed, setIsCollapsed] = useState(false);
+    const [isCollapsed, setIsCollapsed] = useState(subjectTree.subject.isOpen);
 
     const deleteSubject = useDeleteSubject();
+    const updateSubjectStatus = useSubjectOpen();
 
     const handleDelete = async () => {
         try {
@@ -111,12 +112,26 @@ function SubjectItem({ subjectTree }: {
         }
     };
 
+    const handleOpen = async () => {
+        setIsCollapsed(!isCollapsed);
+        try {
+            await updateSubjectStatus.mutateAsync({
+                subjectId: subjectTree.subject.id,
+                isOpen: !isCollapsed,
+                isArchived: subjectTree.subject.isArchived
+            });
+        } catch {
+            toast.error("Erro ao atualizar status da matéria.");
+        }
+
+    };
+
     return (
         <Fragment key={subjectTree.subject.id}>
             <tr className="select-none">
                 <td colSpan={5} className="py-2.5 px-4 rounded-xl border border-b-2 bg-muted/40" style={{ borderColor: subjectTree.subject.color }}>
                     <div className="flex w-full items-center justify-between gap-6">
-                        <button onClick={() => setIsCollapsed(!isCollapsed)}
+                        <button onClick={handleOpen}
                             className={`flex items-center justify-center h-5 w-5 rounded hover:bg-accent text-muted-foreground transition-colors `}
                         >
                             <ChevronRight size={24} className={` ${isCollapsed ? "rotate-0" : "rotate-90"} transition-transform ease-in-out`} />
@@ -193,6 +208,7 @@ function SubjectItem({ subjectTree }: {
 
 export default function SubjectList() {
     const { data: tree = [], isLoading } = useSubjectTree();
+
 
     if (isLoading) {
         return <SubjectsSkeleton />;

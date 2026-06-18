@@ -3,9 +3,7 @@
 import { Label, LabelList, LabelProps, Pie, PieChart, PieSectorShapeProps, ResponsiveContainer, Sector, Tooltip } from "recharts";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { PieChart as PieChartIcon } from "lucide-react";
-import { useQuery } from "@tanstack/react-query";
-import { getPieChartDataActionRaw } from "@/server/actions/charts.action";
-import useSearchRangeStore from "@/store/useSearchRangeStore";
+import { PieChartData } from "@/server/actions/charts.action";
 
 const toNumber = (value: number | bigint) => (typeof value === "bigint" ? Number(value) : value);
 
@@ -67,7 +65,7 @@ const MyCustomPie = (props: PieSectorShapeProps) => <Sector {...props} fill={pro
 
 const MyCustomLabel = (props: LabelProps) => (
     <>
-        <Label {...props} fontSize={11} fontWeight={500}  position="outside" offset={20} />
+        <Label {...props} fontSize={11} fontWeight={500} position="outside" offset={20} />
     </>
 );
 
@@ -94,26 +92,13 @@ const renderCustomLabel = ({
     );
 };
 
-export const StudyPieChart = () => {
-    const { startDate, endDate } = useSearchRangeStore();
+export const StudyPieChart = ({ data: dataLoad }: { data: PieChartData[] | undefined }) => {
 
-    const { data: chartData } = useQuery({
-        queryKey: ['charts', 'pie', startDate, endDate],
-        queryFn: () => getPieChartDataActionRaw(startDate, endDate),
-        staleTime: 1000 * 60 * 5, // 5 minutos
-    });
+    const chartData = dataLoad;
 
     if (!chartData) return null;
 
-    // Map data to include 'fill' property for Recharts (modern approach without Cell)
-    const data = chartData.map((item) => ({
-        ...item,
-        value: toNumber(item.value),
-        fill: item.color || '#8884d8', // fallback color
-    }));
-    const totalMinutes = data.reduce((acc, item) => acc + item.value, 0);
-
-    console.log("Dados para o gráfico de pizza:", data);
+    const totalMinutes = chartData.reduce((sum, item) => sum + toNumber(item.value), 0);
 
     return (
         <Card>
@@ -134,7 +119,7 @@ export const StudyPieChart = () => {
                         <ResponsiveContainer width="100%" height={250}>
                             <PieChart>
                                 <Pie
-                                    data={data}
+                                    data={chartData}
                                     cx="50%"
                                     cy="50%"
                                     labelLine={true}
@@ -151,7 +136,7 @@ export const StudyPieChart = () => {
                             </PieChart>
                         </ResponsiveContainer>
 
-                        <CustomLegend data={data} totalMinutes={totalMinutes} />
+                        <CustomLegend data={chartData} totalMinutes={totalMinutes} />
                     </>
                 )}
             </CardContent>

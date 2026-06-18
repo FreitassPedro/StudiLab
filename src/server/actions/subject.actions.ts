@@ -30,7 +30,26 @@ export async function createSubjectAction(data: { name: string; color: string })
     }
 }
 
-export async function updateSubjectAction(data: { id: string; name: string; color: string }) {
+export async function updateSubjectStatus(subjectId: string, isOpen: boolean, isArchived: boolean) {
+    await requireAuth();
+    try {
+        return await prisma.subject.update({
+            where: { id: subjectId },
+            data: {
+                isOpen,
+                isArchived,
+            },
+        });
+    } catch (error) {
+        if (error instanceof Prisma.PrismaClientKnownRequestError) {
+            if (error.code === 'P2025') {
+                throw new Error(`Matéria com id "${subjectId}" não encontrada.`);
+            }
+        }
+        throw new Error("Erro desconhecido ao atualizar status da matéria");
+    }
+}
+export async function updateSubjectAction(data: { id: string; name: string; color: string, isOpen?: boolean, isArchived?: boolean }) {
     await requireAuth();
     try {
         return await prisma.subject.update({
@@ -62,74 +81,12 @@ export async function deleteSubjectAction(id: string) {
     return { success: true };
 }
 
-export async function getSubjectsTrees(): Promise<SubjectTree[]> {
-    const user = await requireAuth();
-    const subjects: { id: string; name: string; color: string; topics: { id: string; name: string; parentId: string | null; subjectId: string }[] }[] = await prisma.subject.findMany({
-        where: { userId: user.id },
-        include: {
-            topics: {
-                include: {
-                    studyLogs: false, // Evita carregar os studyLogs
-                },
-            },
-        },
-    });
-    // Recebe uma lista de matérias com seus tópicos, e precisamos transformar em uma estrutura de árvore
-
-    return subjects.map((s) => {
-        const map = new Map<string, TopicNode>();
-        s.topics.forEach((t) => map.set(t.id, { ...t, children: [] }));
-
-        const roots: TopicNode[] = [];
-        s.topics.forEach((t) => {
-            const node = map.get(t.id)!;
-
-            if (t.parentId) {
-                const parent = map.get(t.parentId);
-                if (parent) {
-                    parent.children.push(node);
-                } else {
-                    roots.push(node)
-
-                }
-            }
-            else {
-                roots.push(node);
-            }
-        });
-
-        return {
-            subject: {
-                id: s.id,
-                name: s.name,
-                color: s.color,
-            },
-            topics: roots,
-        };
-
-    });
-}
 
 export async function getSubjectsAction(): Promise<Subject[]> {
     const user = await requireAuth();
     return await prisma.subject.findMany({
         where: { userId: user.id }
     });
-}
-
-export async function getSubjectsWithTopicsAction() {
-    const user = await requireAuth();
-    const subject = await prisma.subject.findMany({
-        where: { userId: user.id },
-        include: {
-            topics: {
-                include: {
-                    studyLogs: false, // Evita carregar os studyLogs
-                },
-            },
-        },
-    });
-    return subject;
 }
 
 export async function createBulkSubjectsWithTopicsAction(data: {

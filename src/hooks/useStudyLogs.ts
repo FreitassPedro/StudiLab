@@ -1,22 +1,29 @@
-import { createStudyLogAction, deleteStudyLogAction, getLastStudyLogAction, getStudyLogsByDateAction, getSummaryStatsAction, getTodayStudyLogsAction, StudyLogInput, updateStudyLogAction, UpdateStudyLogInput } from "@/server/actions/studyLogs.action";
+import { createStudyLogAction, deleteStudyLogAction, getLastStudyLogAction, StudyLogInput, updateStudyLogAction, UpdateStudyLogInput, getStudyLogDetailsAction } from "@/server/actions/studyLogs.action";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { getLocalDateForToday } from "@/lib/utils";
+import { useActivityAnalysis } from "./useActivity";
+import { activityKeys } from "@/lib/query-keys";
 
-const getDateKey = (date: Date) => date.toDateString();
+/**
+ * Hook para o histórico de logs em um intervalo.
+ * Agora utiliza o useActivityAnalysis para compartilhar cache com gráficos e sumários.
+ */
+export function useStudyLogsHistory(startDate: Date, endDate: Date) {
+    const { data, ...rest } = useActivityAnalysis(startDate, endDate);
+    return { data: data?.logs, ...rest };
+}
 
-export const studyLogsByDateQUeryOptions = (startDate: Date, endDate: Date) => ({
-    queryKey: ["studyLogs", "range", getDateKey(startDate), getDateKey(endDate)],
-    queryFn: () => getStudyLogsByDateAction({ startDate, endDate }),
-    enabled: !!startDate && !!endDate,
-    staleTime: 1000 * 60 * 5, // 5 minutos
-});
+export function useStudyLogsRange(startDate: Date, endDate: Date) {
+    return useStudyLogsHistory(startDate, endDate);
+}
 
-export const summaryStatsQueryOptions = (startDate: Date, endDate: Date) => ({
-    queryKey: ["summaryStats", "range", getDateKey(startDate), getDateKey(endDate)],
-    queryFn: () => getSummaryStatsAction(startDate, endDate),
-    enabled: !!startDate && !!endDate,
-    staleTime: 1000 * 60 * 5, // 5 minutos
-});
+/**
+ * Hook para estatísticas resumidas.
+ * Agora deriva os dados do useActivityAnalysis, evitando query extra.
+ */
+export function useSummaryStats(startDate: Date, endDate: Date) {
+    const { data, ...rest } = useActivityAnalysis(startDate, endDate);
+    return { data: data?.summary, ...rest };
+}
 
 export function useLastStudyLog() {
     return useQuery({
@@ -32,9 +39,8 @@ export function useCreateStudyLog() {
     return useMutation({
         mutationFn: (data: StudyLogInput) => createStudyLogAction(data),
         onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: ["studyLogs"] });
-            queryClient.invalidateQueries({ queryKey: ["summaryStats"] });
-            queryClient.invalidateQueries({ queryKey: ["charts"] });
+            queryClient.invalidateQueries({ queryKey: activityKeys.all });
+            queryClient.invalidateQueries({ queryKey: ["dashboard"] });
         },
     });
 }
@@ -45,17 +51,16 @@ export function useUpdateStudyLog() {
     return useMutation({
         mutationFn: (data: UpdateStudyLogInput) => updateStudyLogAction(data),
         onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: ["studyLogs"] });
-            queryClient.invalidateQueries({ queryKey: ["summaryStats"] });
-            queryClient.invalidateQueries({ queryKey: ["charts"] });
+            queryClient.invalidateQueries({ queryKey: activityKeys.all });
+            queryClient.invalidateQueries({ queryKey: ["dashboard"] });
         },
     });
 }
 
 export function useStudyLogDetails(logId: string) {
     return useQuery({
-        queryKey: ["studyLogs", "details", logId],
-        queryFn: () => getStudyLogsByDateAction({ startDate: new Date(), endDate: new Date() }), // This seems wrong in original code but I'll leave as is for now or fix if I find better action
+        queryKey: activityKeys.detail(logId),
+        queryFn: () => getStudyLogDetailsAction(logId),
         enabled: !!logId,
     });
 }
@@ -66,40 +71,17 @@ export function useDeleteStudyLog() {
     return useMutation({
         mutationFn: (id: string) => deleteStudyLogAction(id),
         onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: ["studyLogs"] });
-            queryClient.invalidateQueries({ queryKey: ["summaryStats"] });
-            queryClient.invalidateQueries({ queryKey: ["charts"] });
+            queryClient.invalidateQueries({ queryKey: activityKeys.all });
+            queryClient.invalidateQueries({ queryKey: ["dashboard"] });
         },
     });
 }
 
-export function useStudyLogsHistory(startDate: Date, endDate: Date) {
-    return useQuery({
-        ...studyLogsByDateQUeryOptions(startDate, endDate),
-    });
-}
-
-
+/**
+ * Hoje simplificado para usar o hook central
+ */
 export function useTodayStudyLogs() {
-    // Obter a data local do cliente para passar ao servidor
-    // Isso garante que usuários em diferentes timezones recebam os dados corretos
-    const todayDate = getLocalDateForToday();
-
-    return useQuery({
-        queryKey: ["studyLogs", "today", todayDate.toDateString()],
-        queryFn: () => getTodayStudyLogsAction(todayDate),
-        staleTime: 1000 * 60 * 5, // 5 minutos
-    });
-}
-
-export function useStudyLogsRange(startDate: Date, endDate: Date) {
-    return useQuery({
-        ...studyLogsByDateQUeryOptions(startDate, endDate),
-    });
-}
-
-export function useSummaryStats(startDate: Date, endDate: Date) {
-    return useQuery({
-        ...summaryStatsQueryOptions(startDate, endDate),
-    });
+    const today = new Date();
+    const { data, isLoading } = useActivityAnalysis(today, today);
+    return { data: data?.logs, isLoading };
 }

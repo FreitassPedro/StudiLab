@@ -1,24 +1,26 @@
 "use client";
 
 import { Card, CardContent } from "@/components/ui/card";
-import { useTodayStudyLogs } from "@/hooks/useStudyLogs";
+import { useDashboardData } from "@/hooks/useDashboard";
 import { BookOpen, Target } from "lucide-react";
 import { TodaySummarySkeleton } from "./Skeletons";
 import { useEffect, useState } from "react";
 
 export function TodaySummary() {
-    const { data: logs, isLoading } = useTodayStudyLogs();
+    const { data: dashboardData, isLoading } = useDashboardData();
+    const logs = dashboardData?.logs;
+    const summary = dashboardData?.summary;
     const [isMounted, setIsMounted] = useState(false);
 
     useEffect(() => {
         setIsMounted(true);
     }, []);
 
-    if (isLoading || !logs || !isMounted) {
+    if (isLoading || !logs || !summary || !isMounted) {
         return <TodaySummarySkeleton />;
     }
 
-    const totalMinutes = logs.reduce((sum, log) => sum + log.duration_minutes, 0);
+    const totalMinutes = summary.totalMinutes;
     const hours = Math.floor(totalMinutes / 60);
     const minutes = totalMinutes % 60;
 
@@ -29,7 +31,7 @@ export function TodaySummary() {
     const circumference = 2 * Math.PI * radius;
     const offset = circumference - (progress / 100) * circumference;
 
-    const lastSubject = logs.length > 0 ? logs[logs.length - 1].topic.subject.name : 'Nenhuma';
+    const lastSubject = summary.topSubject?.name || 'Nenhuma';
 
     return (
         <div className="grid gap-4 md:grid-cols-4">

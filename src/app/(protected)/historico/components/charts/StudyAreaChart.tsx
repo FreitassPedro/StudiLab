@@ -3,9 +3,7 @@
 import { Area, AreaChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis, TooltipProps } from "recharts";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { TrendingUp } from "lucide-react";
-import { useQuery } from "@tanstack/react-query";
-import { getAreaChartACtion } from "@/server/actions/charts.action";
-import useSearchRangeStore from "@/store/useSearchRangeStore";
+
 
 const formatTime = (minutes: number) => {
     if (minutes === 0) return '0min';
@@ -85,38 +83,12 @@ const CustomTooltip = ({ active, payload, data }: CustomToolTipProps) => {
     );
 };
 
-export const StudyAreaChart = () => {
-    const { startDate, endDate } = useSearchRangeStore();
-
-    const { data: rawData, isLoading } = useQuery({
-        queryKey: ['charts', 'area', startDate, endDate],
-        queryFn: () => getAreaChartACtion(startDate, endDate),
-        staleTime: 1000 * 60 * 5, // 5 minutos
-    });
-
+export const StudyAreaChart = ({ data }: { data: AreaChartData | undefined }) => {
+    const rawData = data;
     const chartData: ChartDataPoint[] = Object.entries(rawData || {}).map(([date, info]) => ({
         date,
         minutes: info.totalMinutes,
     }));
-
-    if (isLoading) {
-        return (
-            <Card>
-                <CardHeader className="pb-2">
-                    <CardTitle className="text-base flex items-center gap-2">
-                        <TrendingUp className="h-4 w-4 text-violet-500" />
-                        Evolução de Estudo
-                    </CardTitle>
-                    <CardDescription>Tempo total por dia no período</CardDescription>
-                </CardHeader>
-                <CardContent>
-                    <div className="flex items-center justify-center h-50 text-sm text-muted-foreground">
-                        Carregando...
-                    </div>
-                </CardContent>
-            </Card>
-        );
-    }
 
     const hasData = chartData && chartData.length > 0;
 

@@ -1,6 +1,6 @@
 "use client";
 
-import { useSummaryStats } from "@/hooks/useStudyLogs";
+import { useHistoryAnalysis } from "@/hooks/useCharts";
 import { BookOpen, Clock, Timer, TrendingUp, Trophy, Zap, Award } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import useSearchRangeStore from "@/store/useSearchRangeStore";
@@ -16,7 +16,8 @@ const formatDuration = (minutes: number) => {
 
 export function SummaryCards() {
     const { startDate, endDate } = useSearchRangeStore();
-    const { data: stats, error, isLoading } = useSummaryStats(startDate, endDate);
+    const { data: analysis, error, isLoading } = useHistoryAnalysis(startDate, endDate);
+    const stats = analysis?.summary;
 
     if (isLoading) {
         return (

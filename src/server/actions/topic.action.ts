@@ -8,8 +8,7 @@ import { requireAuth } from "./requireAuth";
 
 export async function getTopicsAction(): Promise<Topic[]> {
     const user = await requireAuth();
-    await new Promise(resolve => setTimeout(resolve, 20)); // Simula delay
-    const topics = prisma.topic.findMany({
+    const topics = await prisma.topic.findMany({
         where: {
             subject: {
                 userId: user.id
@@ -19,13 +18,6 @@ export async function getTopicsAction(): Promise<Topic[]> {
     return topics;
 }
 
-
-export async function getTopicsBySubjectAction(subjectId: string): Promise<Topic[]> {
-    await requireAuth();
-    return prisma.topic.findMany({
-        where: { subjectId },
-    });
-}
 
 export async function postCreateTopic(name: string, subjectId: string, parentId: string | null): Promise<Topic> {
     await requireAuth();
@@ -37,29 +29,6 @@ export async function postCreateTopic(name: string, subjectId: string, parentId:
         },
     });
     return newTopic;
-}
-
-export async function getTopicsTreeAction(): Promise<TopicNode[]> {
-    const user = await requireAuth();
-    const topics = await prisma.topic.findMany({
-        where: { subject: { userId: user.id } },
-        select: { id: true, name: true, subjectId: true, parentId: true },
-    });
-
-    const map = new Map<string, TopicNode>();
-    topics.forEach((t) => map.set(t.id, { ...t, children: [] }));
-
-    const roots: TopicNode[] = [];
-    topics.forEach((t) => {
-        const node = map.get(t.id)!;
-        if (t.parentId) {
-            map.get(t.parentId)?.children.push(node);
-        } else {
-            roots.push(node);
-        }
-    });
-
-    return roots;
 }
 
 export async function deleteTopicAction(topicId: string): Promise<void> {

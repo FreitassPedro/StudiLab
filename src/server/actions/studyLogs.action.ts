@@ -252,18 +252,18 @@ export async function getTodayStudyLogsAction(todayDate?: Date) {
 
     // Normalizar para dia zero (meia-noite local)
     const startOfDay = new Date(
-      today.getFullYear(),
-      today.getMonth(),
-      today.getDate(),
-      0, 0, 0, 0
+        today.getFullYear(),
+        today.getMonth(),
+        today.getDate(),
+        0, 0, 0, 0
     );
 
     // Normalizar para fim do dia (23:59:59:999)
     const endOfDay = new Date(
-      today.getFullYear(),
-      today.getMonth(),
-      today.getDate(),
-      23, 59, 59, 999
+        today.getFullYear(),
+        today.getMonth(),
+        today.getDate(),
+        23, 59, 59, 999
     );
 
     return prisma.studyLogs.findMany({
@@ -342,90 +342,3 @@ export type SummaryStats = {
     topSubjectMinutes: number;
     avgMinutesPerDay: number;
 };
-
-export async function getSummaryStatsAction(
-    startDate: Date,
-    endDate: Date
-): Promise<SummaryStats> {
-    const user = await requireAuth();
-    // Normalizar datas para evitar problemas de timezone ao comparar com @db.Date
-    const normalizedStart = new Date(startDate);
-    normalizedStart.setHours(0, 0, 0, 0);
-
-    const normalizedEnd = new Date(endDate);
-    normalizedEnd.setHours(23, 59, 59, 999);
-
-    // Query 1: Estatísticas básicas (total, count, max, avg)
-    type BasicStats = {
-        totalMinutes: bigint | null;
-        totalSessions: bigint;
-        longestSession: number | null;
-    };
-
-    const basicStatsResult = await prisma.$queryRaw<BasicStats[]>`
-        SELECT
-            COALESCE(SUM(sl."duration_minutes"), 0) AS "totalMinutes",
-            COUNT(sl.id) AS "totalSessions",
-            MAX(sl."duration_minutes") AS "longestSession"
-        FROM "StudyLogs" sl
-        INNER JOIN "Topic" t ON t.id = sl."topicId"
-        INNER JOIN "Subject" s ON s.id = t."subjectId"
-        WHERE 
-            sl."study_date" >= ${normalizedStart}
-            AND sl."study_date" <= ${normalizedEnd}
-            AND s."userId" = ${user.id}
-    `;
-
-
-
-    const basicStats = basicStatsResult[0];
-    const totalMinutes = Number(basicStats?.totalMinutes ?? 0);
-    const totalSessions = Number(basicStats?.totalSessions ?? 0);
-    const longestSession = basicStats?.longestSession ?? 0;
-    const avgSession = totalSessions > 0 ? Math.round(totalMinutes / totalSessions) : 0;
-    const avgMinutesPerDay = Math.round(totalMinutes / ((normalizedEnd.getTime() - normalizedStart.getTime()) / (1000 * 60 * 60 * 24)));
-
-    // Query 2: Matéria com mais minutos
-    type TopSubjectResult = {
-        id: string;
-        name: string;
-        color: string;
-        totalMinutes: bigint;
-    };
-
-    const topSubjectResult = await prisma.$queryRaw<TopSubjectResult[]>`
-        SELECT
-            s.id,
-            s.name,
-            s.color,
-            SUM(sl."duration_minutes") AS "totalMinutes"
-        FROM "Subject" s
-        INNER JOIN "Topic" t ON t."subjectId" = s.id
-        INNER JOIN "StudyLogs" sl ON sl."topicId" = t.id
-        WHERE 
-            sl."study_date" >= ${normalizedStart}
-            AND sl."study_date" <= ${normalizedEnd}
-            AND s."userId" = ${user.id}
-        GROUP BY s.id, s.name, s.color
-        ORDER BY "totalMinutes" DESC
-        LIMIT 1
-    `;
-
-    const topSubjectData = topSubjectResult[0];
-    const topSubject = topSubjectData ? {
-        id: topSubjectData.id,
-        name: topSubjectData.name,
-        color: topSubjectData.color,
-    } : null;
-    const topSubjectMinutes = topSubjectData ? Number(topSubjectData.totalMinutes) : 0;
-
-    return {
-        totalMinutes,
-        totalSessions,
-        avgSession,
-        longestSession,
-        topSubject,
-        topSubjectMinutes,
-        avgMinutesPerDay,
-    };
-}

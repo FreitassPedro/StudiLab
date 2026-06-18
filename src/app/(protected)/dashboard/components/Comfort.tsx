@@ -30,15 +30,13 @@ function getComfortLevel(totalMinutes: number) {
     }
 }
 
-export function ComfortSection() {
-    const { data: logs } = useTodayStudyLogs();
-    const { data: session } = authClient.useSession();
+export async function ComfortSection() {
 
+    const user = await authClient.getSession(); // Garantindo que temos acesso à sessão do usuário para verificar o nome
 
-    if (session?.user?.name !== "Laura") return null;
+    if (user.data?.user?.name !== "Laura" || user.data?.user?.name !== "laura") return null;
 
-    const totalMinutes = logs?.reduce((sum, log) => sum + log.duration_minutes, 0) || 0;
-    const level = getComfortLevel(totalMinutes);
+    const level = getComfortLevel(20);
 
 
     return (

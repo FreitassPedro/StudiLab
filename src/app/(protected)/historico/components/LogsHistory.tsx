@@ -9,9 +9,10 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { useStudyLogsHistory, useUpdateStudyLog, useDeleteStudyLog } from "@/hooks/useStudyLogs";
+import { useUpdateStudyLog, useDeleteStudyLog } from "@/hooks/useStudyLogs";
 import { useTopicsBySubject } from "@/hooks/useTopics";
-import { getStudyLogDetailsAction, getStudyLogsByDateAction } from "@/server/actions/studyLogs.action";
+import { getStudyLogDetailsAction } from "@/server/actions/studyLogs.action";
+import { useHistoryAnalysis } from "@/hooks/useCharts";
 import { useQuery } from "@tanstack/react-query";
 import { addWeeks, endOfWeek, format, isSameWeek, subWeeks } from "date-fns";
 import { ptBR } from "date-fns/locale";
@@ -449,7 +450,8 @@ export function LogsHistory() {
     const currentStart = startDate;
     const currentEnd = endDate;
 
-    const { data, status, error, isFetching } = useStudyLogsHistory(currentStart, currentEnd);
+    const { data: analysis, status, error, isFetching } = useHistoryAnalysis(currentStart, currentEnd);
+    const data = analysis?.logs;
 
     const groupedLogs = useMemo(() => {
         const allLogs = data ?? [];

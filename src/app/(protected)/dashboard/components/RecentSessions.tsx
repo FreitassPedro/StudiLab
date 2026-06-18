@@ -2,7 +2,7 @@
 
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { useTodayStudyLogs } from '@/hooks/useStudyLogs';
+import { useDashboardData } from '@/hooks/useDashboard';
 import { BookOpen, Clock, FileText, Trash2, ChevronRight } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 
@@ -94,7 +94,8 @@ function RecentSessionsSkeleton() {
 }
 
 export function RecentSessions() {
-    const { data: todayLogs, isLoading } = useTodayStudyLogs();
+    const { data: dashboardData, isLoading } = useDashboardData();
+    const todayLogs = dashboardData?.logs;
     const route = useRouter();
 
     return (

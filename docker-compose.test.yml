@@ -17,6 +17,7 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
+    command: ["postgres", "-c", "log_statement=all", "-c", "log_duration=on"]
 
 volumes:
   postgres_test_data:

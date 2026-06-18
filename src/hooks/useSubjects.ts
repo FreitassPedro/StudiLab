@@ -1,26 +1,32 @@
-import { createBulkSubjectsWithTopicsAction, createSubjectAction, deleteSubjectAction, getSubjectsAction, getSubjectsTrees, getSubjectsWithTopicsAction, updateSubjectAction } from "@/server/actions/subject.actions";
+import { createBulkSubjectsWithTopicsAction, createSubjectAction, deleteSubjectAction, getSubjectsAction, updateSubjectAction, updateSubjectStatus } from "@/server/actions/subject.actions";
 import { queryOptions, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { indexSubjectById } from "@/server/normalizers/indexSubject";
+import { metadataKeys } from "@/lib/query-keys";
+import { useTopics } from "./useTopics";
+import { useMemo } from "react";
+import { Subject, SubjectTree, Topic, TopicNode } from "@/types/types";
+
+const STALE_TIME = 1000 * 60 * 60; // 1 hora para metadados
 
 /***
  * Options
  * 
 ***/
 export const subjectsKeys = {
-    all: ["subjects"] as const,
-    tree: ["subjects", "tree"] as const,
-    list: ["subjects", "list"] as const,
-    withTopics: ["subjects", "with-topics"] as const,
+    all: metadataKeys.subjects,
+    tree: metadataKeys.subjectTree,
+    list: metadataKeys.subjects,
 };
 
 export const useSubjectsOptions = () => queryOptions({
     queryKey: subjectsKeys.list,
     queryFn: () => getSubjectsAction(),
-});
+    staleTime: STALE_TIME,
 
-export const useSubjectsWithTopicsOptions = () => queryOptions({
-    queryKey: subjectsKeys.withTopics,
-    queryFn: () => getSubjectsWithTopicsAction(),
+    gcTime: 1000 * 60 * 30, // 30 minutos para coleta de lixo, caso não seja usado.
+    refetchOnWindowFocus: false, // Não refazemos a query ao focar a janela, pois os dados são metadados.
+    refetchOnReconnect: false, // Não refazemos a query ao reconectar, pois os dados são metadados.
+    refetchOnMount: false, // Não refazemos a query ao montar, pois os dados são metadados.
 });
 
 /***
@@ -39,10 +45,6 @@ export function useSubjects() {
     return useQuery(
         useSubjectsOptions()
     );
-}
-
-export function useSubjectsWithTopics() {
-    return useQuery(useSubjectsWithTopicsOptions());
 }
 
 
@@ -72,17 +74,61 @@ export function useBulkCreateSubjects() {
     });
 }
 
+/**
+ * Otimizado para construir a árvore em memória a partir de matérias e tópicos globais.
+ * Evita uma query extra ao banco e aproveita o cache de metadados.
+ */
 export function useSubjectTree() {
-    return useQuery({
-        queryKey: subjectsKeys.tree,
-        queryFn: () => getSubjectsTrees(),
-        staleTime: Infinity,
-        gcTime: 1000 * 60 * 30,
-        refetchOnWindowFocus: false,
-        refetchOnReconnect: false,
-    });
+    const { data: subjects, isLoading: isLoadingSubjects } = useSubjects();
+    const { data: topicsData, isLoading: isLoadingTopics } = useTopics();
+
+    const tree = useMemo(() => {
+        if (!subjects || !topicsData?.topics) return [];
+
+        return subjects.map((s): SubjectTree => {
+            const subjectTopics = topicsData.topics.filter(t => t.subjectId === s.id);
+            const map = new Map<string, TopicNode>();
+            
+            // Primeiro criamos todos os nós
+            subjectTopics.forEach((t) => map.set(t.id, { ...t, children: [] }));
+
+            const roots: TopicNode[] = [];
+            // Depois organizamos a hierarquia
+            subjectTopics.forEach((t) => {
+                const node = map.get(t.id)!;
+                if (t.parentId) {
+                    const parent = map.get(t.parentId);
+                    if (parent) {
+                        parent.children.push(node);
+                    } else {
+                        roots.push(node);
+                    }
+                } else {
+                    roots.push(node);
+                }
+            });
+
+            return {
+                subject: s,
+                topics: roots,
+            };
+        });
+    }, [subjects, topicsData?.topics]);
+
+    return {
+        data: tree,
+        isLoading: isLoadingSubjects || isLoadingTopics,
+    };
 }
 
+export function useSubjectOpen() {
+    return useMutation({
+        mutationFn: async (payload: { subjectId: string; isOpen: boolean; isArchived: boolean }) => {
+            const { subjectId, isOpen, isArchived } = payload;
+            return updateSubjectStatus(subjectId, isOpen, isArchived);
+        },
+    });
+}
 
 export function useDeleteSubject() {
     const queryClient = useQueryClient();
@@ -108,3 +154,4 @@ export function useUpdateSubject() {
         },
     });
 }
+

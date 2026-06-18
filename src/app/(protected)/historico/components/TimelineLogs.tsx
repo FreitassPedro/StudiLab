@@ -3,7 +3,7 @@
 import { Clock, Loader2 } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { isSameDay } from "date-fns";
-import { useStudyLogsRange } from "@/hooks/useStudyLogs";
+import { useHistoryAnalysis } from "@/hooks/useCharts";
 import useSearchRangeStore from "@/store/useSearchRangeStore";
 import { useEffect, useRef } from "react";
 
@@ -56,7 +56,8 @@ export function TimelineLogs() {
     const range = { startDate, endDate };
     const isSingleDay = range && isSameDay(range.startDate, range.endDate);
 
-    const { data: logs, isLoading } = useStudyLogsRange(range.startDate, range.endDate);
+    const { data: analysis, isLoading } = useHistoryAnalysis(range.startDate, range.endDate);
+    const logs = analysis?.logs;
     const latestLogRef = useRef<HTMLDivElement>(null);
 
     // Scroll to the log with latest end_time when logs are loaded

@@ -2,6 +2,15 @@ export interface Subject {
     id: string;
     name: string;
     color: string;
+    isOpen: boolean;
+    isArchived: boolean;    
+}
+
+export type PieChartData = {
+    name: string;
+    value: number;
+    sessions: number;
+    color?: string;
 }
 
 export interface Topic {

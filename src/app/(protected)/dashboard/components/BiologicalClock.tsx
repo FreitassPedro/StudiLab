@@ -1,43 +1,29 @@
 "use client";
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { useTodayStudyLogs } from "@/hooks/useStudyLogs";
+import { useDashboardData } from "@/hooks/useDashboard";
 import { Brain, Zap } from "lucide-react";
 import { useMemo } from "react";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell } from 'recharts';
 
 export function BiologicalClock() {
-    const { data: logs } = useTodayStudyLogs();
+    const { data: dashboardData } = useDashboardData();
+    const logs = dashboardData?.logs;
+    const biologicalClock = dashboardData?.charts?.biologicalClock;
 
     const chartData = useMemo(() => {
-        const hours = Array.from({ length: 24 }, (_, i) => ({
-            hour: i,
-            minutes: 0,
-            label: `${i}h`,
+        if (!biologicalClock) {
+            return Array.from({ length: 24 }, (_, i) => ({
+                hour: i,
+                minutes: 0,
+                label: `${i}h`,
+            }));
+        }
+        return biologicalClock.map(item => ({
+            ...item,
+            label: `${item.hour}h`,
         }));
-
-        if (!logs) return hours;
-
-        logs.forEach(log => {
-            const start = new Date(log.start_time);
-            const end = new Date(log.end_time);
-            
-            let current = new Date(start);
-            while (current < end) {
-                const hour = current.getHours();
-                const nextHour = new Date(current);
-                nextHour.setHours(hour + 1, 0, 0, 0);
-                
-                const segmentEnd = nextHour < end ? nextHour : end;
-                const durationMinutes = (segmentEnd.getTime() - current.getTime()) / (1000 * 60);
-                
-                hours[hour].minutes += Math.round(durationMinutes);
-                current = segmentEnd;
-            }
-        });
-
-        return hours;
-    }, [logs]);
+    }, [biologicalClock]);
 
     const peakHour = useMemo(() =>
         [...chartData].sort((a, b) => b.minutes - a.minutes)[0]

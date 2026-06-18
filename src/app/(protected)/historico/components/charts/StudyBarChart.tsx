@@ -3,10 +3,8 @@
 import { useMemo } from "react";
 import { Bar, BarChart, CartesianGrid, Legend, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { useQuery } from "@tanstack/react-query";
 import { BarChart3 } from "lucide-react";
-import { getAreaChartACtion } from "@/server/actions/charts.action";
-import useSearchRangeStore from "@/store/useSearchRangeStore";
+
 
 const formatTime = (minutes: number) => {
     if (minutes === 0) return "0min";
@@ -31,7 +29,7 @@ interface DayStudyData {
     materia: AreaSubject[];
 }
 
-interface AreaChartData {
+export interface BarChartData {
     [date: string]: DayStudyData;
 }
 
@@ -70,16 +68,11 @@ const CustomTooltip = ({ active, payload, label }: any) => {
     return null;
 };
 
-export const StudyBarChart = () => {
-    const { startDate, endDate } = useSearchRangeStore();
+export const StudyBarChart = ({ data }: { data: BarChartData | undefined }) => {
 
-    const { data: rawData, isLoading } = useQuery({
-        queryKey: ["charts", "bar", startDate, endDate],
-        queryFn: () => getAreaChartACtion(startDate, endDate),
-        staleTime: 1000 * 60 * 5,
-    });
+    const rawData = data;
 
-    const typedData = (rawData || {}) as AreaChartData;
+    const typedData = (rawData || {}) as BarChartData;
 
     const { barData, allMaterias, colorByMateria } = useMemo(() => {
         const subjectsSet = new Set<string>();
@@ -117,24 +110,6 @@ export const StudyBarChart = () => {
         };
     }, [typedData]);
 
-    if (isLoading) {
-        return (
-            <Card className="h-full">
-                <CardHeader className="pb-2">
-                    <CardTitle className="text-base flex items-center gap-2">
-                        <BarChart3 className="h-4 w-4 text-emerald-500" />
-                        Minutos por Dia
-                    </CardTitle>
-                    <CardDescription>Barra total diária segmentada por matéria</CardDescription>
-                </CardHeader>
-                <CardContent className="flex-1 min-h-60">
-                    <div className="flex h-full items-center justify-center text-sm text-muted-foreground">
-                        Carregando...
-                    </div>
-                </CardContent>
-            </Card>
-        );
-    }
 
     const hasData = barData.length > 0;
 

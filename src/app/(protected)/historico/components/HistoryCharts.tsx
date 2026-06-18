@@ -7,6 +7,8 @@ import { Suspense } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { PieChartIcon } from "lucide-react";
 import { StudyBarChart } from "./charts/StudyBarChart";
+import { useHistoryAnalysis } from "@/hooks/useCharts";
+import useSearchRangeStore from "@/store/useSearchRangeStore";
 
 const ChartSkeleton = () => {
     return (
@@ -27,20 +29,23 @@ const ChartSkeleton = () => {
     );
 }
 export const HistoryCharts = () => {
+    const { startDate, endDate } = useSearchRangeStore();
 
+    const { data, isLoading } = useHistoryAnalysis(startDate, endDate);
+
+    if (isLoading) return <ChartSkeleton />;
+
+    if (!data) return <div>Erro no processamento dos dados</div>;
 
     return (
         <>
             <div className="grid gap-4 md:grid-cols-2">
                 <Suspense fallback={<ChartSkeleton />}>
-                    <StudyBarChart />
-                </Suspense>
+                    <StudyBarChart data={data.charts.barChart} />
 
-                <Suspense fallback={<ChartSkeleton />}>
-                    <StudyPieChart />
-                </Suspense>
-                <Suspense fallback={<ChartSkeleton />}>
-                    <StudyAreaChart />
+                    <StudyPieChart data={data.charts.pieChart} />
+
+                    <StudyAreaChart data={data.charts.areaChart} />
                 </Suspense>
             </div>
 

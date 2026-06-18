@@ -1,14 +1,17 @@
-import { postCreateTopic, getTopicsAction, getTopicsBySubjectAction, deleteTopicAction, updateTopicAction, getTopicsTreeAction } from "@/server/actions/topic.action";
+import { useMemo } from "react";
+import { postCreateTopic, getTopicsAction, deleteTopicAction, updateTopicAction } from "@/server/actions/topic.action";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Topic } from "@/types/types";
+import { Topic, TopicNode } from "@/types/types";
+import { activityKeys, metadataKeys } from "@/lib/query-keys";
+
+const STALE_TIME = 1000 * 60 * 60; // 1 hora para metadados
 
 /*
-keyss
+keys
 */
 export const topicsKeys = {
-    all: ['topics'] as const,
-    tree: ['topics', 'tree'] as const,
-    bySubject: (subjectId?: string) => ['topics', 'by-subject', subjectId] as const,
+    all: metadataKeys.topics,
+    tree: metadataKeys.topicTree,
 };
 
 /// ********************
@@ -16,18 +19,13 @@ export const topicsKeys = {
 // Options
 //
 // ********************
-export const topicsBySubjectQueryOptions = (subjectId?: string) => ({
-    queryKey: topicsKeys.bySubject(subjectId),
-    queryFn: () => getTopicsBySubjectAction(subjectId!),
-    enabled: !!subjectId,
-});
-
 export function useTopics() {
     return useQuery({
         queryKey: topicsKeys.all,
         queryFn: () => getTopicsAction(),
-        select: (topics) => {
-            const topicsMap: Record<string, typeof topics[number]> = {};
+        staleTime: STALE_TIME,
+        select: (topics: Topic[]) => {
+            const topicsMap: Record<string, Topic> = {};
             topics.forEach(topic => {
                 topicsMap[topic.id] = topic;
             });
@@ -36,8 +34,23 @@ export function useTopics() {
     });
 }
 
+/**
+ * Otimizado para filtrar em memória a partir de todos os tópicos.
+ * Isso garante que se já tivermos os tópicos (do dashboard, por exemplo), 
+ * não faremos uma nova query ao banco.
+ */
 export function useTopicsBySubject(subjectId?: string) {
-    return useQuery(topicsBySubjectQueryOptions(subjectId));
+    const { data, isLoading } = useTopics();
+
+    const filteredTopics = useMemo(() => {
+        if (!data?.topics || !subjectId) return [];
+        return data.topics.filter(t => t.subjectId === subjectId);
+    }, [data?.topics, subjectId]);
+
+    return {
+        data: filteredTopics,
+        isLoading
+    };
 }
 
 export function useTopicsMap() {
@@ -45,36 +58,63 @@ export function useTopicsMap() {
     return (data?.topicsMap ?? {}) as Record<string, Topic>;
 }
 
+/**
+ * Otimizado para construir a árvore em memória a partir de todos os tópicos.
+ */
 export function useTopicsTree() {
-    return useQuery({
-        queryKey: topicsKeys.tree,
-        queryFn: () => getTopicsTreeAction(),
-    });
+    const { data: topicsData, isLoading } = useTopics();
+
+    const tree = useMemo(() => {
+        if (!topicsData?.topics) return [];
+
+        const topics = topicsData.topics;
+        const map = new Map<string, TopicNode>();
+        
+        // Primeiro criamos todos os nós
+        topics.forEach((t) => map.set(t.id, { ...t, children: [] }));
+
+        const roots: TopicNode[] = [];
+        // Depois organizamos a hierarquia
+        topics.forEach((t) => {
+            const node = map.get(t.id)!;
+            if (t.parentId) {
+                const parent = map.get(t.parentId);
+                if (parent) {
+                    parent.children.push(node);
+                } else {
+                    roots.push(node);
+                }
+            } else {
+                roots.push(node);
+            }
+        });
+
+        return roots;
+    }, [topicsData?.topics]);
+
+    return {
+        data: tree,
+        isLoading,
+    };
 }
 
 
-
+interface CreateTopicInput {
+    name: string;
+    subjectId: string;
+    parentId?: string | null;
+}
 export function useCreateTopic() {
     const queryClient = useQueryClient();
 
-
-
     return useMutation({
-        mutationFn: ({ name, subjectId, parentId }: { name: string; subjectId: string, parentId: string | null }) =>
-            postCreateTopic(name, subjectId, parentId),
-        onSuccess: (topic, variables) => {
-            queryClient.setQueryData(
-                topicsKeys.bySubject(variables.subjectId),
-                (currentTopics: typeof topic[] | undefined) => {
-                    if (!currentTopics) return [topic];
-                    if (currentTopics.some((t) => t.id === topic.id)) return currentTopics;
-                    return [...currentTopics, topic];
-                }
-            );
-
-            queryClient.invalidateQueries({ queryKey: topicsKeys.bySubject(variables.subjectId) });
+        mutationFn: (topicInput: CreateTopicInput) =>
+            postCreateTopic(topicInput.name, topicInput.subjectId, topicInput.parentId ?? null),
+        onSuccess: () => {
+            // Invalidação em cascata conforme DATA_FETCHING.md
             queryClient.invalidateQueries({ queryKey: topicsKeys.all });
-            queryClient.invalidateQueries({ queryKey: ["subjects", "tree"] });
+            queryClient.invalidateQueries({ queryKey: metadataKeys.subjects });
+            queryClient.invalidateQueries({ queryKey: activityKeys.all });
         },
 
     });
@@ -87,7 +127,8 @@ export function useDeleteTopic() {
         mutationFn: (topicId: string) => deleteTopicAction(topicId),
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: topicsKeys.all });
-            queryClient.invalidateQueries({ queryKey: ["subjects", "tree"] });
+            queryClient.invalidateQueries({ queryKey: metadataKeys.subjects });
+            queryClient.invalidateQueries({ queryKey: activityKeys.all });
         },
     });
 }
@@ -100,7 +141,8 @@ export function useUpdateTopic() {
             updateTopicAction(topicId, name),
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: topicsKeys.all });
-            queryClient.invalidateQueries({ queryKey: ["subjects", "tree"] });
+            queryClient.invalidateQueries({ queryKey: metadataKeys.subjects });
+            queryClient.invalidateQueries({ queryKey: activityKeys.all });
         },
     });
 }
