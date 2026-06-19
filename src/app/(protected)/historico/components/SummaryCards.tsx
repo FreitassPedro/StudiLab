@@ -19,6 +19,8 @@ export function SummaryCards() {
     const { data: analysis, error, isLoading } = useHistoryAnalysis(startDate, endDate);
     const stats = analysis?.summary;
 
+    console.log("start", startDate, "end", endDate);
+
     if (isLoading) {
         return (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">

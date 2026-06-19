@@ -23,11 +23,23 @@ export async function getHistoryAnalysisAction(startDate: Date, endDate: Date): 
     const user = await requireAuth();
 
     // Normalizar datas para evitar problemas de timezone ao comparar com @db.Date
-    const normalizedStart = new Date(startDate);
-    normalizedStart.setHours(0, 0, 0, 0);
+    // Construimos datas estritas em UTC baseadas nos componentes locais da data enviada.
+    // Assim, se o usuário enviou "2026-06-15" (que vira 03:00 UTC), normalizamos para 2026-06-15T00:00:00.000Z
+    const normalizedStart = new Date(Date.UTC(
+        startDate.getFullYear(),
+        startDate.getMonth(),
+        startDate.getDate(),
+        0, 0, 0, 0
+    ));
 
-    const normalizedEnd = new Date(endDate);
-    normalizedEnd.setHours(23, 59, 59, 999);
+    const normalizedEnd = new Date(Date.UTC(
+        endDate.getFullYear(),
+        endDate.getMonth(),
+        endDate.getDate(),
+        0, 0, 0, 0 // Prisma converte @db.Date ignorando hora, então 00:00 é perfeito para lte
+    ));
+
+    console.log("Fetching Data", normalizedStart, normalizedEnd);
 
     // UNICA QUERY AO BANCO: Busca todos os logs no intervalo com as relações necessárias
     const logs = await prisma.studyLogs.findMany({
@@ -53,6 +65,8 @@ export async function getHistoryAnalysisAction(startDate: Date, endDate: Date): 
             start_time: "asc",
         },
     });
+
+    console.log("Logs found:", logs);
 
     // --- PROCESSAMENTO EM MEMÓRIA (MUITO MAIS RÁPIDO QUE MÚLTIPLAS QUERIES) ---
 
@@ -132,7 +146,11 @@ export async function getHistoryAnalysisAction(startDate: Date, endDate: Date): 
     const avgSession = totalSessions > 0 ? Math.round(totalMinutes / totalSessions) : 0;
 
     // Calcular dias únicos com estudo para média diária real (opcional) ou usar range fixo
-    const dayCount = Math.max(1, Math.ceil((normalizedEnd.getTime() - normalizedStart.getTime()) / (1000 * 60 * 60 * 24)));
+    // Como normalizedStart e normalizedEnd agora são ambos à meia-noite (00:00:00.000Z),
+    // a diferença em dias entre 15 e 15 é 0, entre 15 e 16 é 1.
+    // O total de dias no intervalo inclusivo é a diferença + 1.
+    const diffDays = Math.round((normalizedEnd.getTime() - normalizedStart.getTime()) / (1000 * 60 * 60 * 24));
+    const dayCount = Math.max(1, diffDays + 1);
     const avgMinutesPerDay = Math.round(totalMinutes / dayCount);
 
     const summary: SummaryStats = {

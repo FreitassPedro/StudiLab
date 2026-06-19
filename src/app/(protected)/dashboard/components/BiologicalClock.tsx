@@ -4,11 +4,11 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useDashboardData } from "@/hooks/useDashboard";
 import { Brain, Zap } from "lucide-react";
 import { useMemo } from "react";
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell } from 'recharts';
+import { BarShapeProps, Rectangle } from "recharts";
+import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts';
 
 export function BiologicalClock() {
     const { data: dashboardData } = useDashboardData();
-    const logs = dashboardData?.logs;
     const biologicalClock = dashboardData?.charts?.biologicalClock;
 
     const chartData = useMemo(() => {
@@ -41,6 +41,14 @@ export function BiologicalClock() {
         return null;
     };
 
+    const MyCustomRectangle = (props: BarShapeProps) => {
+        const { fill } = props;
+        return <Rectangle {...props}
+            fill={fill}
+            radius={[4, 4, 0, 0]}
+        />
+    }
+
     return (
         <Card className="border-none bg-linear-to-br from-primary/5 to-secondary/5 shadow-md overflow-hidden">
             <CardHeader className="pb-2">
@@ -69,15 +77,8 @@ export function BiologicalClock() {
                                 radius={[4, 4, 0, 0]}
                                 animationDuration={1500}
                                 animationEasing="ease-out"
+                                shape={MyCustomRectangle}
                             >
-                                {chartData.map((entry, index) => (
-                                    <Cell
-                                        key={`cell-${index}`}
-                                        fill={entry.minutes >= 60 ? "var(--primary)" : "var(--primary)/40)"}
-                                        fillOpacity={entry.minutes >= 60 ? 1 : entry.minutes >= 30 ? 0.6 : 0.4}
-                                        className={entry.minutes >= 60 ? "drop-shadow-[0_0_8px_rgba(var(--primary),0.6)]" : ""}
-                                    />
-                                ))}
                             </Bar>
                         </BarChart>
                     </ResponsiveContainer>

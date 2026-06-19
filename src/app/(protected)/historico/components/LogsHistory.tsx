@@ -69,8 +69,8 @@ const EditLogForm = ({
     const end = new Date(logDetails.end_time);
 
     const [startTime, setStartTime] = useState(`${String(start.getHours()).padStart(2, '0')}:${String(start.getMinutes()).padStart(2, '0')}`);
-
     const [endTime, setEndTime] = useState(`${String(end.getHours()).padStart(2, '0')}:${String(end.getMinutes()).padStart(2, '0')}`);
+    const [studyDate, setStudyDate] = useState(() => new Date(logDetails.study_date).toISOString().split('T')[0]);
     const [notes, setNotes] = useState(logDetails.notes ?? "");
     const [topicId, setTopicId] = useState(logDetails.topic.id);
     const { data: topics } = useTopicBySubject(logDetails.topic.subject.id);
@@ -81,11 +81,11 @@ const EditLogForm = ({
 
         const [startHour, startMin] = startTime.split(':').map(Number);
         const [endHour, endMin] = endTime.split(':').map(Number);
-        const studyDate = new Date(logDetails.study_date);
+        const parsedDate = new Date(studyDate + "T00:00:00");
 
-        const newStartTime = new Date(studyDate);
+        const newStartTime = new Date(parsedDate);
         newStartTime.setHours(startHour, startMin, 0, 0);
-        const newEndTime = new Date(studyDate);
+        const newEndTime = new Date(parsedDate);
         newEndTime.setHours(endHour, endMin, 0, 0);
         const duration = Math.round((newEndTime.getTime() - newStartTime.getTime()) / 60000);
 
@@ -123,6 +123,17 @@ const EditLogForm = ({
                             ))}
                         </SelectContent>
                     </Select>
+                </div>
+
+                {/* Data de Estudo */}
+                <div className="space-y-2">
+                    <Label htmlFor="studyDate">Data</Label>
+                    <Input
+                        id="studyDate"
+                        type="date"
+                        value={studyDate}
+                        onChange={(e) => setStudyDate(e.target.value)}
+                    />
                 </div>
 
                 {/* Horário de Início */}

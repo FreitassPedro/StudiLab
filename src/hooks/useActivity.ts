@@ -1,4 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
+import { format } from "date-fns";
 import { getHistoryAnalysisAction } from "@/server/actions/analysis.action";
 import { activityKeys } from "@/lib/query-keys";
 import { getStudyLogDetailsAction } from "@/server/actions/studyLogs.action";
@@ -8,6 +9,7 @@ import { getStudyLogDetailsAction } from "@/server/actions/studyLogs.action";
  * Substitui hooks redundantes como useStudyLogsRange e useSummaryStats.
  */
 export function useActivityAnalysis(startDate: Date, endDate: Date) {
+
     return useQuery({
         queryKey: activityKeys.range(startDate, endDate),
         queryFn: () => getHistoryAnalysisAction(startDate, endDate),
@@ -28,7 +30,6 @@ export function useActivityAnalysis(startDate: Date, endDate: Date) {
  */
 export function useTodayActivity() {
     const today = new Date();
-    today.setHours(0, 0, 0, 0);
 
     return useQuery({
         queryKey: activityKeys.today(),
