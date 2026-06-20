@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, useMemo, useCallback } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import {
@@ -13,17 +13,15 @@ import {
   PenLine,
   Maximize2,
   Minimize2,
-  Plus,
-  ArrowLeft,
-  Settings2
+  Settings2,
+  ClockArrowUpIcon,
+  ClockArrowUp
 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import { Textarea } from "@/components/ui/textarea";
 import { Glass } from "./Glass";
 import { CircularTimer } from "./CircularTimer";
-import { TopicSelector } from "./TopicTreeSelector";
 import { NewTopicDialog } from "../../materias/components/NewTopicDialog";
 
 import { useSubjects } from "@/hooks/useSubjects";
@@ -36,8 +34,17 @@ import { StudyLogInput } from "@/server/actions/studyLogs.action";
 import { useTopicsMap } from "@/hooks/useTopics";
 import { usePageTitleWithCronometer } from "@/hooks/usePageTitleWithCronometer";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
+import { Label } from "@/components/ui/label";
+import { Input } from "@/components/ui/input";
 
 const GOALS = [25, 45, 60, 90];
+const hexToRgba = (hex, a) => {
+  const h = hex.replace("#", "");
+  const r = parseInt(h.slice(0, 2), 16);
+  const g = parseInt(h.slice(2, 4), 16);
+  const b = parseInt(h.slice(4, 6), 16);
+  return `rgba(${r},${g},${b},${a})`;
+};
 
 interface Subject {
   id: string;
@@ -52,14 +59,151 @@ const subject: Subject = {
 }
 
 
+export function ExtraDetails() {
+
+  const form = useSessionFormStore((state) => state.form);
+  const updateForm = useSessionFormStore((state) => state.updateForm);
+  
+  const [studyMode, setStudyMode] = useState<"teoria" | "revisao" | "exercicios" | "resumo">("teoria");
+
+  const setCurrentTime = (field: "start_time" | "end_time") => {
+    updateForm({ [field]: new Date() });
+  };
+
+  return (
+    < div className="flex flex-col h-full justify-between space-y-4 animate-in slide-in-from-right duration-500" >
+      {/* Topic & Notes */}
+      < Card className="h-full flex-1" >
+        <CardHeader>
+          <Settings2 className="h-4 w-4 text-primary" />
+          <h3 className="text-sm font-bold uppercase tracking-wider">Configuração</h3>
+        </CardHeader>
+        <CardContent className="flex-1 space-y-2 flex flex-col"  >
+
+          <div className="space-y-2">
+            <p className="text-[10px] font-bold text-muted-foreground uppercase">Modo de Estudo</p>
+            <div className="grid grid-cols-2 gap-2">
+              {["teoria", "revisao", "exercicios", "resumo"].map((m) => (
+                <button
+                  key={m}
+                  onClick={() => setStudyMode(m as any)}
+                  className={`px-3 py-2 rounded-xl text-xs font-semibold capitalize transition-all border ${studyMode === m
+                    ? 'bg-primary/10 border-primary text-primary'
+                    : 'bg-muted/30 border-transparent text-muted-foreground hover:bg-muted/50'
+                    }`}
+                >
+                  {m}
+                </button>
+              ))}
+            </div>
+          </div>
+          <div className="space-y-1 mr-4">
+            <Label htmlFor="study_date" className="text-[10px] font-medium text-foreground/80">
+              Data
+            </Label>
+            <Input
+              id="study_date"
+              type="date"
+              value={form.study_date?.toISOString().split('T')[0] || ''}
+              className="h-8 text-xs bg-background/60 focus-visible:ring-primary/40"
+              onChange={(e) => { }}
+            />
+          </div>
+
+          <div className="grid grid-cols-2 gap-2">
+            {/* Hora Início */}
+            <div className="space-y-1">
+              <Label htmlFor="start_time" className="text-[10px] font-medium text-foreground/80">
+                Início
+              </Label>
+              <div className="flex gap-1">
+                <Input
+                  id="start_time"
+                  type="time"
+                  value={form.start_time?.toISOString().split('T')[1] || ''}
+                  className="h-8 text-xs bg-background/60 focus-visible:ring-primary/40 min-w-0"
+                  onChange={(e) => { }}
+                />
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => setCurrentTime("start_time")}
+                  title="Hora atual"
+                  className="shrink-0 h-8 w-8 text-muted-foreground hover:text-foreground"
+                >
+                  <ClockArrowUp className="h-3.5 w-3.5" />
+                </Button>
+              </div>
+            </div>
+
+            {/* Hora Fim */}
+            <div className="space-y-1">
+              <Label htmlFor="end_time" className="text-[10px] font-medium text-foreground/80">
+                Fim
+              </Label>
+              <div className="flex gap-1">
+                <Input
+                  id="end_time"
+                  type="time"
+                  value={form.end_time?.toISOString().split('T')[1] || ''}
+                  className={`h-8 text-xs bg-background/60 focus-visible:ring-primary/40 min-w-0`}
+                  onChange={(e) => { }}
+                />
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => setCurrentTime("end_time")}
+                  title="Hora atual"
+                  className="shrink-0 h-8 w-8 text-muted-foreground hover:text-foreground"
+                >
+                  <ClockArrowUpIcon className="h-3.5 w-3.5" />
+                </Button>
+              </div>
+
+            </div>
+          </div>
+          <div className="space-y-2">
+            <div className="flex items-center gap-2">
+              <PenLine className="h-4 w-4 text-primary" />
+              <h3 className="text-sm font-semibold uppercase tracking-wider">Anotações</h3>
+            </div>
+            <Textarea
+              placeholder="Insights, dificuldades ou observações..."
+              className="min-h-[120px] bg-background/20 border-border/40 focus:ring-primary/40 rounded-2xl resize-none"
+              value={notes}
+              onChange={(e) => setNotes(e.target.value)}
+            />
+          </div>
+
+        </CardContent>
+      </Card >
+    </div >
+
+  )
+}
+
 export function ImmersiveSession() {
   const router = useRouter();
   const createStudyLog = useCreateStudyLog();
   const topicsMap = useTopicsMap();
 
   // Stores
-  const { cronometer, updateCronometer, startTicking, stopTicking, resetCronometer } = useCronometerStore();
-  const { form, updateForm, resetForm } = useSessionFormStore();
+  const form = useSessionFormStore();
+  const resetForm = useSessionFormStore((state) => state.resetForm);
+  const updateForm = useSessionFormStore((state) => state.updateForm);
+
+  const isCronometerRunning = useCronometerStore((state) => state.cronometer.isRunning);
+  const cronometerStartTime = useCronometerStore((state) => state.cronometer.startTime);
+  const cronometerEndTime = useCronometerStore((state) => state.cronometer.endTime);
+  const updateCronometer = useCronometerStore((state) => state.updateCronometer);
+  const resetCronometer = useCronometerStore((state) => state.resetCronometer);
+  const startTicking = useCronometerStore((state) => state.startTicking);
+  const stopTicking = useCronometerStore((state) => state.stopTicking);
+
+  const seconds = useCronometerStore((state) => state.cronometer.seconds);
+
 
   // Local UI state
   const [zenMode, setZenMode] = useState(false);
@@ -67,11 +211,7 @@ export function ImmersiveSession() {
   const [notes, setNotes] = useState("");
   const [newTopicDialogOpen, setNewTopicDialogOpen] = useState(false);
   const [topicSelectOpen, setTopicSelectOpen] = useState(false);
-  const [studyMode, setStudyMode] = useState<"teoria" | "revisao" | "exercicios" | "resumo">("teoria");
-
   const [timerSize, setTimerSize] = useState(320);
-
-
 
   useEffect(() => {
     const handleResize = () => {
@@ -85,8 +225,8 @@ export function ImmersiveSession() {
   const { data: subjects = [], isLoading: loadingSubjects } = useSubjects();
 
   usePageTitleWithCronometer({
-    isRunning: cronometer.isRunning,
-    seconds: cronometer.seconds,
+    isRunning: isCronometerRunning,
+    seconds: 12,
     baseTitle: "Motor de Estudo",
   });
 
@@ -99,14 +239,14 @@ export function ImmersiveSession() {
   const accentColor = activeSubject?.color || "hsl(var(--primary))";
 
   // Form helpers
-  const progress = Math.min(1, cronometer.seconds / (selectedGoal * 60));
-  const mm = String(Math.floor(cronometer.seconds / 60)).padStart(2, "0");
-  const ss = String(cronometer.seconds % 60).padStart(2, "0");
+  const progress = Math.min(1, seconds / (selectedGoal * 60));
+  const mm = String(Math.floor(seconds / 60)).padStart(2, "0");
+  const ss = String(seconds % 60).padStart(2, "0");
 
   // Handlers
   const handleStart = () => {
     const now = new Date();
-    if (!cronometer.isRunning && cronometer.seconds === 0) {
+    if (!isCronometerRunning && seconds === 0) {
       updateCronometer({ startTime: now, endTime: null });
       updateForm({ start_time: now, study_date: getLocalDateForToday() });
     }
@@ -132,14 +272,14 @@ export function ImmersiveSession() {
       return;
     }
 
-    const mins = Math.max(1, Math.round(cronometer.seconds / 60));
+    const mins = Math.max(1, Math.round(seconds / 60));
     const now = new Date();
 
     const data: StudyLogInput = {
       topic_id: form.topicId,
       study_date: form.study_date || getLocalDateForToday(),
       material_type: studyMode,
-      start_time: form.start_time || new Date(now.getTime() - cronometer.seconds * 1000),
+      start_time: form.start_time || new Date(now.getTime() - seconds * 1000),
       end_time: now,
       duration_minutes: mins,
       notes: notes || undefined,
@@ -159,16 +299,12 @@ export function ImmersiveSession() {
     updateForm({ subjectId: id, topicId: "" });
   };
 
-  return (
-    <div className="flex flex-col gap-6 w-full max-w-6xl mx-auto p-4 md:p-8 animate-in fade-in duration-500">
+  const setCurrentTime = (field: "start_time" | "end_time") => {
+    updateForm({ [field]: new Date() });
+  };
 
-      {/* Background Ambient Glow */}
-      <div
-        className="fixed inset-0 pointer-events-none transition-all duration-1000"
-        style={{
-          background: `radial-gradient(circle at 50% 0%, ${accentColor}15, transparent 50%), radial-gradient(circle at 100% 100%, ${accentColor}05, transparent 50%)`
-        }}
-      />
+  return (
+    <div className="flex flex-col w-full max-w-6xl mx-auto p-4 md:p-8 animate-in fade-in duration-500">
 
       {/* Header */}
       {!zenMode && (
@@ -185,7 +321,7 @@ export function ImmersiveSession() {
         </div>
       )}
 
-      <div className={`grid gap-8 transition-all duration-500 ${zenMode ? 'grid-cols-1' : 'lg:grid-cols-[1fr_350px]'}`}>
+      <div className={`grid  transition-all duration-500 ${zenMode ? 'grid-cols-1' : 'lg:grid-cols-[1fr_350px]'}`}>
 
         {/* Main Section: Timer */}
         <div className="flex flex-col items-center justify-center space-y-8">
@@ -198,12 +334,12 @@ export function ImmersiveSession() {
               {GOALS.map(g => (
                 <button
                   key={g}
-                  onClick={() => !cronometer.isRunning && setSelectedGoal(g)}
+                  onClick={() => !isCronometerRunning && setSelectedGoal(g)}
                   className={`px-3 py-1 rounded-full text-xs font-mono transition-all ${selectedGoal === g
                     ? 'bg-primary text-primary-foreground'
                     : 'bg-muted/50 text-muted-foreground hover:bg-muted'
                     }`}
-                  disabled={cronometer.isRunning}
+                  disabled={isCronometerRunning}
                 >
                   {g}m
                 </button>
@@ -223,12 +359,12 @@ export function ImmersiveSession() {
 
             <CircularTimer
               progress={progress}
-              isRunning={cronometer.isRunning}
+              isRunning={isCronometerRunning}
               color={accentColor}
               size={timerSize}
             >
               <span className="text-xs text-muted-foreground font-mono uppercase tracking-tighter mb-1">
-                {cronometer.isRunning ? "Em Foco" : "Pausado"}
+                {isCronometerRunning ? "Em Foco" : "Pausado"}
               </span>
               <span className="text-6xl md:text-7xl font-mono font-bold tabular-nums">
                 {mm}:{ss}
@@ -238,39 +374,29 @@ export function ImmersiveSession() {
               </span>
             </CircularTimer>
 
-            {/* Current Topic Indicator */}
-            <div
-              className="px-6 py-2 border-2 border-gray-600 rounded-2xl flex items-center gap-3 transition-all cursor-pointer hover:scale-105"
-              style={{ backgroundColor: `${accentColor}15` }}
-              onClick={() => setTopicSelectOpen(true)}
-            >
-              <Target className="h-5 w-5" style={{ color: accentColor }} />
-              <div className="flex flex-col">
-                <span className="text-[10px] uppercase text-muted-foreground font-bold">Tópico Atual</span>
-                <span className="text-sm font-semibold truncate max-w-[200px]">
-                  {form.topicId ? (topicsMap[form.topicId]?.name || "Tópico Selecionado") : "Clique para selecionar..."}
-                </span>
-              </div>
+            {/* Subject atual */}
+            <div style={{ marginTop: 18, display: "flex", alignItems: "center", gap: 8, padding: "8px 14px", borderRadius: 11, background: hexToRgba(subject.color, 0.1), border: `1px solid ${hexToRgba(subject.color, 0.3)}` }}>
+              <BookOpen size={15} />
+              <span style={{ fontSize: 13.5 }}>{subject.name.split(" ")[0]} · <b>{subject.name}</b></span>
             </div>
 
             {/* Current Topic Indicator */}
             <div
-              className="px-6 py-2 border-2 border-gray-600 rounded-2xl flex items-center gap-3 transition-all cursor-pointer hover:scale-105"
+              className="px-6 py-2 mt-2 border-1 border-gray-600 rounded-2xl flex items-center gap-3 transition-all cursor-pointer hover:scale-105"
               style={{ backgroundColor: `${accentColor}15` }}
               onClick={() => setTopicSelectOpen(true)}
             >
               <Target className="h-5 w-5" style={{ color: accentColor }} />
               <div className="flex flex-col">
-                <span className="text-[10px] uppercase text-muted-foreground font-bold">Tópico Atual</span>
                 <span className="text-sm font-semibold truncate max-w-[200px]">
-                  {form.topicId ? (topicsMap[form.topicId]?.name || "Tópico Selecionado") : "Clique para selecionar..."}
+                  {form.topicId ? (topicsMap[form.topicId]?.name || "Tópico Selecionado") : "Selecionar tópico..."}
                 </span>
               </div>
             </div>
 
             {/* Controls */}
             <div className="mt-8 flex gap-4">
-              {!cronometer.isRunning ? (
+              {!isCronometerRunning ? (
                 <Button
                   size="lg"
                   variant="default"
@@ -278,7 +404,7 @@ export function ImmersiveSession() {
                   onClick={handleStart}
                 >
                   <Play className="h-6 w-6 fill-current" />
-                  {cronometer.seconds > 0 ? "Retomar" : "Iniciar Foco"}
+                  {isCronometerRunning ? "Retomar" : "Iniciar"}
                 </Button>
               ) : (
                 <Button
@@ -301,16 +427,16 @@ export function ImmersiveSession() {
                 <RotateCcw className="h-6 w-6" />
               </Button>
 
-              {cronometer.seconds > 10 && (
-                <Button
-                  variant="default"
-                  className="h-14 px-6 rounded-2xl bg-emerald-500 hover:bg-emerald-600 text-white font-bold gap-2 shadow-lg"
-                  onClick={handleFinish}
-                >
-                  <CheckCircle2 className="h-6 w-6" />
-                  Concluir
-                </Button>
-              )}
+
+              <Button
+                variant="default"
+                className="h-14 px-6 rounded-2xl bg-emerald-500 hover:bg-emerald-600 text-white font-bold gap-2 shadow-lg"
+                onClick={handleFinish}
+              >
+                <CheckCircle2 className="h-6 w-6" />
+                Concluir
+              </Button>
+
             </div>
 
             {zenMode && (
@@ -325,85 +451,7 @@ export function ImmersiveSession() {
           </Glass>
         </div>
 
-        {/* Sidebar Section: Configuration */}
-        <div className="flex flex-col gap-6 animate-in slide-in-from-right duration-500">
-          {/* Topic & Notes */}
-          <Card className="p-6 space-y-6">
-            <CardHeader>
-
-              <Settings2 className="h-4 w-4 text-primary" />
-              <h3 className="text-sm font-bold uppercase tracking-wider">Configuração</h3>
-
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-2">
-                <p className="text-[10px] font-bold text-muted-foreground uppercase">Tópico</p>
-                <div className="flex gap-2">
-                  <TopicSelector
-                    open={topicSelectOpen}
-                    onOpenChange={setTopicSelectOpen}
-                    subjectId={form.subjectId}
-                    selectedTopicId={form.topicId}
-                    onTopicSelect={(id) => updateForm({ topicId: id })}
-                  />
-                  <Button
-                    variant="outline"
-                    size="icon"
-                    onClick={() => setNewTopicDialogOpen(true)}
-                    disabled={!form.subjectId}
-                  >
-                    <Plus className="h-4 w-4" />
-                  </Button>
-                </div>
-              </div>
-
-              <div className="space-y-2">
-                <p className="text-[10px] font-bold text-muted-foreground uppercase">Modo de Estudo</p>
-                <div className="grid grid-cols-2 gap-2">
-                  {["teoria", "revisao", "exercicios", "resumo"].map((m) => (
-                    <button
-                      key={m}
-                      onClick={() => setStudyMode(m as any)}
-                      className={`px-3 py-2 rounded-xl text-xs font-semibold capitalize transition-all border ${studyMode === m
-                        ? 'bg-primary/10 border-primary text-primary'
-                        : 'bg-muted/30 border-transparent text-muted-foreground hover:bg-muted/50'
-                        }`}
-                    >
-                      {m}
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              <div className="space-y-2">
-                <div className="flex items-center gap-2">
-                  <PenLine className="h-4 w-4 text-primary" />
-                  <h3 className="text-sm font-bold uppercase tracking-wider">Diário de Bordo</h3>
-                </div>
-                <Textarea
-                  placeholder="Insights, dificuldades ou observações..."
-                  className="min-h-[120px] bg-background/20 border-border/40 focus:ring-primary/40 rounded-2xl resize-none"
-                  value={notes}
-                  onChange={(e) => setNotes(e.target.value)}
-                />
-              </div>
-              <Button
-                variant="outline"
-                className="w-full rounded-2xl h-12"
-                onClick={() => router.back()}
-              >
-                <ArrowLeft className="h-4 w-4 mr-2" /> Cancelar
-              </Button>
-            </CardContent>
-
-          </Card>
-
-
-
-        </div>
-
-      </div >
-
+      </div>
       {
         form.subjectId && (
           <NewTopicDialog
