@@ -1,5 +1,3 @@
-"use client";
-
 import { ImmersiveSession } from "./components/ImmersiveSession";
 
 export default function NovaSessaoPage() {

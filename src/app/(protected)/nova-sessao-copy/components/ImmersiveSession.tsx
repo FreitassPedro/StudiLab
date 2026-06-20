@@ -39,6 +39,19 @@ import { Card, CardContent, CardHeader } from "@/components/ui/card";
 
 const GOALS = [25, 45, 60, 90];
 
+interface Subject {
+  id: string;
+  name: string;
+  color: string;
+}
+
+const subject: Subject = {
+  id: "1",
+  name: "Matemática",
+  color: "#FF0000"
+}
+
+
 export function ImmersiveSession() {
   const router = useRouter();
   const createStudyLog = useCreateStudyLog();
@@ -57,6 +70,8 @@ export function ImmersiveSession() {
   const [studyMode, setStudyMode] = useState<"teoria" | "revisao" | "exercicios" | "resumo">("teoria");
 
   const [timerSize, setTimerSize] = useState(320);
+
+
 
   useEffect(() => {
     const handleResize = () => {
@@ -225,8 +240,23 @@ export function ImmersiveSession() {
 
             {/* Current Topic Indicator */}
             <div
-              className="mt-12 px-6 py-3 rounded-2xl flex items-center gap-3 transition-all cursor-pointer hover:scale-105"
-              style={{ backgroundColor: `${accentColor}15`, border: `1px solid ${accentColor}33` }}
+              className="px-6 py-2 border-2 border-gray-600 rounded-2xl flex items-center gap-3 transition-all cursor-pointer hover:scale-105"
+              style={{ backgroundColor: `${accentColor}15` }}
+              onClick={() => setTopicSelectOpen(true)}
+            >
+              <Target className="h-5 w-5" style={{ color: accentColor }} />
+              <div className="flex flex-col">
+                <span className="text-[10px] uppercase text-muted-foreground font-bold">Tópico Atual</span>
+                <span className="text-sm font-semibold truncate max-w-[200px]">
+                  {form.topicId ? (topicsMap[form.topicId]?.name || "Tópico Selecionado") : "Clique para selecionar..."}
+                </span>
+              </div>
+            </div>
+
+            {/* Current Topic Indicator */}
+            <div
+              className="px-6 py-2 border-2 border-gray-600 rounded-2xl flex items-center gap-3 transition-all cursor-pointer hover:scale-105"
+              style={{ backgroundColor: `${accentColor}15` }}
               onClick={() => setTopicSelectOpen(true)}
             >
               <Target className="h-5 w-5" style={{ color: accentColor }} />
@@ -243,8 +273,8 @@ export function ImmersiveSession() {
               {!cronometer.isRunning ? (
                 <Button
                   size="lg"
+                  variant="default"
                   className="rounded-2xl h-14 px-8 text-lg font-bold gap-2 shadow-xl hover:scale-105 transition-transform"
-                  style={{ backgroundColor: accentColor, color: '#fff' }}
                   onClick={handleStart}
                 >
                   <Play className="h-6 w-6 fill-current" />
@@ -253,7 +283,7 @@ export function ImmersiveSession() {
               ) : (
                 <Button
                   size="lg"
-                  variant="secondary"
+                  variant="default"
                   className="rounded-2xl h-14 px-8 text-lg font-bold gap-2 shadow-xl hover:scale-105 transition-transform"
                   onClick={handlePause}
                 >
