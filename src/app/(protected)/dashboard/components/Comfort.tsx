@@ -1,5 +1,6 @@
 "use client";
 
+import { useTodayActivity } from "@/hooks/useActivity";
 import { useDashboardData } from "@/hooks/useDashboard";
 
 import Image from "next/image";
@@ -35,9 +36,11 @@ function getComfortLevel(totalMinutes: number) {
 
 
 export function ComfortSection() {
-    const { data: dashboardData } = useDashboardData();
+    const { data: todayActivity, isLoading } = useTodayActivity();
 
-    const minutes = dashboardData?.summary?.totalMinutes || 0;
+    if (isLoading) return null;
+
+    const minutes = todayActivity?.summary?.totalMinutes || 0;
 
     const level = getComfortLevel(minutes);
     return (

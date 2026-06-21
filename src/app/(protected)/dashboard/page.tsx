@@ -48,7 +48,11 @@ export default async function DashboardPage() {
                     <TodaySummary />
                 </Suspense>
             </section>
-
+            {
+                user?.name.toLocaleLowerCase() === "laura" && (
+                    <ComfortSection />
+                )
+            }
             {/* Grid de Atividade e Inteligência */}
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
                 {/* Coluna Principal: Sessões e Timeline */}
@@ -68,9 +72,7 @@ export default async function DashboardPage() {
                         <RecentSessions />
                     </div>
 
-                    {user?.name === "Laura" && (
-                        <ComfortSection />
-                    )}
+
                     <div className="space-y-4">
                         <h2 className="text-xl font-bold flex items-center gap-2 px-2">
                             <Calendar className="w-5 h-5 text-primary" />
