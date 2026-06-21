@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "next dev --turbopack",
-    "dev:test": "dotenv -e .env.test -- next dev --turbopack",
+    "dev:test": "dotenv -e .env.test -- next dev",
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
@@ -20,7 +20,7 @@
     "test:reset:seed": "npm run test:db:reset && npm run test:push && npm run test:seed"
   },
   "dependencies": {
-    "@base-ui/react": "^1.4.1",
+    "@base-ui/react": "^1.6.0",
     "@better-auth/prisma-adapter": "^1.6.18",
     "@hookform/resolvers": "^5.2.2",
     "@prisma/adapter-pg": "^7.4.1",
@@ -68,5 +68,16 @@
   "prisma": {
     "seed": "tsx prisma/seed.ts",
     "seed-test": "tsx prisma/seed-test.ts"
+  },
+  "allowScripts": {
+    "@prisma/engines@7.8.0": true,
+    "@prisma/engines@7.7.0": true,
+    "es5-ext@0.10.64": true,
+    "esbuild@0.28.1": true,
+    "msw@2.14.6": true,
+    "prisma@7.8.0": true,
+    "prisma@7.7.0": true,
+    "sharp@0.34.5": true,
+    "unrs-resolver@1.12.2": true
   }
 }

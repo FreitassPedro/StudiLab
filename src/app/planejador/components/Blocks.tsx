@@ -158,13 +158,12 @@ export function BlockCard({
                     <DropdownMenuGroup>
                         {/* Edit button */}
                         <DropdownMenuItem
-                            onSelect={(e) => {
-                                e.preventDefault();
+                            onSelect={() => {
                                 openEditBlock(block);
                             }}
                         >
-                            Editar
                             <Pencil className="w-2.5 h-2.5" />
+                            Editar
                         </DropdownMenuItem>
                         <DropdownMenuItem
                             onClick={() => duplicateBlock(block.id)}
@@ -289,16 +288,22 @@ export function NewBlockFormModal({
 
     }, [normalizedFormSubject, subjects]);
 
-    const handleSubjectChange = useCallback((selectedValue: string) => {
-        console.log("handleSubjectChange called with", selectedValue);
+    const handleSubjectChange = useCallback((selectedValue: string, isSelection: boolean = false) => {
+        console.log("handleSubjectChange called with", selectedValue, "isSelection:", isSelection);
 
-        if (!selectedValue) return;
+        if (!selectedValue) {
+            onFormChange({ subjectId: "" });
+            return;
+        }
 
-        const matchedSubject = subjects.find(s => s.name.toLowerCase() === selectedValue.toLowerCase());
+        const matchedSubject = subjects.find(s => s.id === selectedValue || s.name.toLowerCase() === selectedValue.toLowerCase());
 
         const subjectId = matchedSubject ? matchedSubject.id : normalizeSubjectName(selectedValue);
         console.log("handleSubjectChange Select", { selectedValue, subjectId, matchedSubject });
-        setSubjectNameInput(subjectId);
+
+        if (isSelection && matchedSubject) {
+            setSubjectNameInput(matchedSubject.name);
+        }
 
         onFormChange({
             subjectId: subjectId,
@@ -308,7 +313,7 @@ export function NewBlockFormModal({
 
 
     return (
-        <Dialog open={open} onOpenChange={(v) => !v && onCloseModal()} modal={false}>
+        <Dialog open={open} onOpenChange={(v) => !v && onCloseModal()}>
             <DialogContent className="max-w-sm">
                 <DialogHeader>
                     <DialogTitle>
@@ -328,11 +333,11 @@ export function NewBlockFormModal({
                             // Acionado ao digitar
                             onInputValueChange={(value) => {
                                 setSubjectNameInput(value ?? "");
-                                handleSubjectChange(value ?? "");
+                                handleSubjectChange(value ?? "", false);
                             }}
                             // Acionado ao selecionar
                             onValueChange={(value) => {
-                                handleSubjectChange(value ?? "");
+                                handleSubjectChange(value ?? "", true);
                             }}
                         >
                             <ComboboxInput

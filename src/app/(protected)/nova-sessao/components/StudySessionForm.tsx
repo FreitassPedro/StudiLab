@@ -31,7 +31,6 @@ import {
 } from "@/components/ui/select";
 
 import { useSubjects } from "@/hooks/useSubjects";
-import { useTopicsMap } from "@/hooks/useTopics";
 import { useCreateStudyLog, useLastStudyLog } from "@/hooks/useStudyLogs";
 import { StudyLogInput } from "@/server/actions/studyLogs.action";
 import { NewTopicDialog } from "../../materias/components/NewTopicDialog";
