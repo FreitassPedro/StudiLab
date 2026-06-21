@@ -1,5 +1,6 @@
 import { useState, useEffect, useMemo } from "react";
-import { useRouter } from "next/navigation";
+import { useFormContext } from "react-hook-form";
+import { StudySessionFormData } from "@/schemas/studySession.schema";
 import { toast } from "sonner";
 import {
     Play, Pause, RotateCcw, CheckCircle2, Minimize2, ChevronLeft, ChevronRight
@@ -7,11 +8,8 @@ import {
 import { Button } from "@/components/ui/button";
 import { Glass } from "./Glass";
 import { useSubjects } from "@/hooks/useSubjects";
-import { useCreateStudyLog } from "@/hooks/useStudyLogs";
 import useCronometerStore from "@/store/useCronometerStore";
-import useSessionFormStore from "@/store/useSessionFormStore";
 import { getLocalDateForToday } from "@/lib/utils";
-import { StudyLogInput } from "@/server/actions/studyLogs.action";
 import { usePageTitleWithCronometer } from "@/hooks/usePageTitleWithCronometer";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useTopicBySubject } from "@/hooks/useTopics";
@@ -39,13 +37,10 @@ export function MainSection({
     isDetailsOpen,
     setIsDetailsOpen
 }: MainSectionProps) {
-    const router = useRouter();
-    const createStudyLog = useCreateStudyLog();
-
     // Stores
-    const form = useSessionFormStore((state) => state.form);
-    const resetForm = useSessionFormStore((state) => state.resetForm);
-    const updateForm = useSessionFormStore((state) => state.updateForm);
+    const { watch, setValue, reset } = useFormContext<StudySessionFormData>();
+    const subjectId = watch("subjectId");
+    const topicId = watch("topicId");
 
     const isCronometerRunning = useCronometerStore((state) => state.cronometer.isRunning);
     const cronometerStartTime = useCronometerStore((state) => state.cronometer.startTime);
@@ -70,9 +65,9 @@ export function MainSection({
     }, []);
 
     const { data: subjects = [], isLoading: loadingSubjects } = useSubjects();
-    const { data: topics = [], isLoading: loadingTopics } = useTopicBySubject(form.subjectId);
+    const { data: topics = [], isLoading: loadingTopics } = useTopicBySubject(subjectId);
 
-    const activeSubject = useMemo(() => subjects.find((s: any) => s.id === form.subjectId), [subjects, form.subjectId]);
+    const activeSubject = useMemo(() => subjects.find((s: any) => s.id === subjectId), [subjects, subjectId]);
 
     usePageTitleWithCronometer({
         isRunning: isCronometerRunning,
@@ -89,8 +84,12 @@ export function MainSection({
         const now = new Date();
         if (!isCronometerRunning && seconds === 0) {
             updateCronometer({ startTime: now, endTime: null });
-            updateForm({ start_time: now, study_date: getLocalDateForToday() });
+            setValue("start_time", now);
+            setValue("study_date", getLocalDateForToday());
         }
+        // Limpa o end_time no form ao iniciar/retomar
+        setValue("end_time", undefined as any);
+
         updateCronometer({ isRunning: true });
         startTicking();
         if (!zenMode && window.innerWidth < 1024) setZenMode(true);
@@ -98,41 +97,13 @@ export function MainSection({
 
     const handlePause = () => {
         stopTicking();
-        updateCronometer({ isRunning: false });
+        // Sincroniza o end_time no form ao pausar
+        setValue("end_time", new Date());
     };
 
     const handleReset = () => {
         resetCronometer();
-        resetForm();
-    };
-
-    const handleFinish = async () => {
-        if (!form.subjectId || !form.topicId) {
-            toast.error("Selecione uma matéria e um tópico antes de concluir.");
-            return;
-        }
-
-        const mins = Math.max(1, Math.round(seconds / 60));
-        const now = new Date();
-
-        const data: StudyLogInput = {
-            topic_id: form.topicId,
-            study_date: form.study_date || getLocalDateForToday(),
-            material_type: form.studyMode,
-            start_time: form.start_time || new Date(now.getTime() - seconds * 1000),
-            end_time: now,
-            duration_minutes: mins,
-            notes: form.notes || undefined,
-        };
-
-        try {
-            await createStudyLog.mutateAsync(data);
-            toast.success("Sessão registrada com sucesso!");
-            handleReset();
-            router.push("/dashboard");
-        } catch (error) {
-            toast.error("Erro ao salvar sessão.");
-        }
+        reset();
     };
 
     return (
@@ -172,8 +143,8 @@ export function MainSection({
 
             {/* Current Subject Indicator */}
             <Select
-                value={form.subjectId}
-                onValueChange={(value) => updateForm({ subjectId: value })}
+                value={subjectId}
+                onValueChange={(value) => setValue("subjectId", value)}
             >
                 <SelectTrigger className="">
                     <SelectValue placeholder="Selecione uma matéria" />
@@ -192,10 +163,10 @@ export function MainSection({
             </Select>
 
             {/* Current Topic Indicator */}
-            {form.subjectId && topics && (
+            {subjectId && topics && (
                 <Select
-                    value={form.topicId}
-                    onValueChange={(value) => updateForm({ topicId: value })}
+                    value={topicId}
+                    onValueChange={(value) => setValue("topicId", value)}
                 >
                     <SelectTrigger>
                         <SelectValue placeholder="Selecione um tópico" />
@@ -217,19 +188,21 @@ export function MainSection({
             <div className="mt-8 flex gap-4">
                 {!isCronometerRunning ? (
                     <Button
+                        type="button"
                         size="lg"
                         variant="default"
                         className="rounded-2xl h-14 px-8 text-lg font-bold gap-2 shadow-xl hover:scale-105 transition-transform"
                         onClick={handleStart}
                     >
                         <Play className="h-6 w-6 fill-current" />
-                        {isCronometerRunning ? "Retomar" : "Iniciar"}
+                        {seconds > 0 ? "Retomar" : "Iniciar"}
                     </Button>
                 ) : (
                     <Button
+                        type="button"
                         size="lg"
                         variant="default"
-                        className="rounded-2xl h-14 px-8 text-lg font-bold gap-2 shadow-xl hover:scale-105 transition-transform"
+                        className="rounded-2xl h-10 px-8 text-lg font-bold gap-2 shadow-xl hover:scale-105 transition-transform"
                         onClick={handlePause}
                     >
                         <Pause className="h-6 w-6 fill-current" />
@@ -238,6 +211,7 @@ export function MainSection({
                 )}
 
                 <Button
+                    type="button"
                     variant="outline"
                     size="icon"
                     className="h-14 w-14 rounded-2xl border-border/40 bg-background/20"
@@ -248,9 +222,9 @@ export function MainSection({
 
 
                 <Button
+                    type="submit"
                     variant="default"
                     className="h-14 px-6 rounded-2xl bg-emerald-500 hover:bg-emerald-600 text-white font-bold gap-2 shadow-lg"
-                    onClick={handleFinish}
                 >
                     <CheckCircle2 className="h-6 w-6" />
                     Concluir
@@ -260,6 +234,7 @@ export function MainSection({
 
             {zenMode && (
                 <Button
+                    type="button"
                     variant="ghost"
                     className="absolute bottom-6 text-muted-foreground"
                     onClick={() => setZenMode(false)}
@@ -270,6 +245,7 @@ export function MainSection({
 
             {!zenMode && (
                 <Button
+                    type="button"
                     variant="secondary"
                     size="icon"
                     onClick={() => setIsDetailsOpen(!isDetailsOpen)}

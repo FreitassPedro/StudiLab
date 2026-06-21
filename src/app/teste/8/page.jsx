@@ -46,56 +46,78 @@ const SUBJECTS = [
 
 const TOPIC_TREE = {
   s1: [
-    { id: "t1", name: "Princípios Fundamentais", children: [
-      { id: "t1a", name: "Fundamentos da República" },
-      { id: "t1b", name: "Separação dos Poderes" },
-    ]},
-    { id: "t2", name: "Direitos e Garantias", children: [
-      { id: "t2a", name: "Direitos Individuais" },
-      { id: "t2b", name: "Direitos Sociais" },
-      { id: "t2c", name: "Nacionalidade" },
-    ]},
-    { id: "t3", name: "Organização do Estado", children: [
-      { id: "t3a", name: "União e Estados" },
-      { id: "t3b", name: "Municípios" },
-    ]},
+    {
+      id: "t1", name: "Princípios Fundamentais", children: [
+        { id: "t1a", name: "Fundamentos da República" },
+        { id: "t1b", name: "Separação dos Poderes" },
+      ]
+    },
+    {
+      id: "t2", name: "Direitos e Garantias", children: [
+        { id: "t2a", name: "Direitos Individuais" },
+        { id: "t2b", name: "Direitos Sociais" },
+        { id: "t2c", name: "Nacionalidade" },
+      ]
+    },
+    {
+      id: "t3", name: "Organização do Estado", children: [
+        { id: "t3a", name: "União e Estados" },
+        { id: "t3b", name: "Municípios" },
+      ]
+    },
   ],
   s2: [
-    { id: "t4", name: "Lógica Proposicional", children: [
-      { id: "t4a", name: "Conectivos" },
-      { id: "t4b", name: "Tabela-Verdade" },
-    ]},
-    { id: "t5", name: "Análise Combinatória", children: [
-      { id: "t5a", name: "Permutações" },
-      { id: "t5b", name: "Probabilidade" },
-    ]},
+    {
+      id: "t4", name: "Lógica Proposicional", children: [
+        { id: "t4a", name: "Conectivos" },
+        { id: "t4b", name: "Tabela-Verdade" },
+      ]
+    },
+    {
+      id: "t5", name: "Análise Combinatória", children: [
+        { id: "t5a", name: "Permutações" },
+        { id: "t5b", name: "Probabilidade" },
+      ]
+    },
   ],
   s3: [
-    { id: "t6", name: "Sintaxe", children: [
-      { id: "t6a", name: "Concordância" },
-      { id: "t6b", name: "Regência" },
-    ]},
-    { id: "t7", name: "Interpretação", children: [
-      { id: "t7a", name: "Coesão e Coerência" },
-    ]},
+    {
+      id: "t6", name: "Sintaxe", children: [
+        { id: "t6a", name: "Concordância" },
+        { id: "t6b", name: "Regência" },
+      ]
+    },
+    {
+      id: "t7", name: "Interpretação", children: [
+        { id: "t7a", name: "Coesão e Coerência" },
+      ]
+    },
   ],
   s4: [
-    { id: "t8", name: "Redes", children: [
-      { id: "t8a", name: "Protocolos" },
-      { id: "t8b", name: "Segurança" },
-    ]},
-    { id: "t9", name: "Pacote Office", children: [
-      { id: "t9a", name: "Planilhas" },
-    ]},
+    {
+      id: "t8", name: "Redes", children: [
+        { id: "t8a", name: "Protocolos" },
+        { id: "t8b", name: "Segurança" },
+      ]
+    },
+    {
+      id: "t9", name: "Pacote Office", children: [
+        { id: "t9a", name: "Planilhas" },
+      ]
+    },
   ],
   s5: [
-    { id: "t10", name: "Gestão de Pessoas", children: [
-      { id: "t10a", name: "Liderança" },
-      { id: "t10b", name: "Motivação" },
-    ]},
-    { id: "t11", name: "Processos", children: [
-      { id: "t11a", name: "BPM" },
-    ]},
+    {
+      id: "t10", name: "Gestão de Pessoas", children: [
+        { id: "t10a", name: "Liderança" },
+        { id: "t10b", name: "Motivação" },
+      ]
+    },
+    {
+      id: "t11", name: "Processos", children: [
+        { id: "t11a", name: "BPM" },
+      ]
+    },
   ],
 };
 
@@ -162,7 +184,7 @@ const levelFromHours = (h) => Math.max(1, Math.floor(Math.sqrt(h * 4)));
 const hoursForLevel = (lvl) => (lvl * lvl) / 4;
 
 const MESES = ["jan", "fev", "mar", "abr", "mai", "jun", "jul", "ago", "set", "out", "nov", "dez"];
-const MESES_LONG = ["Janeiro","Fevereiro","Março","Abril","Maio","Junho","Julho","Agosto","Setembro","Outubro","Novembro","Dezembro"];
+const MESES_LONG = ["Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho", "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"];
 const fmtDate = (d) => `${d.getDate()} de ${MESES_LONG[d.getMonth()]}`;
 
 function computeSubjectStats(logs, subject) {
@@ -291,7 +313,9 @@ function Ring({ size = 220, stroke = 14, progress = 0, color = "#39C6F0", pulse,
   return (
     <div className="relative" style={{ width: size, height: size }}>
       <svg width={size} height={size} style={{ display: "block", transform: "rotate(-90deg)" }}>
+        {/* Background circle */}
         <circle cx={size / 2} cy={size / 2} r={r} fill="none" stroke="rgba(255,255,255,0.08)" strokeWidth={stroke} />
+        {/* Foreground circle */}
         <circle
           cx={size / 2} cy={size / 2} r={r} fill="none" stroke={color} strokeWidth={stroke}
           strokeLinecap="round" strokeDasharray={c} strokeDashoffset={off}
@@ -380,8 +404,10 @@ export default function App() {
           overflow: "hidden", borderRight: `1px solid ${STROKE}`,
           display: "flex", flexDirection: "column", alignItems: "center", paddingTop: 18, gap: 6,
         }}>
-          <div style={{ width: 38, height: 38, borderRadius: 11, display: "grid", placeItems: "center", marginBottom: 14,
-            background: hexToRgba(ambient, 0.16), border: `1px solid ${hexToRgba(ambient, 0.4)}` }}>
+          <div style={{
+            width: 38, height: 38, borderRadius: 11, display: "grid", placeItems: "center", marginBottom: 14,
+            background: hexToRgba(ambient, 0.16), border: `1px solid ${hexToRgba(ambient, 0.4)}`
+          }}>
             <Brain size={20} color={ambient} />
           </div>
           {NAV.map((n) => {
@@ -848,10 +874,12 @@ function MasteryCard({ st, open, onToggle, go }) {
     <Glass accent={color} className="ea-lift" style={{ padding: 18, display: "flex", flexDirection: "column" }}>
       {/* cabeçalho */}
       <div style={{ display: "flex", alignItems: "flex-start", gap: 12 }}>
-        <div style={{ width: 46, height: 46, borderRadius: 13, flexShrink: 0, display: "grid", placeItems: "center",
-          background: hexToRgba(color, 0.16), border: `1px solid ${hexToRgba(color, 0.4)}` }}>
+        <div style={{
+          width: 46, height: 46, borderRadius: 13, flexShrink: 0, display: "grid", placeItems: "center",
+          background: hexToRgba(color, 0.16), border: `1px solid ${hexToRgba(color, 0.4)}`
+        }}>
           <span style={{ fontFamily: "var(--ea-mono)", fontWeight: 700, color, fontSize: 15 }}>
-            {("Nv" )}<span style={{ fontSize: 18 }}>{st.level}</span>
+            {("Nv")}<span style={{ fontSize: 18 }}>{st.level}</span>
           </span>
         </div>
         <div style={{ flex: 1, minWidth: 0 }}>

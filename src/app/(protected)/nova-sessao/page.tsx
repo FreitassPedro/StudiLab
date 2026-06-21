@@ -6,8 +6,10 @@ import { StudySessionForm } from "./components/StudySessionForm";
 import { TodayTimeline } from "./components/TodayTimeline";
 import { Button } from "@/components/ui/button";
 import { History, X } from "lucide-react";
+import { useRouter } from "next/navigation";
 
 export default function NovaSessaoPage() {
+    const router = useRouter();
     const [isSidebarOpen, setIsSidebarOpen] = React.useState(false);
 
     return (

@@ -14,7 +14,7 @@ interface CircularTimerProps {
 }
 
 export function CircularTimer({
-  size = 280,
+  size = 250,
   stroke = 12,
   progress = 0,
   color = "hsl(var(--primary))",
@@ -34,8 +34,7 @@ export function CircularTimer({
       <svg
         width={size}
         height={size}
-        viewBox={`0 0 ${size} ${size}`}
-        className="-rotate-90 drop-shadow-[0_0_15px_rgba(0,0,0,0.1)]"
+        className="-rotate-90 block"
       >
         {/* Background Circle */}
         <circle
@@ -56,15 +55,16 @@ export function CircularTimer({
           strokeWidth={stroke}
           strokeLinecap="round"
           strokeDasharray={circumference}
+          strokeDashoffset={circumference}
           style={{
             strokeDashoffset: offset,
-            transition: "stroke-dashoffset 0.6s cubic-bezier(0.4, 0, 0.2, 1), stroke 0.3s ease",
+            transition: "stroke-dashoffset .6s cubic-bezier(0.4, 0, 0.2, 1), stroke 0.5s ease",
             filter: isRunning ? `drop-shadow(0 0 8px ${color})` : 'none'
           }}
         />
       </svg>
 
-      {/* Pulse Effect */}
+      {/* Pulse Effect 
       {isRunning && (
         <div
           className="absolute inset-0 rounded-full animate-ping opacity-20 pointer-events-none"
@@ -74,6 +74,7 @@ export function CircularTimer({
           }}
         />
       )}
+*/}
 
       {/* Content */}
       <div className="absolute inset-0 flex flex-col items-center justify-center text-center p-6">

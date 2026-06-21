@@ -35,6 +35,7 @@ export function Cronometer() {
 
     const progress = 1;
 
+
     console.log("Seconds: ", seconds)
 
     return (
