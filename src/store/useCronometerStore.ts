@@ -24,9 +24,18 @@ const useCronometerStore = create<CronometerState>((set, get) => ({
     cronometer: { isRunning: false, seconds: 0, startTime: null, endTime: null },
 
     setCronometer: (cronometer) => set({ cronometer }),
-    updateCronometer: (partial) => set((state) => ({
-        cronometer: { ...state.cronometer, ...partial }
-    })),
+    updateCronometer: (partial) => set((state) => {
+        const newCronometer = { ...state.cronometer, ...partial };
+        
+        if (newCronometer.startTime && newCronometer.endTime && !newCronometer.isRunning) {
+            const diffMs = new Date(newCronometer.endTime).getTime() - new Date(newCronometer.startTime).getTime();
+            if (diffMs >= 0) {
+                newCronometer.seconds = Math.floor(diffMs / 1000);
+            }
+        }
+        
+        return { cronometer: newCronometer };
+    }),
     startTicking: () => {
         if (tickIntervalId) return;
 

@@ -6,12 +6,29 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Settings2, ClockArrowUp, ClockArrowUpIcon, PenLine } from "lucide-react";
 import useSessionFormStore from "@/store/useSessionFormStore";
+import useCronometerStore from "@/store/useCronometerStore";
 
 type StudyMode = "teoria" | "revisao" | "exercicios" | "resumo";
+
+const padTwo = (n: number) => n.toString().padStart(2, "0");
+
+const formatTimeLocal = (date?: Date) => {
+    if (!date || isNaN(date.getTime())) return "";
+    return `${padTwo(date.getHours())}:${padTwo(date.getMinutes())}`;
+};
+
+const formatDateLocal = (date?: Date) => {
+    if (!date || isNaN(date.getTime())) return "";
+    const year = date.getFullYear();
+    const month = padTwo(date.getMonth() + 1);
+    const day = padTwo(date.getDate());
+    return `${year}-${month}-${day}`;
+};
 
 export function ExtraDetails() {
 
     const form = useSessionFormStore((state) => state.form);
+    const updateCronometer = useCronometerStore((state) => state.updateCronometer);
     const updateForm = useSessionFormStore((state) => state.updateForm);
 
     const [studyMode, setStudyMode] = useState<StudyMode>("teoria");
@@ -20,13 +37,36 @@ export function ExtraDetails() {
         updateForm({ [field]: new Date() });
     };
 
+    const handleTimeInput = (field: "start_time" | "end_time", value: string) => {
+        if (!value) {
+            updateForm({ [field]: undefined });
+            return;
+        }
+        const [hours, minutes] = value.split(":");
+        const date = new Date();
+        date.setHours(+hours, +minutes, 0, 0);
+        updateForm({ [field]: date });
+
+        const cronometerField = field === "start_time" ? "startTime" : "endTime";
+        updateCronometer({ [cronometerField]: date });
+    };
+
+    const handleDateInput = (value: string) => {
+        if (!value) {
+            updateForm({ study_date: undefined });
+            return;
+        }
+        const [year, month, day] = value.split("-").map(Number);
+        updateForm({ study_date: new Date(year, month - 1, day) });
+    };
+
     return (
         <div className="flex flex-col h-full justify-between space-y-4 animate-in slide-in-from-right duration-500" >
             {/* Topic & Notes */}
             <Card className="h-full flex-1 rounded-tr-2xl rounded-br-2xl" >
-                <CardHeader>
+                <CardHeader className="flex flex-row">
                     <Settings2 className="h-4 w-4 text-primary" />
-                    <h3 className="text-sm font-bold uppercase tracking-wider">Configuração</h3>
+                    <h3 className="text-sm font-bold uppercase tracking-wider">Extra</h3>
                 </CardHeader>
                 <CardContent className="flex-1 space-y-4 flex flex-col"  >
                     <div className="space-y-2">
@@ -53,9 +93,9 @@ export function ExtraDetails() {
                         <Input
                             id="study_date"
                             type="date"
-                            value={form.study_date?.toISOString().split('T')[0] || ''}
+                            value={formatDateLocal(form.study_date)}
                             className="h-8 text-xs bg-background/60 focus-visible:ring-primary/40"
-                            onChange={(e) => updateForm({ study_date: new Date(e.target.value) })}
+                            onChange={(e) => handleDateInput(e.target.value)}
                         />
                     </div>
 
@@ -69,20 +109,11 @@ export function ExtraDetails() {
                                 <Input
                                     id="start_time"
                                     type="time"
-                                    value={form.start_time?.toISOString().split('T')[1] || ''}
+                                    value={formatTimeLocal(form.start_time)}
                                     className="h-8 text-xs bg-background/60 focus-visible:ring-primary/40 min-w-0"
-                                    onChange={(e) => updateForm({ start_time: new Date(e.target.value) })}
+                                    onChange={(e) => handleTimeInput("start_time", e.target.value)}
                                 />
-                                <Button
-                                    type="button"
-                                    variant="ghost"
-                                    size="icon"
-                                    onClick={() => setCurrentTime("start_time")}
-                                    title="Hora atual"
-                                    className="shrink-0 h-8 w-8 text-muted-foreground hover:text-foreground"
-                                >
-                                    <ClockArrowUp className="h-3.5 w-3.5" />
-                                </Button>
+
                             </div>
                         </div>
 
@@ -95,9 +126,9 @@ export function ExtraDetails() {
                                 <Input
                                     id="end_time"
                                     type="time"
-                                    value={form.end_time?.toISOString().split('T')[1] || ''}
+                                    value={formatTimeLocal(form.end_time)}
                                     className={`h-8 text-xs bg-background/60 focus-visible:ring-primary/40 min-w-0`}
-                                    onChange={(e) => updateForm({ end_time: new Date(e.target.value) })}
+                                    onChange={(e) => handleTimeInput("end_time", e.target.value)}
                                 />
                                 <Button
                                     type="button"

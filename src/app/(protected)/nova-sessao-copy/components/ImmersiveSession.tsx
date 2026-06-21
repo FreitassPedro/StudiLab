@@ -9,7 +9,7 @@ import { NewTopicDialog } from "../../materias/components/NewTopicDialog";
 import useSessionFormStore from "@/store/useSessionFormStore";
 
 import { MainSection } from "./MainForm";
-import { ExtraDetails } from "./FormExtra";
+import { ExtraDetails } from "./ExtraSide";
 
 
 
@@ -39,7 +39,7 @@ export function ImmersiveSession() {
         </div>
       )}
 
-      <div className="flex flex-col lg:flex-row items-start justify-center w-full">
+      <div className="relative flex flex-col lg:flex-row items-start justify-center w-full">
 
         {/* Main Section: Z-index superior forçando posição no topo da pilha */}
         <div className="relative z-20 transition-all duration-500 w-full shadow-lg rounded-xl ">
@@ -54,10 +54,10 @@ export function ImmersiveSession() {
         {/* Extra Details: Z-index inferior emergindo sob o eixo primário */}
         <div
           className={`
-      relative z-10 flex overflow-hidden transition-all duration-500 ease-[cubic-bezier(0.4,0,0.2,1)]
+      relative z-10 flex overflow-hidden transition-all duration-500 ease-in-out
       ${isDetailsOpen
-              ? "opacity-100 max-h-[1000px] lg:max-w-[500px] translate-y-0 lg:translate-x-0 -mt-4 lg:mt-0 lg:-ml-4 pt-4 lg:pt-0 lg:pl-4"
-              : "opacity-0 max-h-0 lg:max-w-0 -translate-y-8 lg:-translate-y-0 lg:-translate-x-8 mt-0 lg:ml-0"
+              ? "opacity-100 max-h-[1000px] lg:max-w-125 translate-y-0 lg:translate-x-0 -mt-4 lg:mt-0 lg:-ml-4 pt-4 lg:pt-0 lg:pl-0"
+              : "opacity-0 max-h-0 lg:max-w-0 -translate-y-8 lg:translate-y-0lg:-translate-x-8 mt-0 lg:ml-0"
             }
     `}
         >

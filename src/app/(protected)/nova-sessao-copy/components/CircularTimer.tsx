@@ -27,15 +27,15 @@ export function CircularTimer({
   const offset = circumference * (1 - Math.max(0, Math.min(1, progress)));
 
   return (
-    <div 
-      className={cn("relative flex items-center justify-center", className)} 
+    <div
+      className={cn("relative flex items-center justify-center", className)}
       style={{ width: size, height: size }}
     >
-      <svg 
-        width={size} 
-        height={size} 
+      <svg
+        width={size}
+        height={size}
         viewBox={`0 0 ${size} ${size}`}
-        className="rotate-[-90deg] drop-shadow-[0_0_15px_rgba(0,0,0,0.1)]"
+        className="-rotate-90 drop-shadow-[0_0_15px_rgba(0,0,0,0.1)]"
       >
         {/* Background Circle */}
         <circle
@@ -43,7 +43,7 @@ export function CircularTimer({
           cy={size / 2}
           r={radius}
           fill="none"
-          stroke="hsl(var(--muted) / 0.2)"
+          stroke="hsl(var(--secondary))"
           strokeWidth={stroke}
         />
         {/* Progress Circle */}
@@ -56,22 +56,22 @@ export function CircularTimer({
           strokeWidth={stroke}
           strokeLinecap="round"
           strokeDasharray={circumference}
-          style={{ 
+          style={{
             strokeDashoffset: offset,
             transition: "stroke-dashoffset 0.6s cubic-bezier(0.4, 0, 0.2, 1), stroke 0.3s ease",
             filter: isRunning ? `drop-shadow(0 0 8px ${color})` : 'none'
           }}
         />
       </svg>
-      
+
       {/* Pulse Effect */}
       {isRunning && (
-        <div 
+        <div
           className="absolute inset-0 rounded-full animate-ping opacity-20 pointer-events-none"
-          style={{ 
+          style={{
             backgroundColor: color,
             animationDuration: '2s'
-          }} 
+          }}
         />
       )}
 
