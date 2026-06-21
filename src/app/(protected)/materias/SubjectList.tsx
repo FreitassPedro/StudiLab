@@ -271,7 +271,7 @@ export default function SubjectList() {
                             subjectTree={subjectTree}
                         />
                     ))}
-                    
+
                     {archivedTree.length > 0 && (
                         <>
                             <tr>
@@ -284,6 +284,7 @@ export default function SubjectList() {
                                         </span>
                                         <div className="h-px bg-border flex-1" />
                                     </div>
+                                    <span className="text-xs text-muted-foreground block text-center">Matérias Arquivada não aparecerão disponíveis para seleção de estudos. Desarquive para voltar a usar. </span>
                                 </td>
                             </tr>
                             {archivedTree.map((subjectTree) => (
