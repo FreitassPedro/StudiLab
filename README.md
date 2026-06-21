@@ -44,6 +44,27 @@
 - [ ] (#13) Exibir card flutuante de estudo em andamento em todas as páginas
 - [ ] (#16) Conectar Spotify no perfil para compartilhar o que está ouvindo
 
+---
+
+## BrainStorm
+
+# /materias
+criar botão arquivar matéria -> esconder matéria no nova-sesão se arquivada
+criar layout de caderno/blocos 
+Em /materias, ordenar por ordem alfabetica
+
+trocar layout do nova/sessao
+
+criar /perfil
+
+modificar cores dos cartões em 
+
+arrumar /planejador newBlock bugado // ajustar 
+
+criar "tasks" similar ao google tasks. Definindo, inicialmente, tarefas em localStorage para Subjects.
+
+---
+
 
 
 # AUTH

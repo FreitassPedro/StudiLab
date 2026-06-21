@@ -35,7 +35,7 @@ export default function ProfilePage() {
         <ThemeSwitcher />
 
         {/* Banner */}
-        <ProfileBanner />
+        {/* <ProfileBanner /> */}
 
         {/* Main content */}
         <main className="mx-auto max-w-[900px] px-5 pb-20">

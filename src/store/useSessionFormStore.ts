@@ -3,6 +3,8 @@ import { create } from 'zustand';
 interface FormData {
     subjectId: string;
     topicId: string;
+    studyMode: string;
+    notes?: string;
     start_time?: Date;
     end_time?: Date;
     study_date?: Date;
@@ -19,8 +21,11 @@ interface SessionFormState {
 const initialFormData: FormData = {
     subjectId: '',
     topicId: '',
+    studyMode: '',
+    notes: '',
     start_time: undefined,
-    end_time: undefined
+    end_time: undefined,
+    study_date: undefined
 
 };
 
