@@ -126,6 +126,20 @@ export function useSubjectOpen() {
     });
 }
 
+export function useToggleArchiveSubject() {
+    const queryClient = useQueryClient();
+
+    return useMutation({
+        mutationFn: async (payload: { subjectId: string; isOpen: boolean; isArchived: boolean }) => {
+            const { subjectId, isOpen, isArchived } = payload;
+            return updateSubjectStatus(subjectId, isOpen, isArchived);
+        },
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: subjectsKeys.all });
+        },
+    });
+}
+
 export function useDeleteSubject() {
     const queryClient = useQueryClient();
 

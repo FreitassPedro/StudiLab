@@ -65,6 +65,7 @@ export function MainSection({
     }, []);
 
     const { data: subjects = [], isLoading: loadingSubjects } = useSubjects();
+    const activeSubjects = useMemo(() => subjects.filter((s: any) => !s.isArchived), [subjects]);
     const { data: topics = [], isLoading: loadingTopics } = useTopicBySubject(subjectId);
 
     const activeSubject = useMemo(() => subjects.find((s: any) => s.id === subjectId), [subjects, subjectId]);
@@ -150,7 +151,7 @@ export function MainSection({
                     <SelectValue placeholder="Selecione uma matéria" />
                 </SelectTrigger>
                 <SelectContent>
-                    {subjects.map((subject) => (
+                    {activeSubjects.map((subject: any) => (
                         <SelectItem key={subject.id} value={subject.id}>
                             <span
                                 className="w-2.5 h-2.5 rounded-full inline-block shrink-0"

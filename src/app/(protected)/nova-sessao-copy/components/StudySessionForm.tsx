@@ -115,6 +115,7 @@ export function StudySessionForm() {
     const resetCronometer = useCronometerStore((state) => state.resetCronometer);
 
     const { data: subjects = [], isLoading: loadingSubjects } = useSubjects();
+    const activeSubjects = useMemo(() => subjects.filter((s: any) => !s.isArchived), [subjects]);
     const { data: lastLog } = useLastStudyLog();
 
     const [newTopicDialogOpen, setNewTopicDialogOpen] = useState(false);
@@ -325,12 +326,12 @@ export function StudySessionForm() {
                                                             <SelectItem value="loading" disabled>
                                                                 Carregando...
                                                             </SelectItem>
-                                                        ) : subjects.length === 0 ? (
+                                                        ) : activeSubjects.length === 0 ? (
                                                             <SelectItem value="empty" disabled>
                                                                 Nenhuma matéria cadastrada
                                                             </SelectItem>
                                                         ) : (
-                                                            subjects.map((subject) => (
+                                                            activeSubjects.map((subject: any) => (
                                                                 <SelectItem key={subject.id} value={subject.id}>
                                                                     <span className="flex items-center gap-2 text-sm">
                                                                         <span

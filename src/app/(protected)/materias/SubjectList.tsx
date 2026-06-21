@@ -1,9 +1,9 @@
 "use client";
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { useDeleteSubject, useSubjectOpen, useSubjectTree } from "@/hooks/useSubjects";
+import { useDeleteSubject, useSubjectOpen, useSubjectTree, useToggleArchiveSubject } from "@/hooks/useSubjects";
 import { Button } from "@/components/ui/button";
-import { ChevronDown, ChevronRight, FileText, Folder, FolderOpen, Plus, Settings, Trash2 } from "lucide-react";
+import { ChevronDown, ChevronRight, FileText, Folder, FolderOpen, Plus, Settings, Trash2, Archive, ArchiveRestore } from "lucide-react";
 import { SubjectTree, TopicNode } from "@/types/types";
 import { Fragment, useState } from "react";
 import { toast } from "sonner";
@@ -102,6 +102,7 @@ function SubjectItem({ subjectTree }: {
 
     const deleteSubject = useDeleteSubject();
     const updateSubjectStatus = useSubjectOpen();
+    const toggleArchiveSubject = useToggleArchiveSubject();
 
     const handleDelete = async () => {
         try {
@@ -126,10 +127,25 @@ function SubjectItem({ subjectTree }: {
 
     };
 
+    const handleToggleArchive = async () => {
+        try {
+            await toggleArchiveSubject.mutateAsync({
+                subjectId: subjectTree.subject.id,
+                isOpen: subjectTree.subject.isOpen,
+                isArchived: !subjectTree.subject.isArchived
+            });
+            toast.info(subjectTree.subject.isArchived ? "Matéria desarquivada com sucesso." : "Matéria arquivada com sucesso.");
+        } catch {
+            toast.error("Erro ao alterar status da matéria.");
+        }
+    };
+
+    const isArchived = subjectTree.subject.isArchived;
+
     return (
         <Fragment key={subjectTree.subject.id}>
-            <tr className="select-none">
-                <td colSpan={5} className="py-2.5 px-4 rounded-xl border border-b-2 bg-muted/40" style={{ borderColor: subjectTree.subject.color }}>
+            <tr className={`select-none ${isArchived ? 'opacity-50 grayscale hover:opacity-80 transition-opacity' : ''}`}>
+                <td colSpan={5} className={`py-2.5 px-4 rounded-xl border border-b-2 ${isArchived ? 'bg-muted/20' : 'bg-muted/40'}`} style={{ borderColor: subjectTree.subject.color }}>
                     <div className="flex w-full items-center justify-between gap-6">
                         <button onClick={handleOpen}
                             className={`flex items-center justify-center h-5 w-5 rounded hover:bg-accent text-muted-foreground transition-colors `}
@@ -162,6 +178,20 @@ function SubjectItem({ subjectTree }: {
                                 onClick={handleDelete}
                             >
                                 <Trash2 className="h-4 w-4 text-destructive" />
+                            </Button>
+
+                            <Button
+                                variant="ghost"
+                                size="icon"
+                                className="h-9 w-9"
+                                onClick={handleToggleArchive}
+                                title={subjectTree.subject.isArchived ? "Desarquivar matéria" : "Arquivar matéria"}
+                            >
+                                {subjectTree.subject.isArchived ? (
+                                    <ArchiveRestore className="h-4 w-4 text-muted-foreground" />
+                                ) : (
+                                    <Archive className="h-4 w-4 text-muted-foreground" />
+                                )}
                             </Button>
 
                             {/* Edit Subject */}
@@ -214,6 +244,9 @@ export default function SubjectList() {
         return <SubjectsSkeleton />;
     }
 
+    const activeTree = tree.filter(t => !t.subject.isArchived);
+    const archivedTree = tree.filter(t => t.subject.isArchived);
+
     return (
         <div className="mt-10 rounded-2xl border border-border bg-card p-2 overflow-hidden">
             <table className="w-full text-sm border-separate border-spacing-y-2">
@@ -232,12 +265,35 @@ export default function SubjectList() {
                     </tr>
                 </thead>
                 <tbody>
-                    {tree.map((subjectTree) => (
+                    {activeTree.map((subjectTree) => (
                         <SubjectItem
                             key={subjectTree.subject.id}
                             subjectTree={subjectTree}
                         />
                     ))}
+                    
+                    {archivedTree.length > 0 && (
+                        <>
+                            <tr>
+                                <td colSpan={5} className="py-6">
+                                    <div className="flex items-center gap-4">
+                                        <div className="h-px bg-border flex-1" />
+                                        <span className="text-xs font-medium text-muted-foreground uppercase tracking-wider flex items-center gap-2">
+                                            <Archive className="h-4 w-4" />
+                                            Matérias Arquivadas
+                                        </span>
+                                        <div className="h-px bg-border flex-1" />
+                                    </div>
+                                </td>
+                            </tr>
+                            {archivedTree.map((subjectTree) => (
+                                <SubjectItem
+                                    key={subjectTree.subject.id}
+                                    subjectTree={subjectTree}
+                                />
+                            ))}
+                        </>
+                    )}
                 </tbody>
             </table>
         </div>

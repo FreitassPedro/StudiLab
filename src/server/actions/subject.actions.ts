@@ -85,7 +85,8 @@ export async function deleteSubjectAction(id: string) {
 export async function getSubjectsAction(): Promise<Subject[]> {
     const user = await requireAuth();
     return await prisma.subject.findMany({
-        where: { userId: user.id }
+        where: { userId: user.id },
+        orderBy: { name: 'asc' }
     });
 }
 
