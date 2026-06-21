@@ -2,7 +2,7 @@ import { useState, useEffect, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import {
-  Play, Pause, RotateCcw, CheckCircle2, BookOpen, Target, Minimize2, ChevronLeft, ChevronRight
+    Play, Pause, RotateCcw, CheckCircle2, BookOpen, Target, Minimize2, ChevronLeft, ChevronRight
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Glass } from "./Glass";
@@ -13,16 +13,17 @@ import useCronometerStore from "@/store/useCronometerStore";
 import useSessionFormStore from "@/store/useSessionFormStore";
 import { getLocalDateForToday } from "@/lib/utils";
 import { StudyLogInput } from "@/server/actions/studyLogs.action";
-import { useTopicsMap } from "@/hooks/useTopics";
 import { usePageTitleWithCronometer } from "@/hooks/usePageTitleWithCronometer";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { useTopicBySubject } from "@/hooks/useTopics";
 
 const GOALS = [25, 45, 60, 90];
 const hexToRgba = (hex: string, a: number) => {
-  const h = hex.replace("#", "");
-  const r = parseInt(h.slice(0, 2), 16);
-  const g = parseInt(h.slice(2, 4), 16);
-  const b = parseInt(h.slice(4, 6), 16);
-  return `rgba(${r},${g},${b},${a})`;
+    const h = hex.replace("#", "");
+    const r = parseInt(h.slice(0, 2), 16);
+    const g = parseInt(h.slice(2, 4), 16);
+    const b = parseInt(h.slice(4, 6), 16);
+    return `rgba(${r},${g},${b},${a})`;
 };
 
 interface MainSectionProps {
@@ -40,7 +41,6 @@ export function MainSection({
 }: MainSectionProps) {
     const router = useRouter();
     const createStudyLog = useCreateStudyLog();
-    const topicsMap = useTopicsMap();
 
     // Stores
     const form = useSessionFormStore((state) => state.form);
@@ -59,6 +59,7 @@ export function MainSection({
     // Local UI state
     const [selectedGoal, setSelectedGoal] = useState(50);
     const [topicSelectOpen, setTopicSelectOpen] = useState(false);
+    const [subjectSelectOpen, setSubjectSelectOpen] = useState(false);
     const [timerSize, setTimerSize] = useState(320);
 
     useEffect(() => {
@@ -71,6 +72,9 @@ export function MainSection({
     }, []);
 
     const { data: subjects = [], isLoading: loadingSubjects } = useSubjects();
+    const { data: topics = [], isLoading: loadingTopics } = useTopicBySubject(form.subjectId);
+
+    const activeSubject = useMemo(() => subjects.find((s: any) => s.id === form.subjectId), [subjects, form.subjectId]);
 
     usePageTitleWithCronometer({
         isRunning: isCronometerRunning,
@@ -78,11 +82,6 @@ export function MainSection({
         baseTitle: "Motor de Estudo",
     });
 
-    // Derived state
-    const activeSubject = useMemo(() =>
-        subjects.find((s: any) => s.id === form.subjectId),
-        [subjects, form.subjectId]
-    );
 
     const accentColor = activeSubject?.color || "hsl(var(--primary))";
 
@@ -193,27 +192,48 @@ export function MainSection({
                     </span>
                 </CircularTimer>
 
-                {/* Subject atual */}
-                {activeSubject && (
-                    <div style={{ marginTop: 18, display: "flex", alignItems: "center", gap: 8, padding: "8px 14px", borderRadius: 11, background: hexToRgba(activeSubject.color, 0.1), border: `1px solid ${hexToRgba(activeSubject.color, 0.3)}` }}>
-                        <BookOpen size={15} />
-                        <span style={{ fontSize: 13.5 }}>{activeSubject.name.split(" ")[0]} · <b>{activeSubject.name}</b></span>
-                    </div>
-                )}
+                {/* Current Subject Indicator */}
+                <Select
+                    value={form.subjectId}
+                    onValueChange={(value) => updateForm({ subjectId: value })}
+                >
+                    <SelectTrigger className="">
+                        <SelectValue placeholder="Selecione uma matéria" />
+                    </SelectTrigger>
+                    <SelectContent>
+                        {subjects.map((subject) => (
+                            <SelectItem key={subject.id} value={subject.id}>
+                                <span
+                                    className="w-2.5 h-2.5 rounded-full inline-block shrink-0"
+                                    style={{ backgroundColor: subject.color }}
+                                />
+                                {subject.name}
+                            </SelectItem>
+                        ))}
+                    </SelectContent>
+                </Select>
 
                 {/* Current Topic Indicator */}
-                <div
-                    className="px-6 py-2 mt-2 border-1 border-gray-600 rounded-2xl flex items-center gap-3 transition-all cursor-pointer hover:scale-105"
-                    style={{ backgroundColor: `${accentColor}15` }}
-                    onClick={() => setTopicSelectOpen(true)}
-                >
-                    <Target className="h-5 w-5" style={{ color: accentColor }} />
-                    <div className="flex flex-col">
-                        <span className="text-sm font-semibold truncate max-w-[200px]">
-                            {form.topicId ? (topicsMap[form.topicId]?.name || "Tópico Selecionado") : "Selecionar tópico..."}
-                        </span>
-                    </div>
-                </div>
+                {form.subjectId && topics && (
+                    <Select
+                        value={form.topicId}
+                        onValueChange={(value) => updateForm({ topicId: value })}
+                    >
+                        <SelectTrigger>
+                            <SelectValue placeholder="Selecione um tópico" />
+                        </SelectTrigger>
+                        <SelectContent>
+                            {topics.map((t) => (
+                                <SelectItem key={t.id} value={t.id}>
+                                    <span
+                                        className="w-2.5 h-2.5 rounded-full inline-block shrink-0"
+                                    />
+                                    {t.name}
+                                </SelectItem>
+                            ))}
+                        </SelectContent>
+                    </Select>
+                )}
 
                 {/* Controls */}
                 <div className="mt-8 flex gap-4">

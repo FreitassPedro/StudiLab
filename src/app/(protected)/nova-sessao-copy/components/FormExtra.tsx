@@ -9,13 +9,7 @@ import useSessionFormStore from "@/store/useSessionFormStore";
 
 type StudyMode = "teoria" | "revisao" | "exercicios" | "resumo";
 
-export function ExtraDetails({
-    isDetailsOpen,
-    setIsDetailsOpen
-}: {
-    isDetailsOpen: boolean;
-    setIsDetailsOpen: (val: boolean) => void;
-}) {
+export function ExtraDetails() {
 
     const form = useSessionFormStore((state) => state.form);
     const updateForm = useSessionFormStore((state) => state.updateForm);

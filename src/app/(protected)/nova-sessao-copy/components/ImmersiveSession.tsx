@@ -13,8 +13,6 @@ import { ExtraDetails } from "./FormExtra";
 
 
 
-
-
 export function ImmersiveSession() {
   const form = useSessionFormStore((state) => state.form);
   const updateForm = useSessionFormStore((state) => state.updateForm);
@@ -65,10 +63,7 @@ export function ImmersiveSession() {
         >
           {/* Contêiner interno para manter a integridade da largura do conteúdo durante o colapso */}
           <div className="w-full rounded-b-xl lg:rounded-bl-none lg:rounded-r-xl shadow-inner">
-            <ExtraDetails
-              isDetailsOpen={isDetailsOpen}
-              setIsDetailsOpen={setIsDetailsOpen}
-            />
+            <ExtraDetails />
           </div>
         </div>
 

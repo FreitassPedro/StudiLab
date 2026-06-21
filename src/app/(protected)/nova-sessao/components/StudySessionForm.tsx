@@ -370,7 +370,7 @@ export function StudySessionForm() {
                                             <Label className="text-xs font-medium text-foreground/80">Tópico Estudado</Label>
                                             <div className="flex items-center gap min-w-0">
                                                 <div className="flex-1 min-w-0">
-                                                    
+
                                                     <TopicSelector
                                                         open={topicSelectOpen}
                                                         onOpenChange={setTopicSelectOpen}
@@ -378,7 +378,7 @@ export function StudySessionForm() {
                                                         selectedTopicId={selectionForm.topicId}
                                                         onTopicSelect={(topicId) => handleTopicChange(topicId)}
                                                     />
-                                                    
+
                                                 </div>
                                                 <Button
                                                     type="button"
