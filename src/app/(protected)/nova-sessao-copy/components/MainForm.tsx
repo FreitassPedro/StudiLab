@@ -249,10 +249,10 @@ export function MainSection({
                     variant="secondary"
                     size="icon"
                     onClick={() => setIsDetailsOpen(!isDetailsOpen)}
-                    className="absolute top-1/2 -right-4 transform -translate-y-1/2 rounded-full h-8 w-8 shadow-md border border-border/50 z-20 flex items-center justify-center bg-background/90 hover:bg-background"
+                    className="absolute top-1/2 -right-4 transform h-14 w-14 -translate-y-1/2 rounded-full shadow-md border border-border/50 z-20 flex items-center justify-center bg-background/80 hover:bg-background"
                     title={isDetailsOpen ? "Recolher Detalhes" : "Expandir Detalhes"}
                 >
-                    {isDetailsOpen ? <ChevronLeft className="h-4 w-4 text-foreground" /> : <ChevronRight className="h-4 w-4 text-foreground" />}
+                    {isDetailsOpen ? <ChevronLeft className="h-12 w-12 text-foreground" /> : <ChevronRight className="h-12 w-12 text-foreground" />}
                 </Button>
             )}
         </Glass>

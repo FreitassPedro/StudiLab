@@ -71,7 +71,7 @@ export function ImmersiveSession() {
   };
 
   function backToOldVersion() {
-    router.push("/nova-sessao");
+    router.push("/nova-sessao/old");
   }
 
   return (
