@@ -70,12 +70,6 @@ export function MainSection({
 
     const activeSubject = useMemo(() => subjects.find((s: any) => s.id === subjectId), [subjects, subjectId]);
 
-    usePageTitleWithCronometer({
-        isRunning: isCronometerRunning,
-        seconds: 12,
-        baseTitle: "Motor de Estudo",
-    });
-
 
     const accentColor = activeSubject?.color || "hsl(var(--primary))";
 
@@ -187,27 +181,28 @@ export function MainSection({
 
             {/* Controls */}
             <div className="mt-8 flex gap-4">
-                {!isCronometerRunning ? (
+
+                {isCronometerRunning ? (
                     <Button
                         type="button"
                         size="lg"
                         variant="default"
                         className="rounded-2xl h-14 px-8 text-lg font-bold gap-2 shadow-xl hover:scale-105 transition-transform"
-                        onClick={handleStart}
+                        onClick={() => handlePause()}
                     >
-                        <Play className="h-6 w-6 fill-current" />
-                        {seconds > 0 ? "Retomar" : "Iniciar"}
+                        <Pause className="h-6 w-6 fill-current" />
+                        Pausar
                     </Button>
                 ) : (
                     <Button
                         type="button"
                         size="lg"
                         variant="default"
-                        className="rounded-2xl h-10 px-8 text-lg font-bold gap-2 shadow-xl hover:scale-105 transition-transform"
-                        onClick={handlePause}
+                        className="rounded-2xl h-14 px-8 text-lg font-bold gap-2 shadow-xl hover:scale-105 transition-transform"
+                        onClick={() => handleStart()}
                     >
-                        <Pause className="h-6 w-6 fill-current" />
-                        Pausar
+                        <Play className="h-6 w-6 fill-current" />
+                        Iniciar
                     </Button>
                 )}
 
@@ -221,42 +216,45 @@ export function MainSection({
                     <RotateCcw className="h-6 w-6" />
                 </Button>
 
-
-                <Button
-                    type="submit"
-                    variant="default"
-                    className="h-14 px-6 rounded-2xl bg-emerald-500 hover:bg-emerald-600 text-white font-bold gap-2 shadow-lg"
-                >
-                    <CheckCircle2 className="h-6 w-6" />
-                    Concluir
-                </Button>
-
+                {!isCronometerRunning && (
+                    <Button
+                        type="submit"
+                        variant="default"
+                        className="h-14 px-6 rounded-2xl bg-emerald-600 hover:bg-emerald-800 text-white font-bold gap-2 shadow-lg"
+                    >
+                        <CheckCircle2 className="h-6 w-6" />
+                        Concluir
+                    </Button>
+                )}
             </div>
+            {
+                zenMode && (
+                    <Button
+                        type="button"
+                        variant="ghost"
+                        className="absolute bottom-6 text-muted-foreground"
+                        onClick={() => setZenMode(false)}
+                    >
+                        <Minimize2 className="h-4 w-4 mr-2" /> Sair do Modo Zen
+                    </Button>
+                )
+            }
 
-            {zenMode && (
-                <Button
-                    type="button"
-                    variant="ghost"
-                    className="absolute bottom-6 text-muted-foreground"
-                    onClick={() => setZenMode(false)}
-                >
-                    <Minimize2 className="h-4 w-4 mr-2" /> Sair do Modo Zen
-                </Button>
-            )}
-
-            {!zenMode && (
-                <Button
-                    type="button"
-                    variant="secondary"
-                    size="icon"
-                    onClick={() => setIsDetailsOpen(!isDetailsOpen)}
-                    className="absolute top-1/2 -right-4 transform h-14 w-14 -translate-y-1/2 rounded-full shadow-md border border-border/50 z-20 flex items-center justify-center bg-background/80 hover:bg-background"
-                    title={isDetailsOpen ? "Recolher Detalhes" : "Expandir Detalhes"}
-                >
-                    {isDetailsOpen ? <ChevronLeft className="h-12 w-12 text-foreground" /> : <ChevronRight className="h-12 w-12 text-foreground" />}
-                </Button>
-            )}
-        </Glass>
+            {
+                !zenMode && (
+                    <Button
+                        type="button"
+                        variant="secondary"
+                        size="icon"
+                        onClick={() => setIsDetailsOpen(!isDetailsOpen)}
+                        className="absolute top-1/2 -right-4 transform h-14 w-14 -translate-y-1/2 rounded-full shadow-md border border-border/50 z-20 flex items-center justify-center bg-background/80 hover:bg-background"
+                        title={isDetailsOpen ? "Recolher Detalhes" : "Expandir Detalhes"}
+                    >
+                        {isDetailsOpen ? <ChevronLeft className="h-12 w-12 text-foreground" /> : <ChevronRight className="h-12 w-12 text-foreground" />}
+                    </Button>
+                )
+            }
+        </Glass >
 
     );
 }

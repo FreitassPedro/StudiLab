@@ -2,6 +2,7 @@
 import useCronometerStore from "@/store/useCronometerStore";
 import { useCallback, useState } from "react";
 import { CircularTimer } from "./CircularTimer";
+import { usePageTitleWithCronometer } from "@/hooks/usePageTitleWithCronometer";
 
 
 const padTwo = (n: number) => n.toString().padStart(2, "0");
@@ -26,6 +27,18 @@ function TimeDislay({ seconds }: { seconds: number }) {
     )
 };
 
+function CronometerTitleSync() {
+    const isRunning = useCronometerStore((state) => state.cronometer.isRunning);
+    const seconds = useCronometerStore((state) => state.cronometer.seconds);
+
+    usePageTitleWithCronometer({
+        isRunning,
+        seconds,
+        baseTitle: "Nova Sessão de Estudo",
+    });
+
+    return null;
+}
 
 export function Cronometer() {
 
@@ -39,15 +52,18 @@ export function Cronometer() {
     console.log("Seconds: ", seconds)
 
     return (
-        <CircularTimer
-            progress={progress}
-            isRunning={isCronometerRunning}
-            color={"orange"}
-        >
-            <span className="text-xs text-muted-foreground font-mono uppercase tracking-tighter mb-1">
-                {isCronometerRunning ? "Em Foco" : "Pausado"}
-            </span>
-            <TimeDislay seconds={seconds} />
-        </CircularTimer>
+        <>
+            <CronometerTitleSync />
+            <CircularTimer
+                progress={progress}
+                isRunning={isCronometerRunning}
+                color={"orange"}
+            >
+                <span className="text-xs text-muted-foreground font-mono uppercase tracking-tighter mb-1">
+                    {isCronometerRunning ? "Em Foco" : "Pausado"}
+                </span>
+                <TimeDislay seconds={seconds} />
+            </CircularTimer>
+        </>
     )
 }
