@@ -3,6 +3,7 @@ import { format } from "date-fns";
 import { getHistoryAnalysisAction } from "@/server/actions/analysis.action";
 import { activityKeys } from "@/lib/query-keys";
 import { getStudyLogDetailsAction } from "@/server/actions/studyLogs.action";
+import { toUtcMidnight } from "@/lib/utils";
 
 /**
  * Hook central para análise de atividade em um intervalo de datas.
@@ -10,9 +11,12 @@ import { getStudyLogDetailsAction } from "@/server/actions/studyLogs.action";
  */
 export function useActivityAnalysis(startDate: Date, endDate: Date) {
 
+    const startUtc = toUtcMidnight(startDate);
+    const endUtc = toUtcMidnight(endDate);
+
     return useQuery({
         queryKey: activityKeys.range(startDate, endDate),
-        queryFn: () => getHistoryAnalysisAction(startDate, endDate),
+        queryFn: () => getHistoryAnalysisAction(startUtc, endUtc),
 
         staleTime: Infinity, // Mantemos os dados em cache indefinidamente, pois são históricos e não mudam.
         gcTime: 1000 * 60 * 60 * 24, // 24 horas para coleta de lixo, caso não seja usado.
@@ -30,10 +34,11 @@ export function useActivityAnalysis(startDate: Date, endDate: Date) {
  */
 export function useTodayActivity() {
     const today = new Date();
+    const utcToday = toUtcMidnight(today);
 
     return useQuery({
         queryKey: activityKeys.today(),
-        queryFn: () => getHistoryAnalysisAction(today, today),
+        queryFn: () => getHistoryAnalysisAction(utcToday, utcToday),
         staleTime: Infinity,
         gcTime: 1000 * 60 * 60 * 24,
         refetchOnWindowFocus: false,

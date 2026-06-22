@@ -70,3 +70,12 @@ export function getLocalDateForToday(): Date {
     now.getDate()
   );
 }
+
+/**
+ * Converte uma data local em uma data UTC à meia-noite correspondente ao mesmo dia local.
+ * Útil para enviar datas para o servidor de forma consistente, evitando bugs de timezone.
+ */
+export function toUtcMidnight(date: Date): Date {
+  return new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()));
+}
+

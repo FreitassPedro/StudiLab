@@ -37,7 +37,7 @@ import { NewTopicDialog } from "../../materias/components/NewTopicDialog";
 import { TopicSelector } from "./TopicTreeSelector";
 import useSessionFormStore from "@/store/useSessionFormStore";
 import useCronometerStore from "@/store/useCronometerStore";
-import { getLocalDateForToday } from "@/lib/utils";
+import { getLocalDateForToday, toUtcMidnight } from "@/lib/utils";
 import { Cronometer } from "./Cronometer";
 
 // --- Helpers ---
@@ -46,9 +46,6 @@ const calcDurationMinutes = (start?: Date, end?: Date): number => {
     if (!start || !end) return 0;
     return Math.max(0, Math.floor((end.getTime() - start.getTime()) / 60000));
 };
-
-const toUtcDateOnly = (date: Date): Date =>
-    new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()));
 
 const getFormSubmitError = (form: FormData): string | null => {
     console.log("Validating form:", form);
@@ -209,7 +206,7 @@ export function StudySessionForm() {
             return;
         }
 
-        const studyDate = toUtcDateOnly(submitForm.study_date!);
+        const studyDate = toUtcMidnight(submitForm.study_date!);
         const startTime = submitForm.start_time!;
         const endTime = submitForm.end_time!;
         const durationMinutes = calcDurationMinutes(submitForm.start_time, submitForm.end_time);

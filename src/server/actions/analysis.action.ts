@@ -24,18 +24,19 @@ export async function getHistoryAnalysisAction(startDate: Date, endDate: Date): 
 
     // Normalizar datas para evitar problemas de timezone ao comparar com @db.Date
     // Construimos datas estritas em UTC baseadas nos componentes locais da data enviada.
-    // Assim, se o usuário enviou "2026-06-15" (que vira 03:00 UTC), normalizamos para 2026-06-15T00:00:00.000Z
+    // Usamos getUTC* porque os clientes enviam a data já em UTC midnight correspondente ao fuso local,
+    // o que previne bugs quando o servidor está em outro timezone ou lida com datas próximas à meia-noite.
     const normalizedStart = new Date(Date.UTC(
-        startDate.getFullYear(),
-        startDate.getMonth(),
-        startDate.getDate(),
+        startDate.getUTCFullYear(),
+        startDate.getUTCMonth(),
+        startDate.getUTCDate(),
         0, 0, 0, 0
     ));
 
     const normalizedEnd = new Date(Date.UTC(
-        endDate.getFullYear(),
-        endDate.getMonth(),
-        endDate.getDate(),
+        endDate.getUTCFullYear(),
+        endDate.getUTCMonth(),
+        endDate.getUTCDate(),
         0, 0, 0, 0 // Prisma converte @db.Date ignorando hora, então 00:00 é perfeito para lte
     ));
 
