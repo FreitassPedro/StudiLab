@@ -203,7 +203,7 @@ const EditLogDialog = ({
     onOpenChange: (isOpen: boolean) => void;
 }) => {
 
-    const { data: logDetails, isLoading } = useStudyLogDetails(logId);
+    const { data: logDetails, isLoading } = useStudyLogDetails(logId, isOpen);
 
     if (!logId) return null;
 
@@ -237,11 +237,7 @@ const EditLogDialog = ({
 
 const LogDetailsDialog = ({ logId, isOpen, isOpenChange }: { logId: string; isOpen: boolean; isOpenChange: (isOpen: boolean) => void }) => {
 
-    const { data: logDetails, isLoading } = useQuery({
-        queryKey: activityKeys.detail(logId),
-        queryFn: () => getStudyLogDetailsAction(logId),
-        enabled: !!logId && isOpen,
-    });
+    const { data: logDetails, isLoading } = useStudyLogDetails(logId, isOpen);
 
     if (!logId) return null;
 

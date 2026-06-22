@@ -57,11 +57,11 @@ export function useUpdateStudyLog() {
     });
 }
 
-export function useStudyLogDetails(logId: string) {
+export function useStudyLogDetails(logId: string, enabled = true) {
     return useQuery({
         queryKey: activityKeys.detail(logId),
         queryFn: () => getStudyLogDetailsAction(logId),
-        enabled: !!logId,
+        enabled: !!logId && enabled,
     });
 }
 
