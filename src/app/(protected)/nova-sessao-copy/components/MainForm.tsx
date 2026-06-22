@@ -15,7 +15,7 @@ import { useTopicBySubject } from "@/hooks/useTopics";
 import { Cronometer } from "./Cronometer";
 import { NewTopicDialog } from "../../materias/components/NewTopicDialog";
 
-const GOALS = [25, 45, 60, 90];
+const GOALS = [0, 25, 45, 60, 90];
 const hexToRgba = (hex: string, a: number) => {
     const h = hex.replace("#", "");
     const r = parseInt(h.slice(0, 2), 16);

@@ -10,9 +10,10 @@ import { Card, CardContent, CardDescription, CardTitle, CardHeader } from "@/com
 import { Separator } from "@/components/ui/separator";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
-import { LogInIcon, UserPlusIcon } from "lucide-react";
+import { Eye, EyeClosed, LogInIcon, UserPlusIcon } from "lucide-react";
 import { useForm } from "react-hook-form";
 import Link from "next/link";
+import { useState } from "react";
 
 const formSchema = z.object({
     name: z.string().min(2, "O nome de usuário deve ter pelo menos 2 caracteres"),
@@ -23,6 +24,7 @@ type FormData = z.infer<typeof formSchema>;
 
 export default function SignInPage() {
     const router = useRouter();
+    const [showPassword, setShowPassword] = useState(false);
 
     const { register, handleSubmit, formState: { errors, isSubmitting } } = useForm<FormData>({
         resolver: zodResolver(formSchema)
@@ -90,13 +92,26 @@ export default function SignInPage() {
                                         <Label htmlFor="password">Senha</Label>
                                         <Link href="#" className="text-xs text-primary hover:underline">Esqueceu a senha?</Link>
                                     </div>
-                                    <Input
-                                        id="password"
-                                        type="password"
-                                        placeholder="******"
-                                        {...register("password")}
-                                        className={errors.password ? "border-destructive" : ""}
-                                    />
+                                    <div className="relative">
+                                        <Input
+                                            id="password"
+                                            type={showPassword ? "text" : "password"}
+                                            placeholder="******"
+                                            {...register("password")}
+                                            className={errors.password ? "border-destructive" : ""}
+                                        />
+
+                                        {showPassword ? (
+                                            <Eye
+                                                onClick={() => setShowPassword(!showPassword)}
+                                                className="absolute right-3 h-4 w-4 top-1/2 transform -translate-y-1/2 cursor-pointer text-muted-foreground" />
+                                        ) : (
+                                            <EyeClosed
+                                                onClick={() => setShowPassword(!showPassword)}
+                                                className="absolute right-3 h-4 w-4 top-1/2 transform -translate-y-1/2 cursor-pointer text-muted-foreground" />
+                                        )}
+                                    </div>
+
                                     {errors.password && <p className="text-xs text-destructive font-medium">{errors.password.message}</p>}
                                 </div>
 

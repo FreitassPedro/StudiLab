@@ -39,6 +39,7 @@ export function useCreateStudyLog() {
         mutationFn: (data: StudyLogInput) => createStudyLogAction(data),
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: activityKeys.all });
+            queryClient.invalidateQueries({ queryKey: activityKeys.range(new Date(), new Date()) });
             queryClient.invalidateQueries({ queryKey: ["studyLogs"] });
         },
     });

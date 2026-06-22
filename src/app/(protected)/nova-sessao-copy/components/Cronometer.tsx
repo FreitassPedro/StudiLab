@@ -34,7 +34,7 @@ function CronometerTitleSync() {
     usePageTitleWithCronometer({
         isRunning,
         seconds,
-        baseTitle: "Nova Sessão de Estudo",
+        baseTitle: "Sessão de Estudo",
     });
 
     return null;
@@ -46,7 +46,7 @@ export function Cronometer({ goalMinutes = 50 }: { goalMinutes?: number }) {
 
     const seconds = useCronometerStore((state) => state.cronometer.seconds);
 
-    const progress = Math.min(seconds / (goalMinutes * 60), 1);
+    const progress = Math.min(seconds / (goalMinutes === 0 ? 1 : goalMinutes * 60), 1);
 
 
     console.log("Seconds: ", seconds)
