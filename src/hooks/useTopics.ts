@@ -40,6 +40,7 @@ export function useTopicBySubject(subjectId: string) {
     return useQuery({
         queryKey: topicsKeys.all,
         queryFn: () => getTopicsAction(),
+        enabled: !!subjectId,
         staleTime: STALE_TIME,
         select: (topics: Topic[]) => {
             return topics.filter(topic => topic.subjectId === subjectId);
