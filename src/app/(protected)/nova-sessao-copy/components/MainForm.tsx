@@ -3,17 +3,19 @@ import { useFormContext } from "react-hook-form";
 import { StudySessionFormData } from "@/schemas/studySession.schema";
 import { toast } from "sonner";
 import {
-    Play, Pause, RotateCcw, CheckCircle2, Minimize2, ChevronLeft, ChevronRight
+    Play, Pause, RotateCcw, CheckCircle2, Minimize2, ChevronLeft, ChevronRight,
+    Plus
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Glass } from "./Glass";
 import { useSubjects } from "@/hooks/useSubjects";
 import useCronometerStore from "@/store/useCronometerStore";
-import { getLocalDateForToday } from "@/lib/utils";
+import { cn, getLocalDateForToday } from "@/lib/utils";
 import { usePageTitleWithCronometer } from "@/hooks/usePageTitleWithCronometer";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useTopicBySubject } from "@/hooks/useTopics";
 import { Cronometer } from "./Cronometer";
+import { NewTopicDialog } from "../../materias/components/NewTopicDialog";
 
 const GOALS = [25, 45, 60, 90];
 const hexToRgba = (hex: string, a: number) => {
@@ -54,6 +56,7 @@ export function MainSection({
     // Local UI state
     const [selectedGoal, setSelectedGoal] = useState(50);
     const [timerSize, setTimerSize] = useState(320);
+    const [newTopicDialogOpen, setNewTopicDialogOpen] = useState(false);
 
     useEffect(() => {
         const handleResize = () => {
@@ -111,7 +114,12 @@ export function MainSection({
                 {GOALS.map((g: number) => (
                     <button
                         key={g}
-                        onClick={() => !isCronometerRunning && setSelectedGoal(g)}
+                        onClick={(e) => {
+                            e.preventDefault();
+                            if (!isCronometerRunning) {
+                                setSelectedGoal(g)
+                            }
+                        }}
                         className={`px-3 py-1 rounded-full text-xs font-mono transition-all ${selectedGoal === g
                             ? 'bg-primary text-primary-foreground'
                             : 'bg-muted/50 text-muted-foreground hover:bg-muted'
@@ -136,49 +144,63 @@ export function MainSection({
 
             <Cronometer goalMinutes={selectedGoal} />
 
-            {/* Current Subject Indicator */}
-            <Select
-                value={subjectId}
-                onValueChange={(value) => setValue("subjectId", value)}
-            >
-                <SelectTrigger className="">
-                    <SelectValue placeholder="Selecione uma matéria" />
-                </SelectTrigger>
-                <SelectContent>
-                    {activeSubjects.map((subject: any) => (
-                        <SelectItem key={subject.id} value={subject.id}>
-                            <span
-                                className="w-2.5 h-2.5 rounded-full inline-block shrink-0"
-                                style={{ backgroundColor: subject.color }}
-                            />
-                            {subject.name}
-                        </SelectItem>
-                    ))}
-                </SelectContent>
-            </Select>
-
-            {/* Current Topic Indicator */}
-            {subjectId && topics && (
+            <div className="flex flex-col gap-2 mt-4 w-full items-center">
+                {/* Current Subject Indicator */}
                 <Select
-                    value={topicId}
-                    onValueChange={(value) => setValue("topicId", value)}
+                    value={subjectId}
+                    onValueChange={(value) => setValue("subjectId", value)}
                 >
-                    <SelectTrigger>
-                        <SelectValue placeholder="Selecione um tópico" />
+                    <SelectTrigger
+                        className={cn("w border-2 gap-5 text-md")} style={{
+                            borderColor: subjectId ? accentColor : "",
+                        }}
+                    >
+                        <SelectValue placeholder="Selecione uma matéria" />
                     </SelectTrigger>
                     <SelectContent>
-                        {topics.map((t) => (
-                            <SelectItem key={t.id} value={t.id}>
+                        {activeSubjects.map((subject: any) => (
+                            <SelectItem key={subject.id} value={subject.id}>
                                 <span
                                     className="w-2.5 h-2.5 rounded-full inline-block shrink-0"
+                                    style={{ backgroundColor: subject.color }}
                                 />
-                                {t.name}
+                                {subject.name}
                             </SelectItem>
                         ))}
                     </SelectContent>
                 </Select>
-            )}
 
+                {/* Current Topic Indicator */}
+                {subjectId && topics && (
+                    <div className="flex gap-2 items-center">
+                        <Select
+                            value={topicId}
+                            onValueChange={(value) => setValue("topicId", value)}
+                        >
+                            <SelectTrigger className="h-6">
+                                <SelectValue placeholder="Selecione um tópico" />
+                            </SelectTrigger>
+                            <SelectContent>
+                                {topics.map((t) => (
+                                    <SelectItem key={t.id} value={t.id}>
+                                        {t.name}
+                                    </SelectItem>
+                                ))}
+                            </SelectContent>
+                        </Select>
+                        <Button
+                            type="button"
+                            variant="outline"
+                            size="icon"
+                            onClick={() => setNewTopicDialogOpen(true)}
+                            className="h-8 w-8 shrink-0 text-muted-foreground hover:text-foreground"
+                            title="Novo tópico"
+                        >
+                            <Plus className="h-4 w-4" />
+                        </Button>
+                    </div>
+                )}
+            </div>
             {/* Controls */}
             <div className="mt-8 flex gap-4">
 
@@ -254,6 +276,12 @@ export function MainSection({
                     </Button>
                 )
             }
+
+            <NewTopicDialog
+                isOpen={newTopicDialogOpen}
+                onOpenChange={setNewTopicDialogOpen}
+                subjectId={subjectId!}
+            />
         </Glass >
 
     );
