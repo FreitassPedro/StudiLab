@@ -198,13 +198,13 @@ const RenderLogCardItem = ({ log, subject }: { log: TimelineLog; subject?: Timel
             style={{
                 top: `${calculateTop(log.start_time)}%`,
                 height: `${calculateFinalHeight(log.start_time, log.end_time)}%`,
-                backgroundColor: `${subject?.color}33`,
+                backgroundColor: `${subject?.color}45`,
                 borderLeftColor: `${subject?.color}`,
             }}
         >
             <div className="flex justify-between h-full">
                 <div>
-                    <h4 className="font-semibold text-xs text-foreground truncate">{log.topic?.name}</h4>
+                    <h4 className="font-semibold text-xs text-secondary truncate">{log.topic?.name}</h4>
                     <span className="text-xs text-muted-foreground truncate">{subject?.name}</span>
                 </div>
                 <div className="text-xs text-muted-foreground flex items-center gap-1  flex-row justify-between">
@@ -361,14 +361,13 @@ export function TodayTimeline() {
                         </span>
                     </CardTitle>
                     <CardDescription>
-                        Visualize suas sessões de estudo ao longo do dia. A linha do tempo é atualizada em tempo real enquanto o cronômetro estiver ativo.
                     </CardDescription>
                 </CardHeader>
-                <CardContent className="overflow-visible md:flex-1 md:min-h-0 md:overflow-y-auto">
+                <CardContent className="overflow-visible md:flex-1 md:min-h-0 md:overflow-y-auto px-2">
                     <div className="">
                         <div className={`flex flex-row`} style={{ height: TimelineCardProps.height }}>
                             {/* Hour markers */}
-                            <div className="flex flex-col text-xs  text-slate-500 space-y-0 sticky left-0 bg-card z-10" >
+                            <div className="flex flex-col text-xs text-muted-foreground/60 space-y-0 sticky left-0 bg-card z-10" >
                                 {Array.from({ length: 24 }, (_, i) => i).map(hour => (
                                     <div key={hour} className="flex-1 text-right pr-2 border-r border-slate-200">
                                         {`${hour.toString().padStart(2, '0')}:00`}
@@ -382,7 +381,7 @@ export function TodayTimeline() {
                                 {Array.from({ length: 24 }, (_, i) => i + 1).map(hour => (
                                     <div
                                         key={hour}
-                                        className="absolute left-0  right-0 border-t border-slate-200/40"
+                                        className="absolute left-0  right-0 border-t border-slate-200/20"
                                         style={{ top: `${(hour / 24) * 100}%` }}
                                     />
                                 ))}
