@@ -1,7 +1,6 @@
 import { useState, useEffect, useMemo } from "react";
 import { useFormContext } from "react-hook-form";
 import { StudySessionFormData } from "@/schemas/studySession.schema";
-import { toast } from "sonner";
 import {
     Play, Pause, RotateCcw, CheckCircle2, Minimize2, ChevronLeft, ChevronRight,
     Plus
@@ -11,7 +10,6 @@ import { Glass } from "./Glass";
 import { useSubjects } from "@/hooks/useSubjects";
 import useCronometerStore from "@/store/useCronometerStore";
 import { cn, getLocalDateForToday } from "@/lib/utils";
-import { usePageTitleWithCronometer } from "@/hooks/usePageTitleWithCronometer";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useTopicBySubject } from "@/hooks/useTopics";
 import { Cronometer } from "./Cronometer";
@@ -45,8 +43,6 @@ export function MainSection({
     const topicId = watch("topicId");
 
     const isCronometerRunning = useCronometerStore((state) => state.cronometer.isRunning);
-    const cronometerStartTime = useCronometerStore((state) => state.cronometer.startTime);
-    const cronometerEndTime = useCronometerStore((state) => state.cronometer.endTime);
     const updateCronometer = useCronometerStore((state) => state.updateCronometer);
     const resetCronometer = useCronometerStore((state) => state.resetCronometer);
     const startTicking = useCronometerStore((state) => state.startTicking);
@@ -114,6 +110,7 @@ export function MainSection({
                 {GOALS.map((g: number) => (
                     <button
                         key={g}
+                        type="button"
                         onClick={(e) => {
                             e.preventDefault();
                             if (!isCronometerRunning) {

@@ -25,7 +25,7 @@ const formatDateLocal = (date?: Date) => {
 };
 
 export function ExtraDetails() {
-    const { watch, setValue, register } = useFormContext<StudySessionFormData>();
+    const { watch, setValue } = useFormContext<StudySessionFormData>();
     const updateCronometer = useCronometerStore((state) => state.updateCronometer);
 
     const studyMode = watch("studyMode");
@@ -72,6 +72,7 @@ export function ExtraDetails() {
                             {["teoria", "revisao", "exercicios", "resumo"].map((m) => (
                                 <button
                                     key={m}
+                                    type="button"
                                     onClick={() => setValue("studyMode", m as StudyMode)}
                                     className={`px-3 py-2 rounded-xl text-xs font-semibold capitalize transition-all border ${studyMode === m
                                         ? 'bg-primary/10 border-primary text-primary'

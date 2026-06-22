@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { ArrowBigUp, Circle, Loader, Maximize2, Minimize2 } from "lucide-react";
+import { ArrowBigUp, Loader } from "lucide-react";
 import { FormProvider, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "next/navigation";
@@ -24,8 +24,6 @@ export function ImmersiveSession() {
   const createStudyLog = useCreateStudyLog();
   const seconds = useCronometerStore((state) => state.cronometer.seconds);
   const resetCronometer = useCronometerStore((state) => state.resetCronometer);
-
-  const cronometer = useCronometerStore((state) => state.cronometer);
 
   const methods = useForm<StudySessionFormData>({
     resolver: zodResolver(studySessionSchema),
@@ -52,7 +50,6 @@ export function ImmersiveSession() {
     }
 
     const mins = Math.max(1, Math.round(seconds / 60));
-
 
     const payload: StudyLogInput = {
       topic_id: data.topicId,
