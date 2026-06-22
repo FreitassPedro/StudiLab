@@ -134,7 +134,7 @@ export function MainSection({
                 </span>
             </div>
 
-            <Cronometer />
+            <Cronometer goalMinutes={selectedGoal} />
 
             {/* Current Subject Indicator */}
             <Select

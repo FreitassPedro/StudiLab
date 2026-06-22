@@ -40,13 +40,13 @@ function CronometerTitleSync() {
     return null;
 }
 
-export function Cronometer() {
+export function Cronometer({ goalMinutes = 50 }: { goalMinutes?: number }) {
 
     const isCronometerRunning = useCronometerStore((state) => state.cronometer.isRunning);
 
     const seconds = useCronometerStore((state) => state.cronometer.seconds);
 
-    const progress = 1;
+    const progress = Math.min(seconds / (goalMinutes * 60), 1);
 
 
     console.log("Seconds: ", seconds)

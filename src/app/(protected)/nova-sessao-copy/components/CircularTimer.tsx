@@ -42,7 +42,7 @@ export function CircularTimer({
           cy={size / 2}
           r={radius}
           fill="none"
-          stroke="hsl(var(--secondary))"
+          stroke="#1f1f1f"
           strokeWidth={stroke}
         />
         {/* Progress Circle */}
