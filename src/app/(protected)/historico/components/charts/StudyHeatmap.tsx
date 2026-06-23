@@ -5,7 +5,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { useActivityAnalysis } from '@/hooks/useActivity';
 import useSearchRangeStore from '@/store/useSearchRangeStore';
-import { parseDateAsLocal } from '@/lib/utils';
+import { formatDateFromDB } from '@/lib/utils';
 import { startOfMonth, endOfMonth, startOfYear, endOfYear, eachDayOfInterval, format, isSameDay } from 'date-fns';
 
 const getHeatmapColor = (minutes: number) => {
@@ -51,7 +51,7 @@ export function StudyHeatmap() {
   const minutesByDate = useMemo(() => {
     const map: Record<string, number> = {};
     analysis?.logs.forEach(log => {
-      const dateKey = format(parseDateAsLocal(log.study_date), 'yyyy-MM-dd');
+      const dateKey = formatDateFromDB(log.study_date);
       map[dateKey] = (map[dateKey] || 0) + log.duration_minutes;
     });
     return map;

@@ -36,7 +36,7 @@ export async function getStudyLogDetailsAction(logId: string) {
 
 export interface StudyLogInput {
     topic_id: string;
-    study_date: Date;
+    study_date: string;
     start_time: Date;
     end_time: Date;
     material_type?: string;
@@ -49,7 +49,7 @@ export async function createStudyLogAction(data: StudyLogInput) {
     return prisma.studyLogs.create({
         data: {
             topicId: data.topic_id,
-            study_date: data.study_date,
+            study_date: new Date(`${data.study_date}T00:00:00Z`),
             start_time: data.start_time,
             end_time: data.end_time,
             duration_minutes: data.duration_minutes,

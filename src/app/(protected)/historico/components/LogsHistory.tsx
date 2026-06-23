@@ -27,7 +27,7 @@ import {
 } from "lucide-react";
 import { useMemo, useState, useEffect } from "react";
 import useSearchRangeStore from "@/store/useSearchRangeStore";
-import { parseDateAsLocal } from "@/lib/utils";
+import { parseDbDateToLocal, formatDateFromDB } from "@/lib/utils";
 import { useTopicBySubject } from "@/hooks/useTopics";
 
 type StudyLogFeedItem = {
@@ -279,7 +279,7 @@ const LogDetailsDialog = ({ logId, isOpen, isOpenChange }: { logId: string; isOp
                         </div>
                         <div className='space-y-2'>
                             <p className="text-sm text-muted-foreground">Data</p>
-                            <p>{format(parseDateAsLocal(logDetails.study_date), "dd 'de' MMMM 'de' yyyy", { locale: ptBR })}</p>
+                            <p>{format(parseDbDateToLocal(logDetails.study_date), "dd 'de' MMMM 'de' yyyy", { locale: ptBR })}</p>
                         </div>
                     </>
                 ) : (
@@ -415,7 +415,7 @@ export function DateGroup({
         (sum, log) => sum + log.duration_minutes,
         0
     );
-    const dateLabel = format(parseDateAsLocal(dateKey), "EEEE, dd 'de' MMMM", {
+    const dateLabel = format(parseDbDateToLocal(dateKey), "EEEE, dd 'de' MMMM", {
         locale: ptBR,
     });
 
@@ -474,7 +474,7 @@ export function LogsHistory() {
     const groupedLogs = useMemo(() => {
         const allLogs = data ?? [];
         return allLogs.reduce((acc, log) => {
-            const dateKey = format(parseDateAsLocal(log.study_date), "yyyy-MM-dd");
+            const dateKey = formatDateFromDB(log.study_date);
             if (!acc[dateKey]) acc[dateKey] = [];
             acc[dateKey].push(log);
             return acc;

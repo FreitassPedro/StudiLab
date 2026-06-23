@@ -37,11 +37,13 @@ export const HistoryCharts = () => {
 
     if (!data) return <div>Erro no processamento dos dados</div>;
 
+    console.log("Data", data.charts);
+
     return (
         <>
             <div className="grid gap-4 md:grid-cols-2">
                 <Suspense fallback={<ChartSkeleton />}>
-                    <StudyBarChart data={data.charts.barChart} />
+                    <StudyBarChart data={data.charts.areaChart} />
 
                     <StudyPieChart data={data.charts.pieChart} />
 

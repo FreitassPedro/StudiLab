@@ -5,7 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useTodayStudyLogs } from "@/hooks/useStudyLogs";
-import { getLocalDateForToday } from "@/lib/utils";
+import { getTodayLocal } from "@/lib/utils";
 import Link from "next/link";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
@@ -181,7 +181,7 @@ function StatCard({
 }
 
 function TodaySummaryContent({ logs }: { logs: StudyLog[] }) {
-    const today = getLocalDateForToday();
+    const today = getTodayLocal();
     const totalMinutes = logs.reduce((sum, l) => sum + l.duration_minutes, 0);
     const hours = Math.floor(totalMinutes / 60);
     const minutes = totalMinutes % 60;

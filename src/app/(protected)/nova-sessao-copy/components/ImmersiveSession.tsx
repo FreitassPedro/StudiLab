@@ -12,7 +12,7 @@ import { Button } from "@/components/ui/button";
 import useCronometerStore from "@/store/useCronometerStore";
 import { useCreateStudyLog } from "@/hooks/useStudyLogs";
 import { studySessionSchema, StudySessionFormData } from "@/schemas/studySession.schema";
-import { getLocalDateForToday } from "@/lib/utils";
+import { getTodayLocal, formatDateToLocal } from "@/lib/utils";
 import { StudyLogInput } from "@/server/actions/studyLogs.action";
 
 import { MainSection } from "./MainForm";
@@ -32,7 +32,7 @@ export function ImmersiveSession() {
       subjectId: "",
       topicId: "",
       studyMode: "teoria",
-      study_date: getLocalDateForToday(),
+      study_date: getTodayLocal(),
       notes: "",
     },
   });
@@ -53,7 +53,7 @@ export function ImmersiveSession() {
 
     const payload: StudyLogInput = {
       topic_id: data.topicId,
-      study_date: data.study_date || getLocalDateForToday(),
+      study_date: formatDateToLocal(data.study_date || getTodayLocal()),
       material_type: data.studyMode,
       start_time: data.start_time,
       end_time: data.end_time,

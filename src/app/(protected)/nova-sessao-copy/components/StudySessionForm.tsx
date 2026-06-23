@@ -37,7 +37,7 @@ import { NewTopicDialog } from "../../materias/components/NewTopicDialog";
 import { TopicSelector } from "./TopicTreeSelector";
 import useSessionFormStore from "@/store/useSessionFormStore";
 import useCronometerStore from "@/store/useCronometerStore";
-import { getLocalDateForToday, toUtcMidnight } from "@/lib/utils";
+import { getTodayLocal, formatDateToLocal } from "@/lib/utils";
 
 // --- Helpers ---
 
@@ -79,7 +79,7 @@ const emptyForm: FormData = {
     subjectId: "",
     topicId: "",
     material_type: "",
-    study_date: getLocalDateForToday(),
+    study_date: getTodayLocal(),
     start_time: undefined,
     end_time: undefined,
     notes: "",
@@ -206,7 +206,7 @@ export function StudySessionForm() {
             return;
         }
 
-        const studyDate = toUtcMidnight(submitForm.study_date!);
+        const studyDate = formatDateToLocal(submitForm.study_date!);
         const startTime = submitForm.start_time!;
         const endTime = submitForm.end_time!;
         const durationMinutes = calcDurationMinutes(submitForm.start_time, submitForm.end_time);

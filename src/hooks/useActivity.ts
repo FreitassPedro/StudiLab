@@ -3,17 +3,17 @@ import { format } from "date-fns";
 import { getHistoryAnalysisAction } from "@/server/actions/analysis.action";
 import { activityKeys } from "@/lib/query-keys";
 import { getStudyLogDetailsAction } from "@/server/actions/studyLogs.action";
-import { toUtcMidnight } from "@/lib/utils";
+import { formatDateToLocal } from "@/lib/utils";
 
 /**
  * Hook central para análise de atividade em um intervalo de datas.
  * Substitui hooks redundantes como useStudyLogsRange e useSummaryStats.
  */
 export function useActivityAnalysis(startDate: Date, endDate: Date) {
-
-    const startUtc = toUtcMidnight(startDate);
-    const endUtc = toUtcMidnight(endDate);
-
+    console.log("Data inicial e final inicial", startDate, endDate);
+    const startUtc = formatDateToLocal(startDate);
+    const endUtc = formatDateToLocal(endDate);
+    console.log("useActivityAnalysis", startDate, endDate);
     return useQuery({
         queryKey: activityKeys.range(startDate, endDate),
         queryFn: () => getHistoryAnalysisAction(startUtc, endUtc),
@@ -34,11 +34,11 @@ export function useActivityAnalysis(startDate: Date, endDate: Date) {
  */
 export function useTodayActivity() {
     const today = new Date();
-    const utcToday = toUtcMidnight(today);
+    const todayStr = formatDateToLocal(today);
 
     return useQuery({
         queryKey: activityKeys.today(),
-        queryFn: () => getHistoryAnalysisAction(utcToday, utcToday),
+        queryFn: () => getHistoryAnalysisAction(todayStr, todayStr),
         staleTime: Infinity,
         gcTime: 1000 * 60 * 60 * 24,
         refetchOnWindowFocus: false,

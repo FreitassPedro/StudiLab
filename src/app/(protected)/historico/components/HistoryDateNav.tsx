@@ -12,42 +12,32 @@ import { Calendar } from '@/components/ui/calendar';
 import { addDays, addMonths, addWeeks, endOfMonth, endOfWeek, format, startOfMonth, startOfWeek, subDays, subMonths, subWeeks } from 'date-fns';
 import useSearchRangeStore from '@/store/useSearchRangeStore';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { getLocalDateForToday } from "@/lib/utils";
+import { getTodayLocal } from "@/lib/utils";
 
 export type RangeType = 'day' | 'week' | 'month' | 'custom';
 
 export function HistoryDateNav() {
 
-    const { startDate, endDate, setRange, setRangeType, rangeType } = useSearchRangeStore();
+    const { startDate, endDate, rangeType, setRange } = useSearchRangeStore();
 
     const [isOpenPicker, setIsOpenPicker] = useState(false);
     const [pickingRange, setPickingRange] = useState<CalendarDateRange>({ from: startDate, to: endDate });
     const [customOptions, setCustomOptions] = useState<'last7days' | 'last30days' | 'calendar' | ''>('');
-    const todayRef = useRef<Date>(startDate);
     const calendarRef = useRef<HTMLDivElement>(null);
 
-    // Definir rangeType para 'day' (hoje) quando o componente carregar
-    useEffect(() => {
-        const today = getLocalDateForToday();
-        todayRef.current = today;
-        setRange({ startDate: today, endDate: today });
-        setRangeType('day');
-    }, [setRange, setRangeType]);
 
     const handleRangeTypeChange = (type: string) => {
         const newType = type as RangeType;
-        setRangeType(newType);
 
         if (newType !== 'custom') {
             setCustomOptions('');
         }
 
-        const today = getLocalDateForToday();
+        const today = getTodayLocal();
 
         switch (type) {
             case 'day':
-                setRange({ startDate: today, endDate: today });
-                setRangeType('day');
+                setRange({ startDate: today, endDate: today, rangeType: 'day' });
                 break;
             case 'week':
                 const mondayStart = startOfWeek(today, { weekStartsOn: 1 });
@@ -55,32 +45,31 @@ export function HistoryDateNav() {
                 setRange({
                     startDate: mondayStart,
                     endDate: endOfWeekDate,
+                    rangeType: 'week'
                 });
-                setRangeType('week');
                 break;
             case 'month':
                 setRange({
                     startDate: startOfMonth(today),
                     endDate: endOfMonth(today),
+                    rangeType: 'month'
                 });
-                setRangeType('month');
                 break;
             case 'last7days':
                 setRange({
                     startDate: subDays(today, 6),
                     endDate: today,
+                    rangeType: 'custom'
                 });
-                setRangeType('custom');
                 break;
             case 'last30days':
                 setRange({
                     startDate: subDays(today, 29),
                     endDate: today,
+                    rangeType: 'custom'
                 });
-                setRangeType('custom');
                 break;
             case 'calendar':
-                setRangeType('custom');
                 setIsOpenPicker(true);
                 break;
             default:
@@ -121,7 +110,7 @@ export function HistoryDateNav() {
                 break;
         }
 
-        setRange({ startDate: newStart, endDate: newEnd });
+        setRange({ startDate: newStart, endDate: newEnd, rangeType: "custom" });
     };
 
     const getDisplayLabel = () => {
@@ -189,7 +178,7 @@ export function HistoryDateNav() {
 
     const handleCalendarSearch = () => {
         if (pickingRange?.from && pickingRange?.to) {
-            setRange({ startDate: pickingRange.from, endDate: pickingRange.to });
+            setRange({ startDate: pickingRange.from, endDate: pickingRange.to, rangeType: 'custom' });
             setIsOpenPicker(false);
         }
     };

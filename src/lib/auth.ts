@@ -1,6 +1,7 @@
 import { betterAuth } from "better-auth";
 import { prismaAdapter } from "better-auth/adapters/prisma";
 import { prisma } from "./prisma";
+import { nextCookies } from "better-auth/next-js";
 
 
 export const auth = betterAuth({
@@ -16,5 +17,14 @@ export const auth = betterAuth({
         enabled: true,
         autoSignIn: true,
     },
+    plugins: [
+        nextCookies()
+    ],
+    session: {
+        cookieCache: {
+            enabled: true,
+            maxAge: 60 * 15 // 15 minutes
+        }
+    }
 
 });

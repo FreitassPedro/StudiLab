@@ -6,8 +6,6 @@ import { useTopics } from "./useTopics";
 import { useMemo } from "react";
 import { Subject, SubjectTree, Topic, TopicNode } from "@/types/types";
 
-const STALE_TIME = 1000 * 60 * 60; // 1 hora para metadados
-
 /***
  * Options
  * 
@@ -15,14 +13,12 @@ const STALE_TIME = 1000 * 60 * 60; // 1 hora para metadados
 export const subjectsKeys = {
     all: metadataKeys.subjects,
     tree: metadataKeys.subjectTree,
-    list: metadataKeys.subjects,
 };
 
 export const useSubjectsOptions = () => queryOptions({
-    queryKey: subjectsKeys.list,
+    queryKey: subjectsKeys.all,
     queryFn: () => getSubjectsAction(),
-    staleTime: STALE_TIME,
-    gcTime: 1000 * 60 * 30, // 30 minutos para coleta de lixo
+
 });
 
 /***
@@ -84,7 +80,7 @@ export function useSubjectTree() {
         return subjects.map((s): SubjectTree => {
             const subjectTopics = topicsData.topics.filter(t => t.subjectId === s.id);
             const map = new Map<string, TopicNode>();
-            
+
             // Primeiro criamos todos os nós
             subjectTopics.forEach((t) => map.set(t.id, { ...t, children: [] }));
 

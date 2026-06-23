@@ -6,48 +6,25 @@ export function cn(...inputs: ClassValue[]) {
 }
 
 /**
- * Converte uma string de data (YYYY-MM-DD) ou Date do PostgreSQL para uma Date local
- * sem problemas de timezone. Útil para campos @db.Date do Prisma quando usados na UI.
- * 
- * Problema: new Date("2026-03-02") interpreta como UTC e causa shift de timezone
- * Solução: Extrai os componentes e cria data local explicitamente
+ * Formata um objeto Date local gerando a string "YYYY-MM-DD".
+ * Usa os componentes locais (getFullYear, getMonth, getDate).
  */
-export function parseDateAsLocal(dateInput: Date | string): Date {
-  if (dateInput instanceof Date) {
-    // Para Date objects vindos do Prisma (@db.Date vem como UTC midnight),
-    // usar componentes UTC para evitar shift de timezone
-    return new Date(
-      dateInput.getUTCFullYear(),
-      dateInput.getUTCMonth(),
-      dateInput.getUTCDate()
-    );
-  }
-
-  // Aceita "YYYY-MM-DD" e também datetime ISO, extraindo apenas a parte da data
-  const match = /^(\d{4})-(\d{2})-(\d{2})/.exec(dateInput);
-  if (!match) {
-    throw new Error(`Invalid date string for parseDateAsLocal: ${dateInput}`);
-  }
-
-  const year = Number(match[1]);
-  const month = Number(match[2]);
-  const day = Number(match[3]);
-  return new Date(year, month - 1, day);
+export function formatDateToLocal(date: Date): string {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const day = String(date.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
 }
 
 /**
- * Formata Date ou string de data para "YYYY-MM-DD"
- * Usa UTC para extrair componentes quando é Date (padrão Prisma para @db.Date)
+ * Formata um objeto Date vindo do Prisma (@db.Date) gerando a string "YYYY-MM-DD".
+ * Como o Prisma envia as datas de campo Date como meia-noite UTC, usamos os componentes UTC.
  */
-export function formatDateKey(date: Date | string): string {
+export function formatDateFromDB(date: Date | string): string {
   if (typeof date === 'string') {
-    // Se já é string no formato correto, retorna direto
     if (/^\d{4}-\d{2}-\d{2}$/.test(date)) return date;
-    // Senão, converte para Date primeiro
     date = new Date(date);
   }
-  
-  // Usar UTC para evitar problemas de timezone com @db.Date do Prisma
   const year = date.getUTCFullYear();
   const month = String(date.getUTCMonth() + 1).padStart(2, '0');
   const day = String(date.getUTCDate()).padStart(2, '0');
@@ -55,27 +32,35 @@ export function formatDateKey(date: Date | string): string {
 }
 
 /**
- * Cria uma data local respeitando a timezone do cliente/navegador.
- * Criar uma data local sem problemas de conversão timezone.
- * 
- * Problema: `new Date()` no servidor retorna UTC, causando deslocamento para usuários brasileiros.
- * Solução: Extrair componentes da data local do cliente e criar Date respeitando a timezone local.
+ * Converte a string "YYYY-MM-DD" num objeto Date local referente à meia-noite do dia.
  */
-export function getLocalDateForToday(): Date {
-  const now = new Date();
-  // Cria uma data usando os componentes locais (não UTC)
-  return new Date(
-    now.getFullYear(),
-    now.getMonth(),
-    now.getDate()
-  );
+export function parseLocalStringToDate(dateStr: string): Date {
+  const match = /^(\d{4})-(\d{2})-(\d{2})/.exec(dateStr);
+  if (!match) {
+    throw new Error(`Invalid date string for parseLocalStringToDate: ${dateStr}`);
+  }
+  const year = Number(match[1]);
+  const month = Number(match[2]);
+  const day = Number(match[3]);
+  return new Date(year, month - 1, day);
 }
 
 /**
- * Converte uma data local em uma data UTC à meia-noite correspondente ao mesmo dia local.
- * Útil para enviar datas para o servidor de forma consistente, evitando bugs de timezone.
+ * Converte um Date vindo do Prisma (@db.Date) (UTC midnight) em um Date Local
+ * que representa o mesmo dia. Útil para bibliotecas da UI como date-fns.
  */
-export function toUtcMidnight(date: Date): Date {
-  return new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()));
+export function parseDbDateToLocal(dateInput: Date | string): Date {
+  if (typeof dateInput === 'string') {
+    return parseLocalStringToDate(dateInput);
+  }
+  return new Date(dateInput.getUTCFullYear(), dateInput.getUTCMonth(), dateInput.getUTCDate());
+}
+
+/**
+ * Retorna a data local atual truncada para meia-noite (hora 00:00:00).
+ */
+export function getTodayLocal(): Date {
+  const now = new Date();
+  return new Date(now.getFullYear(), now.getMonth(), now.getDate());
 }
 

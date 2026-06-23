@@ -7,7 +7,7 @@ import useSessionFormStore from "@/store/useSessionFormStore";
 import useCronometerStore from "@/store/useCronometerStore";
 import { Clock } from "lucide-react";
 import { createContext, useContext, useEffect, useMemo, useState } from "react";
-import { getLocalDateForToday } from "@/lib/utils";
+import { getTodayLocal } from "@/lib/utils";
 
 const TimelineCardProps = {
     height: "72rem",
@@ -334,7 +334,7 @@ const RealtimeTimelineLayer = ({
 
 export function TodayTimeline() {
 
-    const today = getLocalDateForToday();
+    const today = getTodayLocal();
 
     const { data: logs, isLoading: isLogsLoading } = useTodayStudyLogs();
     const { data: subjectsMap, isLoading: isSubjectsLoading } = useSubjectsMap();

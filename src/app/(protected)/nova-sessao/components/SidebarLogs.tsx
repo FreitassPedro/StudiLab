@@ -21,7 +21,7 @@ import { getRecentLogsBySubjectAction, getRecentLogsByTopicAction } from "@/serv
 import { useSubjects } from "@/hooks/useSubjects";
 import { useTopicBySubject } from "@/hooks/useTopics";
 import useSessionFormStore from "@/store/useSessionFormStore";
-import { parseDateAsLocal } from "@/lib/utils";
+import { parseDbDateToLocal } from "@/lib/utils";
 
 // --- Helpers ---
 
@@ -41,7 +41,7 @@ const daysAgo = (date: Date) => {
 // --- Sub-components ---
 
 export const LogCard = ({ name, date, notes }: { name: string; date: Date | string; notes?: string }) => {
-    const localDate = parseDateAsLocal(date);
+    const localDate = parseDbDateToLocal(date);
     return (
         <Card className="p-3 gap-0 space-y-2 bg-muted/50 border-none transition-all hover:bg-muted/70">
             <div className="flex justify-between items-center gap-2">

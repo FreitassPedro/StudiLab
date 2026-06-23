@@ -9,7 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Glass } from "./Glass";
 import { useSubjects } from "@/hooks/useSubjects";
 import useCronometerStore from "@/store/useCronometerStore";
-import { cn, getLocalDateForToday } from "@/lib/utils";
+import { cn, getTodayLocal } from "@/lib/utils";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useTopicBySubject } from "@/hooks/useTopics";
 import { Cronometer } from "./Cronometer";
@@ -79,7 +79,7 @@ export function MainSection({
         if (!isCronometerRunning && seconds === 0) {
             updateCronometer({ startTime: now, endTime: null });
             setValue("start_time", now);
-            setValue("study_date", getLocalDateForToday());
+            setValue("study_date", getTodayLocal());
         }
         // Limpa o end_time no form ao iniciar/retomar
         setValue("end_time", undefined as any);
