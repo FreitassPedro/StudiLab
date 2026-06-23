@@ -58,7 +58,6 @@ export async function getHistoryAnalysisAction(startDateStr: string, endDateStr:
     const subjectStats = new Map<string, { id: string; name: string; color: string; totalMinutes: number; totalSessions: number }>();
     const areaChartMap = new Map<string, { totalMinutes: number; materiaMap: Map<string, { name: string; color: string; minutes: number }> }>();
     const heatMap: Record<string, number> = {};
-    const biologicalClockMap = new Map<number, number>();
     let totalMinutes = 0;
     let longestSession = 0;
 

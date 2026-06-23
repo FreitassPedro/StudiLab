@@ -1,6 +1,5 @@
 "use client";
 
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
@@ -10,22 +9,19 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useUpdateStudyLog, useDeleteStudyLog, useStudyLogDetails } from "@/hooks/useStudyLogs";
-import { getStudyLogDetailsAction } from "@/server/actions/studyLogs.action";
 import { useHistoryAnalysis } from "@/hooks/useCharts";
-import { useQuery } from "@tanstack/react-query";
-import { activityKeys } from "@/lib/query-keys";
+
 import { addWeeks, endOfWeek, format, isSameWeek, subWeeks } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import {
-    BookOpen,
     ChevronRight,
     Clock,
     Edit2,
-    FileText,
+    
     Loader2,
     Trash2,
 } from "lucide-react";
-import { useMemo, useState, useEffect } from "react";
+import { useMemo, useState } from "react";
 import useSearchRangeStore from "@/store/useSearchRangeStore";
 import { parseDbDateToLocal, formatDateFromDB } from "@/lib/utils";
 import { useTopicBySubject } from "@/hooks/useTopics";
@@ -499,6 +495,7 @@ export function LogsHistory() {
                         onClick={() => {
                             const previousWeekStart = subWeeks(currentStart, 1);
                             setRange({
+                                rangeType: "week",
                                 startDate: previousWeekStart,
                                 endDate: endOfWeek(previousWeekStart, { weekStartsOn: 1 }),
                             });
@@ -512,6 +509,7 @@ export function LogsHistory() {
                         onClick={() => {
                             const nextWeekStart = addWeeks(currentStart, 1);
                             setRange({
+                                rangeType: "week",
                                 startDate: nextWeekStart,
                                 endDate: endOfWeek(nextWeekStart, { weekStartsOn: 1 }),
                             });
