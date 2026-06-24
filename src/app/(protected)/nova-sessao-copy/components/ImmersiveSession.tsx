@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { ArrowBigUp, Loader } from "lucide-react";
 import { FormProvider, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -41,6 +41,21 @@ export function ImmersiveSession() {
 
   const [zenMode, setZenMode] = useState(false);
   const [isDetailsOpen, setIsDetailsOpen] = useState(false);
+
+  const isRunning = useCronometerStore((state) => state.cronometer.isRunning);
+
+  useEffect(() => {
+    const handleBeforeUnload = (e: BeforeUnloadEvent) => {
+      const isDirty = methods.getValues("subjectId") !== "" || seconds > 0 || isRunning;
+      if (isDirty) {
+        e.preventDefault();
+        e.returnValue = '';
+      }
+    };
+
+    window.addEventListener("beforeunload", handleBeforeUnload);
+    return () => window.removeEventListener("beforeunload", handleBeforeUnload);
+  }, [methods, seconds, isRunning]);
 
   const onSubmit = async (data: StudySessionFormData) => {
     console.log("Submit Try", data);

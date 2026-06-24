@@ -3,6 +3,7 @@
 import { prisma } from "@/lib/prisma";
 import { connection } from "next/server";
 import { requireAuth } from "./requireAuth";
+import { revalidatePath } from "next/cache";
 
 const include = {
     topic: {
@@ -46,7 +47,7 @@ export interface StudyLogInput {
 
 export async function createStudyLogAction(data: StudyLogInput) {
     await requireAuth();
-    return prisma.studyLogs.create({
+    const result = await prisma.studyLogs.create({
         data: {
             topicId: data.topic_id,
             study_date: new Date(`${data.study_date}T00:00:00Z`),
@@ -58,6 +59,9 @@ export async function createStudyLogAction(data: StudyLogInput) {
         },
         include,
     });
+    revalidatePath("/dashboard");
+    revalidatePath("/historico");
+    return result;
 }
 
 export interface UpdateStudyLogInput {
@@ -86,18 +90,24 @@ export async function updateStudyLogAction(data: UpdateStudyLogInput) {
     if (data.duration_minutes !== undefined) updateData.duration_minutes = data.duration_minutes;
     if (data.notes !== undefined) updateData.notes = data.notes;
 
-    return prisma.studyLogs.update({
+    const result = await prisma.studyLogs.update({
         where: { id: data.id },
         data: updateData,
         include,
     });
+    revalidatePath("/dashboard");
+    revalidatePath("/historico");
+    return result;
 }
 
 export async function deleteStudyLogAction(id: string) {
     await requireAuth();
-    return prisma.studyLogs.delete({
+    const result = await prisma.studyLogs.delete({
         where: { id },
     });
+    revalidatePath("/dashboard");
+    revalidatePath("/historico");
+    return result;
 }
 
 export async function getLastStudyLogAction() {
