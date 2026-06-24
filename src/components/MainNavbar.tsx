@@ -126,8 +126,11 @@ export default function MainNavbar() {
                                 <DropdownMenuContent>
                                     <DropdownMenuGroup>
                                         <DropdownMenuItem
-                                            onSelect={() => { }}
-                                        >Perfil</DropdownMenuItem>
+                                            onClick={() => router.push("/profile")}
+                                        >
+                                            <User />
+                                            Perfil
+                                        </DropdownMenuItem>
                                     </DropdownMenuGroup>
                                     <Separator />
                                     <DropdownMenuGroup>
@@ -135,7 +138,7 @@ export default function MainNavbar() {
                                             onSelect={() => handleSignOut()}
                                         >
                                             <LogOut />
-                                            SIgnOUt
+                                            Sair
                                         </DropdownMenuItem>
                                     </DropdownMenuGroup>
                                 </DropdownMenuContent>

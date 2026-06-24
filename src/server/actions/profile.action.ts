@@ -13,7 +13,7 @@ import type {
 
 export async function getProfileDataAction(username?: string): Promise<ProfileData> {
   const currentUser = await requireAuth();
-  
+
   let targetUserId = currentUser.id;
 
   if (username) {
@@ -21,7 +21,7 @@ export async function getProfileDataAction(username?: string): Promise<ProfileDa
       where: { username },
       include: { user: true }
     });
-    
+
     if (!targetProfile) {
       throw new Error("Perfil não encontrado");
     }
@@ -79,7 +79,7 @@ export async function getProfileDataAction(username?: string): Promise<ProfileDa
   const heatmap: Record<string, number> = {};
   let totalMinutes = 0;
   const uniqueStudyDays = new Set<string>();
-  
+
   // Basic Stats Calculation
   const subjectMap = new Map<string, { name: string; color: string; minutes: number }>();
 
@@ -121,18 +121,18 @@ export async function getProfileDataAction(username?: string): Promise<ProfileDa
   let currentStreakCount = 0;
   const msInDay = 1000 * 60 * 60 * 24;
   const currentDateObj = new Date();
-  currentDateObj.setHours(0,0,0,0);
-  
-  for (let i=0; i<365; i++) {
-     const d = new Date(currentDateObj.getTime() - i * msInDay);
-     const dStr = d.toISOString().split("T")[0];
-     if (uniqueStudyDays.has(dStr)) {
-         currentStreakCount++;
-     } else if (i === 0) {
-         // It's okay if they haven't studied today yet
-     } else {
-         break;
-     }
+  currentDateObj.setHours(0, 0, 0, 0);
+
+  for (let i = 0; i < 365; i++) {
+    const d = new Date(currentDateObj.getTime() - i * msInDay);
+    const dStr = d.toISOString().split("T")[0];
+    if (uniqueStudyDays.has(dStr)) {
+      currentStreakCount++;
+    } else if (i === 0) {
+      // It's okay if they haven't studied today yet
+    } else {
+      break;
+    }
   }
   const currentStreak = currentStreakCount;
   const longestStreak = currentStreakCount > 10 ? currentStreakCount : 12; // Placeholder for longest streak
@@ -143,9 +143,9 @@ export async function getProfileDataAction(username?: string): Promise<ProfileDa
     studyDays: uniqueStudyDays.size,
     currentStreak,
     longestStreak,
-    bestWeekMinutes: 0, 
+    bestWeekMinutes: 0,
     bestWeekLabel: "Última Semana",
-    weeklyMinutes: 0,   
+    weeklyMinutes: 0,
     avgMinutesPerDay: uniqueStudyDays.size > 0 ? Math.round(totalMinutes / uniqueStudyDays.size) : 0,
   };
 
@@ -154,9 +154,9 @@ export async function getProfileDataAction(username?: string): Promise<ProfileDa
     where: { userId: targetUserId },
     include: { badge: true }
   });
-  
+
   const allBadges = await prisma.badge.findMany();
-  
+
   const badges: ProfileBadge[] = allBadges.map(b => ({
     emoji: b.emoji,
     name: b.name,
@@ -177,7 +177,7 @@ export async function getProfileDataAction(username?: string): Promise<ProfileDa
 
 export async function toggleFollowUser(targetUserId: string) {
   const currentUser = await requireAuth();
-  
+
   if (currentUser.id === targetUserId) {
     throw new Error("Você não pode seguir a si mesmo");
   }
@@ -222,7 +222,7 @@ export async function updateProfile(data: {
   linkedin?: string;
 }) {
   const currentUser = await requireAuth();
-  
+
   const profile = await prisma.profile.upsert({
     where: { userId: currentUser.id },
     update: data,
@@ -232,6 +232,6 @@ export async function updateProfile(data: {
       username: data.username || `user_${currentUser.id.slice(0, 8)}`
     }
   });
-  
+
   return profile;
 }
