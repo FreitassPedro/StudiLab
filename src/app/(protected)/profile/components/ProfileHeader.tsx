@@ -114,10 +114,17 @@ export function ProfileHeader({ user, stats }: ProfileHeaderProps) {
           </span>
         </div>
 
-        {/* Email as username */}
+        {/* Username / Email */}
         <div className="mb-2.5 text-[13px] text-white/40">
-          @{user.email.split("@")[0]}
+          @{user.username || user.email.split("@")[0]}
         </div>
+
+        {/* Bio */}
+        {user.bio && (
+          <div className="mb-3 text-[14px] text-white/80 max-w-xl">
+            {user.bio}
+          </div>
+        )}
 
         {/* Status based on last subject */}
         <div className="mb-3 inline-flex items-center gap-2 rounded-full border border-white/[0.08] bg-white/[0.04] px-3.5 py-1.5">
@@ -127,8 +134,15 @@ export function ProfileHeader({ user, stats }: ProfileHeaderProps) {
           </span>
         </div>
 
-        {/* Stat pills */}
+        {/* Social Counts & Stat pills */}
         <div className="flex flex-wrap items-center gap-2">
+          {user.followersCount !== undefined && (
+            <StatPill value={String(user.followersCount)} label="Seguidores" />
+          )}
+          {user.followingCount !== undefined && (
+            <StatPill value={String(user.followingCount)} label="Seguindo" />
+          )}
+          
           <StatPill value={totalHoursLabel} label="estudadas" />
           <StatPill value={consistency} label="consistência" />
           <StatPill value={String(stats.studyDays)} label="dias registrados" />

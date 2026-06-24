@@ -60,7 +60,7 @@ export default async function ProfilePage() {
         <ThemeSwitcher />
 
         {/* Banner */}
-        <ProfileBanner />
+        <ProfileBanner coverImage={data.user.coverImage} />
         <MainPage data={data} />
 
 
