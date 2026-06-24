@@ -48,7 +48,6 @@ export function Cronometer({ goalMinutes = 50 }: { goalMinutes?: number }) {
 
     const progress = Math.min(seconds / (goalMinutes === 0 ? 1 : goalMinutes * 60), 1);
 
-
     console.log("Seconds: ", seconds)
 
     return (

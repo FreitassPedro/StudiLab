@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { ArrowBigUp, Loader } from "lucide-react";
 import { FormProvider, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -22,7 +22,6 @@ import { Card, CardContent } from "@/components/ui/card";
 export function ImmersiveSession() {
   const router = useRouter();
   const createStudyLog = useCreateStudyLog();
-  const seconds = useCronometerStore((state) => state.cronometer.seconds);
   const resetCronometer = useCronometerStore((state) => state.resetCronometer);
 
   const methods = useForm<StudySessionFormData>({
@@ -37,25 +36,10 @@ export function ImmersiveSession() {
     },
   });
 
-  const { isSubmitting, errors } = methods.formState;
+  const { isSubmitting } = methods.formState;
 
   const [zenMode, setZenMode] = useState(false);
   const [isDetailsOpen, setIsDetailsOpen] = useState(false);
-
-  const isRunning = useCronometerStore((state) => state.cronometer.isRunning);
-
-  useEffect(() => {
-    const handleBeforeUnload = (e: BeforeUnloadEvent) => {
-      const isDirty = methods.getValues("subjectId") !== "" || seconds > 0 || isRunning;
-      if (isDirty) {
-        e.preventDefault();
-        e.returnValue = '';
-      }
-    };
-
-    window.addEventListener("beforeunload", handleBeforeUnload);
-    return () => window.removeEventListener("beforeunload", handleBeforeUnload);
-  }, [methods, seconds, isRunning]);
 
   const onSubmit = async (data: StudySessionFormData) => {
     console.log("Submit Try", data);
@@ -64,6 +48,7 @@ export function ImmersiveSession() {
       return;
     }
 
+    const { seconds } = useCronometerStore.getState().cronometer;
     const mins = Math.max(1, Math.round(seconds / 60));
 
     const payload: StudyLogInput = {

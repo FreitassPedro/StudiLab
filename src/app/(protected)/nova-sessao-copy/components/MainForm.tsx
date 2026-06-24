@@ -48,7 +48,6 @@ export function MainSection({
     const resetCronometer = useCronometerStore((state) => state.resetCronometer);
     const startTicking = useCronometerStore((state) => state.startTicking);
     const stopTicking = useCronometerStore((state) => state.stopTicking);
-    const seconds = useCronometerStore((state) => state.cronometer.seconds);
 
     // Local UI state
     const [selectedGoal, setSelectedGoal] = useState(50);
@@ -77,6 +76,9 @@ export function MainSection({
     // Handlers
     const handleStart = () => {
         const now = new Date();
+        // Behavior: Reads the current value of the store outside of React's lifecycle.
+        // const seconds = useCronometerStore((state ) => state.cronometer.seconds);Behavior: Subscribes to the specific seconds property inside the store using a selector.Re-renders: Triggers an automatic re-render of the component only when the seconds value changes.
+        const { seconds } = useCronometerStore.getState().cronometer;
         if (!isCronometerRunning && seconds === 0) {
             updateCronometer({ startTime: now, endTime: null });
             setValue("start_time", now);
@@ -178,40 +180,41 @@ export function MainSection({
                             </SelectContent>
                         </Select>
                     </div>
-
                     {/* Current Topic Indicator */}
-                    <div className="flex-1 space-y-1 w-full transition-opacity duration-300" style={{ opacity: subjectId ? 1 : 0.5, pointerEvents: subjectId ? 'auto' : 'none' }}>
-                        <Label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider ml-1">Tópico</Label>
-                        <div className="flex items-center">
-                            <Select
-                                value={topicId}
-                                onValueChange={(value) => setValue("topicId", value)}
-                                disabled={!subjectId}
-                            >
-                                <SelectTrigger className={cn("rounded-xl border-2 w-full", !topicId && "border-dashed")}>
-                                    <SelectValue placeholder={subjectId && (!topics || topics.length === 0) ? "Sem tópicos" : "Selecione..."} />
-                                </SelectTrigger>
-                                <SelectContent>
-                                    {topics && topics.map((t) => (
-                                        <SelectItem key={t.id} value={t.id}>
-                                            {t.name}
-                                        </SelectItem>
-                                    ))}
-                                </SelectContent>
-                            </Select>
-                            <Button
-                                type="button"
-                                variant="outline"
-                                size="icon"
-                                onClick={() => setNewTopicDialogOpen(true)}
-                                className="h-8 w-8 shrink-0 rounded-xl border hover:bg-primary/10 hover:text-primary transition-colors"
-                                title="Novo tópico"
-                                disabled={!subjectId}
-                            >
-                                <Plus className="h-5 w-5" />
-                            </Button>
+                    {subjectId && (
+                        < div className="flex-1 space-y-1 w-full transition-opacity duration-300" style={{ opacity: subjectId ? 1 : 0.5, pointerEvents: subjectId ? 'auto' : 'none' }}>
+                            <Label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider ml-1">Tópico</Label>
+                            <div className="flex items-center">
+                                <Select
+                                    value={topicId}
+                                    onValueChange={(value) => setValue("topicId", value)}
+                                    disabled={!subjectId}
+                                >
+                                    <SelectTrigger className={cn("rounded-xl border-2 w-full", !topicId && "border-dashed")}>
+                                        <SelectValue placeholder={subjectId && (!topics || topics.length === 0) ? "Sem tópicos" : "Selecione..."} />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        {topics && topics.map((t) => (
+                                            <SelectItem key={t.id} value={t.id}>
+                                                {t.name}
+                                            </SelectItem>
+                                        ))}
+                                    </SelectContent>
+                                </Select>
+                                <Button
+                                    type="button"
+                                    variant="outline"
+                                    size="icon"
+                                    onClick={() => setNewTopicDialogOpen(true)}
+                                    className="h-8 w-8 shrink-0 rounded-xl border hover:bg-primary/10 hover:text-primary transition-colors"
+                                    title="Novo tópico"
+                                    disabled={!subjectId}
+                                >
+                                    <Plus className="h-5 w-5" />
+                                </Button>
+                            </div>
                         </div>
-                    </div>
+                    )}
                 </div>
             </div>
             {/* Controls */}
