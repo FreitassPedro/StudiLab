@@ -1271,6 +1271,7 @@ export const SubjectScalarFieldEnum = {
   id: 'id',
   name: 'name',
   color: 'color',
+  icon: 'icon',
   created_at: 'created_at',
   userId: 'userId',
   isArchived: 'isArchived',

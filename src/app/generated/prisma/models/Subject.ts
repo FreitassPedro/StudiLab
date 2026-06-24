@@ -28,6 +28,7 @@ export type SubjectMinAggregateOutputType = {
   id: string | null
   name: string | null
   color: string | null
+  icon: string | null
   created_at: Date | null
   userId: string | null
   isArchived: boolean | null
@@ -38,6 +39,7 @@ export type SubjectMaxAggregateOutputType = {
   id: string | null
   name: string | null
   color: string | null
+  icon: string | null
   created_at: Date | null
   userId: string | null
   isArchived: boolean | null
@@ -48,6 +50,7 @@ export type SubjectCountAggregateOutputType = {
   id: number
   name: number
   color: number
+  icon: number
   created_at: number
   userId: number
   isArchived: number
@@ -60,6 +63,7 @@ export type SubjectMinAggregateInputType = {
   id?: true
   name?: true
   color?: true
+  icon?: true
   created_at?: true
   userId?: true
   isArchived?: true
@@ -70,6 +74,7 @@ export type SubjectMaxAggregateInputType = {
   id?: true
   name?: true
   color?: true
+  icon?: true
   created_at?: true
   userId?: true
   isArchived?: true
@@ -80,6 +85,7 @@ export type SubjectCountAggregateInputType = {
   id?: true
   name?: true
   color?: true
+  icon?: true
   created_at?: true
   userId?: true
   isArchived?: true
@@ -163,6 +169,7 @@ export type SubjectGroupByOutputType = {
   id: string
   name: string
   color: string
+  icon: string | null
   created_at: Date
   userId: string
   isArchived: boolean
@@ -194,6 +201,7 @@ export type SubjectWhereInput = {
   id?: Prisma.StringFilter<"Subject"> | string
   name?: Prisma.StringFilter<"Subject"> | string
   color?: Prisma.StringFilter<"Subject"> | string
+  icon?: Prisma.StringNullableFilter<"Subject"> | string | null
   created_at?: Prisma.DateTimeFilter<"Subject"> | Date | string
   userId?: Prisma.StringFilter<"Subject"> | string
   isArchived?: Prisma.BoolFilter<"Subject"> | boolean
@@ -206,6 +214,7 @@ export type SubjectOrderByWithRelationInput = {
   id?: Prisma.SortOrder
   name?: Prisma.SortOrder
   color?: Prisma.SortOrder
+  icon?: Prisma.SortOrderInput | Prisma.SortOrder
   created_at?: Prisma.SortOrder
   userId?: Prisma.SortOrder
   isArchived?: Prisma.SortOrder
@@ -221,6 +230,7 @@ export type SubjectWhereUniqueInput = Prisma.AtLeast<{
   NOT?: Prisma.SubjectWhereInput | Prisma.SubjectWhereInput[]
   name?: Prisma.StringFilter<"Subject"> | string
   color?: Prisma.StringFilter<"Subject"> | string
+  icon?: Prisma.StringNullableFilter<"Subject"> | string | null
   created_at?: Prisma.DateTimeFilter<"Subject"> | Date | string
   userId?: Prisma.StringFilter<"Subject"> | string
   isArchived?: Prisma.BoolFilter<"Subject"> | boolean
@@ -233,6 +243,7 @@ export type SubjectOrderByWithAggregationInput = {
   id?: Prisma.SortOrder
   name?: Prisma.SortOrder
   color?: Prisma.SortOrder
+  icon?: Prisma.SortOrderInput | Prisma.SortOrder
   created_at?: Prisma.SortOrder
   userId?: Prisma.SortOrder
   isArchived?: Prisma.SortOrder
@@ -249,6 +260,7 @@ export type SubjectScalarWhereWithAggregatesInput = {
   id?: Prisma.StringWithAggregatesFilter<"Subject"> | string
   name?: Prisma.StringWithAggregatesFilter<"Subject"> | string
   color?: Prisma.StringWithAggregatesFilter<"Subject"> | string
+  icon?: Prisma.StringNullableWithAggregatesFilter<"Subject"> | string | null
   created_at?: Prisma.DateTimeWithAggregatesFilter<"Subject"> | Date | string
   userId?: Prisma.StringWithAggregatesFilter<"Subject"> | string
   isArchived?: Prisma.BoolWithAggregatesFilter<"Subject"> | boolean
@@ -259,6 +271,7 @@ export type SubjectCreateInput = {
   id?: string
   name: string
   color: string
+  icon?: string | null
   created_at?: Date | string
   isArchived: boolean
   isOpen: boolean
@@ -270,6 +283,7 @@ export type SubjectUncheckedCreateInput = {
   id?: string
   name: string
   color: string
+  icon?: string | null
   created_at?: Date | string
   userId: string
   isArchived: boolean
@@ -281,6 +295,7 @@ export type SubjectUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
   color?: Prisma.StringFieldUpdateOperationsInput | string
+  icon?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   isArchived?: Prisma.BoolFieldUpdateOperationsInput | boolean
   isOpen?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -292,6 +307,7 @@ export type SubjectUncheckedUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
   color?: Prisma.StringFieldUpdateOperationsInput | string
+  icon?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   userId?: Prisma.StringFieldUpdateOperationsInput | string
   isArchived?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -303,6 +319,7 @@ export type SubjectCreateManyInput = {
   id?: string
   name: string
   color: string
+  icon?: string | null
   created_at?: Date | string
   userId: string
   isArchived: boolean
@@ -313,6 +330,7 @@ export type SubjectUpdateManyMutationInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
   color?: Prisma.StringFieldUpdateOperationsInput | string
+  icon?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   isArchived?: Prisma.BoolFieldUpdateOperationsInput | boolean
   isOpen?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -322,6 +340,7 @@ export type SubjectUncheckedUpdateManyInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
   color?: Prisma.StringFieldUpdateOperationsInput | string
+  icon?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   userId?: Prisma.StringFieldUpdateOperationsInput | string
   isArchived?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -332,6 +351,7 @@ export type SubjectCountOrderByAggregateInput = {
   id?: Prisma.SortOrder
   name?: Prisma.SortOrder
   color?: Prisma.SortOrder
+  icon?: Prisma.SortOrder
   created_at?: Prisma.SortOrder
   userId?: Prisma.SortOrder
   isArchived?: Prisma.SortOrder
@@ -342,6 +362,7 @@ export type SubjectMaxOrderByAggregateInput = {
   id?: Prisma.SortOrder
   name?: Prisma.SortOrder
   color?: Prisma.SortOrder
+  icon?: Prisma.SortOrder
   created_at?: Prisma.SortOrder
   userId?: Prisma.SortOrder
   isArchived?: Prisma.SortOrder
@@ -352,6 +373,7 @@ export type SubjectMinOrderByAggregateInput = {
   id?: Prisma.SortOrder
   name?: Prisma.SortOrder
   color?: Prisma.SortOrder
+  icon?: Prisma.SortOrder
   created_at?: Prisma.SortOrder
   userId?: Prisma.SortOrder
   isArchived?: Prisma.SortOrder
@@ -375,6 +397,10 @@ export type SubjectOrderByRelationAggregateInput = {
 
 export type StringFieldUpdateOperationsInput = {
   set?: string
+}
+
+export type NullableStringFieldUpdateOperationsInput = {
+  set?: string | null
 }
 
 export type DateTimeFieldUpdateOperationsInput = {
@@ -445,6 +471,7 @@ export type SubjectCreateWithoutTopicsInput = {
   id?: string
   name: string
   color: string
+  icon?: string | null
   created_at?: Date | string
   isArchived: boolean
   isOpen: boolean
@@ -455,6 +482,7 @@ export type SubjectUncheckedCreateWithoutTopicsInput = {
   id?: string
   name: string
   color: string
+  icon?: string | null
   created_at?: Date | string
   userId: string
   isArchived: boolean
@@ -481,6 +509,7 @@ export type SubjectUpdateWithoutTopicsInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
   color?: Prisma.StringFieldUpdateOperationsInput | string
+  icon?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   isArchived?: Prisma.BoolFieldUpdateOperationsInput | boolean
   isOpen?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -491,6 +520,7 @@ export type SubjectUncheckedUpdateWithoutTopicsInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
   color?: Prisma.StringFieldUpdateOperationsInput | string
+  icon?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   userId?: Prisma.StringFieldUpdateOperationsInput | string
   isArchived?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -501,6 +531,7 @@ export type SubjectCreateWithoutUserInput = {
   id?: string
   name: string
   color: string
+  icon?: string | null
   created_at?: Date | string
   isArchived: boolean
   isOpen: boolean
@@ -511,6 +542,7 @@ export type SubjectUncheckedCreateWithoutUserInput = {
   id?: string
   name: string
   color: string
+  icon?: string | null
   created_at?: Date | string
   isArchived: boolean
   isOpen: boolean
@@ -550,6 +582,7 @@ export type SubjectScalarWhereInput = {
   id?: Prisma.StringFilter<"Subject"> | string
   name?: Prisma.StringFilter<"Subject"> | string
   color?: Prisma.StringFilter<"Subject"> | string
+  icon?: Prisma.StringNullableFilter<"Subject"> | string | null
   created_at?: Prisma.DateTimeFilter<"Subject"> | Date | string
   userId?: Prisma.StringFilter<"Subject"> | string
   isArchived?: Prisma.BoolFilter<"Subject"> | boolean
@@ -560,6 +593,7 @@ export type SubjectCreateManyUserInput = {
   id?: string
   name: string
   color: string
+  icon?: string | null
   created_at?: Date | string
   isArchived: boolean
   isOpen: boolean
@@ -569,6 +603,7 @@ export type SubjectUpdateWithoutUserInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
   color?: Prisma.StringFieldUpdateOperationsInput | string
+  icon?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   isArchived?: Prisma.BoolFieldUpdateOperationsInput | boolean
   isOpen?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -579,6 +614,7 @@ export type SubjectUncheckedUpdateWithoutUserInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
   color?: Prisma.StringFieldUpdateOperationsInput | string
+  icon?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   isArchived?: Prisma.BoolFieldUpdateOperationsInput | boolean
   isOpen?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -589,6 +625,7 @@ export type SubjectUncheckedUpdateManyWithoutUserInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
   color?: Prisma.StringFieldUpdateOperationsInput | string
+  icon?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   created_at?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   isArchived?: Prisma.BoolFieldUpdateOperationsInput | boolean
   isOpen?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -629,6 +666,7 @@ export type SubjectSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs 
   id?: boolean
   name?: boolean
   color?: boolean
+  icon?: boolean
   created_at?: boolean
   userId?: boolean
   isArchived?: boolean
@@ -642,6 +680,7 @@ export type SubjectSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Exten
   id?: boolean
   name?: boolean
   color?: boolean
+  icon?: boolean
   created_at?: boolean
   userId?: boolean
   isArchived?: boolean
@@ -653,6 +692,7 @@ export type SubjectSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Exten
   id?: boolean
   name?: boolean
   color?: boolean
+  icon?: boolean
   created_at?: boolean
   userId?: boolean
   isArchived?: boolean
@@ -664,13 +704,14 @@ export type SubjectSelectScalar = {
   id?: boolean
   name?: boolean
   color?: boolean
+  icon?: boolean
   created_at?: boolean
   userId?: boolean
   isArchived?: boolean
   isOpen?: boolean
 }
 
-export type SubjectOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "name" | "color" | "created_at" | "userId" | "isArchived" | "isOpen", ExtArgs["result"]["subject"]>
+export type SubjectOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "name" | "color" | "icon" | "created_at" | "userId" | "isArchived" | "isOpen", ExtArgs["result"]["subject"]>
 export type SubjectInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
   topics?: boolean | Prisma.Subject$topicsArgs<ExtArgs>
@@ -693,6 +734,7 @@ export type $SubjectPayload<ExtArgs extends runtime.Types.Extensions.InternalArg
     id: string
     name: string
     color: string
+    icon: string | null
     created_at: Date
     userId: string
     isArchived: boolean
@@ -1125,6 +1167,7 @@ export interface SubjectFieldRefs {
   readonly id: Prisma.FieldRef<"Subject", 'String'>
   readonly name: Prisma.FieldRef<"Subject", 'String'>
   readonly color: Prisma.FieldRef<"Subject", 'String'>
+  readonly icon: Prisma.FieldRef<"Subject", 'String'>
   readonly created_at: Prisma.FieldRef<"Subject", 'DateTime'>
   readonly userId: Prisma.FieldRef<"Subject", 'String'>
   readonly isArchived: Prisma.FieldRef<"Subject", 'Boolean'>

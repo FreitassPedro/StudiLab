@@ -11,6 +11,7 @@ model Subject {
   id         String   @id @default(uuid())
   name       String
   color      String
+  icon String?
   created_at DateTime @default(now()) @db.Timestamptz(3)
   userId     String
   isArchived Boolean

@@ -70,7 +70,7 @@ interface ThemeContextValue {
 
 const ThemeContext = createContext<ThemeContextValue>({
   theme: "cyberpunk",
-  setTheme: () => {},
+  setTheme: () => { },
   accent: THEME_ACCENT["cyberpunk"],
 });
 

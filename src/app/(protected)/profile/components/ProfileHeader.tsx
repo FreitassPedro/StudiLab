@@ -37,7 +37,7 @@ function AvatarFrame({
 
   return (
     <div
-      className="h-[108px] w-[108px] flex-shrink-0 z-10 rounded-full p-[3px]"
+      className="h-[180px] w-[180px] shrink-0 z-10 rounded-full p-[3px]"
       style={{
         background: `linear-gradient(135deg, ${accent.accent}, ${accent.accent2})`,
       }}
@@ -127,11 +127,15 @@ export function ProfileHeader({ user, stats }: ProfileHeaderProps) {
         )}
 
         {/* Status based on last subject */}
-        <div className="mb-3 inline-flex items-center gap-2 rounded-full border border-white/[0.08] bg-white/[0.04] px-3.5 py-1.5">
+        <div className="mb-3 inline-flex items-center gap-2 rounded-full border border-white/8 bg-white/[0.04] px-3.5 py-1.5">
           <span>📖</span>
           <span className="text-[13px] text-white/70">
             Olá, {firstName}! Bem-vindo ao seu perfil
           </span>
+        </div>
+        {/*}
+        <div>
+
         </div>
 
         {/* Social Counts & Stat pills */}
