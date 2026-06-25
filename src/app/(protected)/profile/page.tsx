@@ -12,12 +12,12 @@ import { AchievementBadges } from "./components/AchievementBadges";
 import { Suspense } from "react";
 import { ProfileData, Theme } from "./types";
 
-async function MainPage({ data, isOwner, isFollowing }: { data: ProfileData, isOwner: boolean, isFollowing: boolean }) {
+async function MainPage({ data }: { data: ProfileData }) {
 
   return (
     <main className="mx-auto max-w-5xl px-5 pb-20">
       <Suspense>
-        <ProfileHeader user={data.user} stats={data.stats} isOwner={isOwner} isFollowing={isFollowing} />
+        <ProfileHeader user={data.user} stats={data.stats} isOwner={data.isOwner} isFollowing={data.isFollowing} />
 
         <ShowcaseGrid stats={data.stats} />
 
@@ -47,7 +47,7 @@ export default async function ProfilePage() {
 
         {/* Banner */}
         <ProfileBanner coverImage={data.user.coverImage} />
-        <MainPage data={data} isOwner={true} isFollowing={false} />
+        <MainPage data={data} />
 
 
       </div>

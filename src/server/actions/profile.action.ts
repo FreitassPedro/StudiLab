@@ -15,45 +15,67 @@ import { notFound } from "next/navigation";
 export async function getProfileDataAction(username?: string): Promise<ProfileData> {
   const currentUser = await requireAuth();
 
-  let targetUserId = currentUser.id;
+  const targetUserWhere = username ? { profile: { username } } : { id: currentUser.id };
 
-  if (username) {
-    const targetProfile = await prisma.profile.findUnique({
-      where: { username },
-      include: { user: true }
-    });
-
-    if (!targetProfile) {
-      notFound();
-    }
-    if (targetProfile.userId !== currentUser.id && !targetProfile.isPublic) {
-      notFound();
-    }
-    targetUserId = targetProfile.userId;
-  }
-
-  // Fetch User, Study Logs, and Badges in parallel
   const today = new Date();
   const fifteenDaysAgo = new Date();
   fifteenDaysAgo.setDate(today.getDate() - 14);
 
-  const [userRecord, studyLogs, allBadges] = await Promise.all([
-    prisma.user.findUnique({
-      where: { id: targetUserId },
-      include: {
-        profile: true,
-        _count: {
-          select: { followers: true, following: true }
-        },
-        badges: {
-          include: { badge: true }
-        }
+
+  // 1. Fetch exactly what we need for the user first
+  const userRecord = await prisma.user.findFirst({
+    where: targetUserWhere,
+    select: {
+      id: true,
+      name: true,
+      email: true,
+      image: true,
+      createdAt: true,
+      profile: true,
+      _count: {
+        select: { followers: true, following: true }
+      },
+      badges: {
+        select: { badgeId: true }
       }
-    }),
+    }
+  });
+
+  console.log("userRecord found:", userRecord ? `Yes (id: ${userRecord.id}, hasProfile: ${!!userRecord.profile})` : "No");
+
+  if (!userRecord) {
+    console.log("Throwing notFound because userRecord is null!");
+    notFound();
+  }
+
+  const isOwner = userRecord.id === currentUser.id;
+  console.log("isOwner:", isOwner);
+
+  // Auto-create profile for legacy users who signed up before the trigger existed
+  if (isOwner && !userRecord.profile) {
+    console.log("Auto-creating profile for legacy user:", currentUser.id);
+    const newProfile = await prisma.profile.create({
+      data: {
+        userId: currentUser.id,
+        username: userRecord.email.split("@")[0] + "_" + currentUser.id.slice(0, 4),
+        isPublic: true,
+      }
+    });
+    userRecord.profile = newProfile;
+    console.log("Profile created:", newProfile.username);
+  }
+
+  if (!isOwner && !userRecord.profile?.isPublic) {
+    console.log("Throwing notFound because not owner and not public");
+    notFound();
+  }
+
+  // 2. Fetch dependencies using the precise target user ID (much faster, no JOINs)
+  const [studyLogs, allBadges, isFollowingData] = await Promise.all([
     prisma.studyLogs.findMany({
       where: {
         topic: {
-          subject: { userId: targetUserId }
+          subject: { userId: userRecord.id }
         },
         study_date: {
           gte: fifteenDaysAgo,
@@ -65,7 +87,15 @@ export async function getProfileDataAction(username?: string): Promise<ProfileDa
       },
       orderBy: { start_time: "desc" }
     }),
-    prisma.badge.findMany()
+    prisma.badge.findMany(),
+    username && !isOwner ? prisma.follows.findUnique({
+      where: {
+        followerId_followingId: {
+          followerId: currentUser.id,
+          followingId: userRecord.id
+        }
+      }
+    }) : Promise.resolve(null)
   ]);
 
   // Calculate Heatmap
@@ -178,6 +208,8 @@ export async function getProfileDataAction(username?: string): Promise<ProfileDa
     recentSessions,
     heatmap,
     badges,
+    isOwner,
+    isFollowing: !!isFollowingData,
   };
 }
 

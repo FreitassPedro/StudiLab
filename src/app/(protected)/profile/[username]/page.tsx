@@ -13,11 +13,11 @@ import { ProfileData, Theme } from "../types";
 import { requireAuth } from "@/server/actions/requireAuth";
 import { checkIsFollowing } from "@/server/actions/follow.action";
 
-async function MainPage({ data, isOwner, isFollowing }: { data: ProfileData, isOwner: boolean, isFollowing: boolean }) {
+async function MainPage({ data }: { data: ProfileData }) {
   return (
     <main className="mx-auto max-w-5xl px-5 pb-20">
       <Suspense>
-        <ProfileHeader user={data.user} stats={data.stats} isOwner={isOwner} isFollowing={isFollowing} />
+        <ProfileHeader user={data.user} stats={data.stats} isOwner={data.isOwner} isFollowing={data.isFollowing} />
         <ShowcaseGrid stats={data.stats} />
         <StudyHeatmap heatmap={data.heatmap} />
         <TopSubjects subjects={data.topSubjects} />
@@ -36,11 +36,6 @@ interface PageProps {
 export default async function UsernameProfilePage({ params }: PageProps) {
   const { username } = await params;
   const data = await getProfileDataAction(username);
-  const currentUser = await requireAuth();
-  const isOwner = currentUser.id === data.user.id;
-  const isFollowing = !isOwner ? await checkIsFollowing(data.user.id) : false;
-
-  
 
   return (
     <ProfileThemeProvider initialTheme={data.user.theme as Theme}>
@@ -48,7 +43,7 @@ export default async function UsernameProfilePage({ params }: PageProps) {
       <div className="min-h-screen bg-[#0a0a0f] font-['Inter',sans-serif] text-[#e2e8f0]">
         {/* Banner */}
         <ProfileBanner coverImage={data.user.coverImage} />
-        <MainPage data={data} isOwner={isOwner} isFollowing={isFollowing} />
+        <MainPage data={data} />
       </div>
     </ProfileThemeProvider>
   );

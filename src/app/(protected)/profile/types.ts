@@ -90,4 +90,6 @@ export interface ProfileData {
   recentSessions: ProfileSession[];
   heatmap: Record<string, number>; // "YYYY-MM-DD" → total minutes
   badges: ProfileBadge[];
+  isOwner: boolean;
+  isFollowing: boolean;
 }
