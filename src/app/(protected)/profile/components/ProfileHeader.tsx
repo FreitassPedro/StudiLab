@@ -6,11 +6,13 @@ import { THEME_CONFIGS, useProfileTheme } from "./ThemeContext";
 import type { ProfileUser, ProfileStats, Theme } from "../types";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { updateProfile } from "@/server/actions/profile.action";
 import { Pencil } from "lucide-react";
+import { AccountSettingsCard } from "./AccountSettingsCard";
 
 function ThemeSwitcherProfile({ theme, setTheme }: { theme: Theme; setTheme: (t: Theme) => void }) {
   return (
@@ -68,66 +70,88 @@ function EditDialog({ children, user }: { children: React.ReactNode; user: Profi
       <DialogTrigger asChild>
         {children}
       </DialogTrigger>
-      <DialogContent className="bg-[#12121a] border-white/10 text-white max-w-md">
-        <DialogHeader>
-          <DialogTitle>Editar Perfil</DialogTitle>
+      <DialogContent className="bg-[#12121a] border-white/10 text-white max-w-md p-0 overflow-hidden">
+        <DialogHeader className="px-6 pt-6">
+          <DialogTitle>Configurações</DialogTitle>
         </DialogHeader>
-        <div className="grid gap-4 py-4">
-          <div className="grid gap-2">
-            <Label htmlFor="coverImage">URL da Foto de Fundo</Label>
-            <Input
-              id="coverImage"
-              value={coverImage}
-              onChange={(e) => setCoverImage(e.target.value)}
-              className="bg-white/5 border-white/10 text-white"
-              placeholder="https://..."
-            />
+
+        <Tabs defaultValue="profile" className="w-full">
+          <div className="px-6">
+            <TabsList className="w-full bg-white/5 border border-white/10 p-1 rounded-xl mb-2">
+              <TabsTrigger value="profile" className="flex-1 rounded-lg data-[state=active]:bg-white/10 data-[state=active]:text-white text-white/60">
+                Perfil
+              </TabsTrigger>
+              <TabsTrigger value="account" className="flex-1 rounded-lg data-[state=active]:bg-white/10 data-[state=active]:text-white text-white/60">
+                Conta
+              </TabsTrigger>
+            </TabsList>
           </div>
-          <div className="grid gap-2">
-            <Label htmlFor="image">URL da Foto de Perfil</Label>
-            <Input
-              id="image"
-              value={image}
-              onChange={(e) => setImage(e.target.value)}
-              className="bg-white/5 border-white/10 text-white"
-              placeholder="https://..."
-            />
-          </div>
-          <div className="grid gap-2">
-            <Label htmlFor="name">Nome</Label>
-            <Input
-              id="name"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              className="bg-white/5 border-white/10 text-white"
-            />
-          </div>
-          <div className="grid gap-2">
-            <Label htmlFor="bio">Biografia</Label>
-            <Textarea
-              id="bio"
-              value={bio}
-              onChange={(e) => setBio(e.target.value)}
-              className="bg-white/5 border-white/10 text-white min-h-[100px]"
-            />
-          </div>
-          <ThemeSwitcherProfile
-            theme={theme as Theme}
-            setTheme={setTheme}
-          />
-        </div>
-        <div className="flex justify-end gap-2">
-          <Button variant="ghost" onClick={() => setOpen(false)}>
-            Cancelar
-          </Button>
-          <Button
-            onClick={handleSave}
-            disabled={loading}
-            className="bg-white text-black hover:bg-white/90"
-          >
-            {loading ? "Salvando..." : "Salvar"}
-          </Button>
-        </div>
+
+          {/* ABA DE PERFIL */}
+          <TabsContent value="profile" className="px-6 pb-6 m-0 focus-visible:outline-none">
+            <div className="grid gap-4 py-2">
+              <div className="grid gap-2">
+                <Label htmlFor="coverImage">URL da Foto de Fundo</Label>
+                <Input
+                  id="coverImage"
+                  value={coverImage}
+                  onChange={(e) => setCoverImage(e.target.value)}
+                  className="bg-white/5 border-white/10 text-white"
+                  placeholder="https://..."
+                />
+              </div>
+              <div className="grid gap-2">
+                <Label htmlFor="image">URL da Foto de Perfil</Label>
+                <Input
+                  id="image"
+                  value={image}
+                  onChange={(e) => setImage(e.target.value)}
+                  className="bg-white/5 border-white/10 text-white"
+                  placeholder="https://..."
+                />
+              </div>
+              <div className="grid gap-2">
+                <Label htmlFor="name">Nome</Label>
+                <Input
+                  id="name"
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  className="bg-white/5 border-white/10 text-white"
+                />
+              </div>
+              <div className="grid gap-2">
+                <Label htmlFor="bio">Biografia</Label>
+                <Textarea
+                  id="bio"
+                  value={bio}
+                  onChange={(e) => setBio(e.target.value)}
+                  className="bg-white/5 border-white/10 text-white min-h-[100px]"
+                />
+              </div>
+              <ThemeSwitcherProfile
+                theme={theme as Theme}
+                setTheme={setTheme}
+              />
+            </div>
+            <div className="flex justify-end gap-2 mt-4">
+              <Button variant="ghost" onClick={() => setOpen(false)} className="hover:bg-white/5 hover:text-white">
+                Cancelar
+              </Button>
+              <Button
+                onClick={handleSave}
+                disabled={loading}
+                className="bg-white text-black hover:bg-white/90"
+              >
+                {loading ? "Salvando..." : "Salvar"}
+              </Button>
+            </div>
+          </TabsContent>
+
+          {/* ABA DE CONTA */}
+          <TabsContent value="account" className="px-6 pb-6 m-0 focus-visible:outline-none max-h-[60vh] overflow-y-auto">
+            <AccountSettingsCard user={user} />
+          </TabsContent>
+        </Tabs>
       </DialogContent>
     </Dialog>
   );
