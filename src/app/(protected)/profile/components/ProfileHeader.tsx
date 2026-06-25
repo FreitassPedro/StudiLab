@@ -13,6 +13,7 @@ import { Label } from "@/components/ui/label";
 import { updateProfile } from "@/server/actions/profile.action";
 import { Pencil } from "lucide-react";
 import { AccountSettingsCard } from "./AccountSettingsCard";
+import { FollowButton } from "./FollowButton";
 
 function ThemeSwitcherProfile({ theme, setTheme }: { theme: Theme; setTheme: (t: Theme) => void }) {
   return (
@@ -224,6 +225,7 @@ interface ProfileHeaderProps {
   user: ProfileUser;
   stats: ProfileStats;
   isOwner: boolean;
+  isFollowing: boolean;
 }
 
 function formatHours(minutes: number): string {
@@ -240,7 +242,7 @@ function calcConsistency(studyDays: number, createdAt: Date): string {
   return `${pct}%`;
 }
 
-export function ProfileHeader({ user, stats, isOwner }: ProfileHeaderProps) {
+export function ProfileHeader({ user, stats, isOwner, isFollowing }: ProfileHeaderProps) {
   const { accent } = useProfileTheme();
 
   const totalHoursLabel = formatHours(stats.totalMinutes);
@@ -307,6 +309,10 @@ export function ProfileHeader({ user, stats, isOwner }: ProfileHeaderProps) {
               Editar Perfil
             </Button>
           </EditDialog>
+        )}
+
+        {!isOwner && (
+          <FollowButton targetUserId={user.id} initialIsFollowing={isFollowing} />
         )}
 
         {/* Social Counts & Stat pills 
