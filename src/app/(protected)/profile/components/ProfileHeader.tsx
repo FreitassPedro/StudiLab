@@ -2,9 +2,8 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { useProfileTheme } from "./ThemeContext";
-import type { ProfileUser, ProfileStats } from "../types";
-import Image from "next/image";
+import { THEME_CONFIGS, useProfileTheme } from "./ThemeContext";
+import type { ProfileUser, ProfileStats, Theme } from "../types";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
@@ -13,6 +12,27 @@ import { Label } from "@/components/ui/label";
 import { updateProfile } from "@/server/actions/profile.action";
 import { Pencil } from "lucide-react";
 
+function ThemeSwitcherProfile({ theme, setTheme }: { theme: Theme; setTheme: (t: Theme) => void }) {
+  return (
+    <div className="flex items-center gap-2.5 rounded-xl border border-white/10 bg-[#0a0a0f]/85 px-3 py-2 backdrop-blur-xl">
+      <span className="text-[10px] font-semibold uppercase tracking-widest text-white/40">
+        Tema
+      </span>
+      {THEME_CONFIGS.map((cfg) => (
+        <button
+          key={cfg.key}
+          title={cfg.tooltip}
+          onClick={() => setTheme(cfg.key as Theme)}
+          className={`relative h-[18px] w-[18px] rounded-full bg-linear-to-br ${cfg.gradient} transition-all duration-200 hover:scale-125 ${theme === cfg.key
+            ? "ring-2 ring-white ring-offset-1 ring-offset-[#0a0a0f]"
+            : ""
+            }`}
+          aria-label={cfg.label}
+        />
+      ))}
+    </div>
+  )
+}
 function EditDialog({ children, user }: { children: React.ReactNode; user: ProfileUser }) {
   const [open, setOpen] = useState(false);
   const [name, setName] = useState(user.name);
@@ -20,6 +40,7 @@ function EditDialog({ children, user }: { children: React.ReactNode; user: Profi
   const [coverImage, setCoverImage] = useState(user.coverImage || "");
   const [image, setImage] = useState(user.image || "");
   const [loading, setLoading] = useState(false);
+  const [theme, setTheme] = useState(user.theme || "midnight");
   const router = useRouter();
 
   async function handleSave() {
@@ -29,7 +50,8 @@ function EditDialog({ children, user }: { children: React.ReactNode; user: Profi
         name,
         bio,
         coverImage,
-        image
+        image,
+        theme
       });
       setOpen(false);
       router.refresh();
@@ -89,6 +111,10 @@ function EditDialog({ children, user }: { children: React.ReactNode; user: Profi
               className="bg-white/5 border-white/10 text-white min-h-[100px]"
             />
           </div>
+          <ThemeSwitcherProfile
+            theme={theme as Theme}
+            setTheme={setTheme}
+          />
         </div>
         <div className="flex justify-end gap-2">
           <Button variant="ghost" onClick={() => setOpen(false)}>

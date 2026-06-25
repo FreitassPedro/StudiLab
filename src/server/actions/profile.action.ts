@@ -215,6 +215,7 @@ export async function updateProfile(data: {
   website?: string;
   name?: string;
   image?: string;
+  theme?: string;
   coverImage?: string;
 }) {
   const currentUser = await requireAuth();
@@ -224,6 +225,7 @@ export async function updateProfile(data: {
     bio: data.bio,
     isPublic: data.isPublic,
     website: data.website,
+    theme: data.theme,
     coverImage: data.coverImage,
   };
 

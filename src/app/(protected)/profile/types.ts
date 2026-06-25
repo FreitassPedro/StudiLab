@@ -25,6 +25,7 @@ export interface ProfileUser {
   image?: string | null;
   createdAt: Date;
   username?: string | null;
+  theme: string;
   bio?: string | null;
   isPublic?: boolean;
   coverImage?: string | null;

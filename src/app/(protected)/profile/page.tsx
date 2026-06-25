@@ -37,6 +37,7 @@ export default async function ProfilePage() {
   const data = await getProfileDataAction();
 
   // Dados retornados da action (mock por enquanto — sem tocar no banco real)
+  
 
   return (
     <ProfileThemeProvider>
