@@ -165,7 +165,7 @@ function EditDialog({ children, user, isOwner }: { children: React.ReactNode; us
 function StatPill({ value, label }: { value: string; label: string }) {
   const { accent } = useProfileTheme();
   return (
-    <div className="flex items-center gap-1.5 rounded-full border border-white/[0.09] bg-white/[0.05] px-3.5 py-1.5 text-xs">
+    <div className="flex items-center gap-1.5 rounded-full border px-3.5 py-1.5 text-xs">
       <span className="font-bold" style={{ color: accent.accent }}>
         {value}
       </span>
@@ -290,20 +290,12 @@ export function ProfileHeader({ user, stats, isOwner, isFollowing }: ProfileHead
           </div>
         )}
 
-        {/* Status based on last subject */}
-        <div className="mb-3 inline-flex items-center gap-2 rounded-full border border-white/8 bg-white/[0.04] px-3.5 py-1.5">
-          <span>📖</span>
-          <span className="text-[13px] text-white/70">
-            {isOwner ? `Olá, ${firstName}! Bem-vindo ao seu perfil` : `Perfil de ${firstName}`}
-          </span>
-        </div>
-
         {isOwner && (
           <EditDialog user={user} isOwner={isOwner}>
             <Button
               variant="outline"
               size="sm"
-              className="border-white/20 bg-white/5 text-white hover:bg-white/10"
+              className="border-white/20 bg-white/5 text-white hover:bg-white/10 "
             >
               <Pencil />
               Editar Perfil
@@ -315,15 +307,15 @@ export function ProfileHeader({ user, stats, isOwner, isFollowing }: ProfileHead
           <FollowButton targetUserId={user.id} initialIsFollowing={isFollowing} />
         )}
 
-        {/* Social Counts & Stat pills 
-        <div className="flex flex-wrap items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2 mt-4">
           {user.followersCount !== undefined && (
             <StatPill value={String(user.followersCount)} label="Seguidores" />
           )}
           {user.followingCount !== undefined && (
             <StatPill value={String(user.followingCount)} label="Seguindo" />
           )}
-          
+
+          {/*
           <StatPill value={totalHoursLabel} label="estudadas" />
           <StatPill value={consistency} label="consistência" />
           <StatPill value={String(stats.studyDays)} label="dias registrados" />
@@ -334,8 +326,8 @@ export function ProfileHeader({ user, stats, isOwner, isFollowing }: ProfileHead
               {stats.currentStreak} dias de ofensiva
             </span>
           </div>
+          */}
         </div>
-        */}
       </div>
     </div>
   );

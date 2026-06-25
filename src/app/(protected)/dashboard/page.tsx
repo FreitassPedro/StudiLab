@@ -89,12 +89,13 @@ export default async function DashboardPage() {
 
                 {/* Coluna Lateral: Insights e Inteligência */}
                 <aside className="lg:col-span-4 space-y-6">
-                    <Suspense fallback={<div className="h-24 bg-muted animate-pulse rounded-xl" />}>
-                        <FollowingList />
-                    </Suspense>
+
 
                     <Suspense fallback={<div className="h-48 bg-muted animate-pulse rounded-xl" />}>
                         <BiologicalClock />
+                    </Suspense>
+                    <Suspense fallback={<div className="h-24 bg-muted animate-pulse rounded-xl" />}>
+                        <FollowingList />
                     </Suspense>
                 </aside>
             </div>

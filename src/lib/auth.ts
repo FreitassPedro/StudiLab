@@ -33,7 +33,7 @@ export const auth = betterAuth({
                     await prisma.profile.create({
                         data: {
                             userId: user.id,
-                            username: user.name.toLowerCase().replace(/\s+/g, "") + "_" + user.id.slice(0, 4),
+                            username: user.email.split("@")[0],
                             isPublic: true,
                         }
                     });

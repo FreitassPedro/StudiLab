@@ -16,7 +16,7 @@ import Link from "next/link";
 import { useState } from "react";
 
 const formSchema = z.object({
-    name: z.string().min(2, "O nome de usuário deve ter pelo menos 2 caracteres"),
+    name: z.string().min(2, "Informe seu username ou e-mail"),
     password: z.string().min(6, "A senha deve ter pelo menos 6 caracteres"),
 });
 
@@ -32,7 +32,9 @@ export default function SignInPage() {
 
     async function handleSignIn(data: FormData) {
         try {
-            const email = `${data.name.toLowerCase().replace(/\s+/g, "")}@example.com`;
+            const inputValue = data.name.trim();
+            const email = inputValue.includes("@") ? inputValue : `${inputValue.toLowerCase()}@email.com`;
+            
             const { error } = await authClient.signIn.email({
                 email: email,
                 password: data.password
@@ -76,11 +78,11 @@ export default function SignInPage() {
                         <CardContent>
                             <form onSubmit={handleSubmit(handleSignIn)} className="space-y-4">
                                 <div className="space-y-2">
-                                    <Label htmlFor="name">Nome de Usuário</Label>
+                                    <Label htmlFor="name">Username ou E-mail</Label>
                                     <Input
                                         id="name"
                                         type="text"
-                                        placeholder="Seu usuário"
+                                        placeholder="seu_usuario ou seu@email.com"
                                         {...register("name")}
                                         className={errors.name ? "border-destructive" : ""}
                                     />
