@@ -23,8 +23,16 @@ export async function getUserByIdAction(userId: string) {
             id: true,
             name: true,
             email: true,
+            image: true,
         },
     });
     return user;
 }
 
+export async function getEmailByUsernameAction(username: string) {
+    const profile = await prisma.profile.findFirst({
+        where: { username: { equals: username, mode: "insensitive" } },
+        include: { user: true },
+    });
+    return profile?.user?.email || null;
+}

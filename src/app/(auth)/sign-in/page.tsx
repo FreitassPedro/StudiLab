@@ -15,6 +15,8 @@ import { useForm } from "react-hook-form";
 import Link from "next/link";
 import { useState } from "react";
 
+import { getEmailByUsernameAction } from "@/server/actions/user.actions";
+
 const formSchema = z.object({
     name: z.string().min(2, "Informe seu username ou e-mail"),
     password: z.string().min(6, "A senha deve ter pelo menos 6 caracteres"),
@@ -33,7 +35,16 @@ export default function SignInPage() {
     async function handleSignIn(data: FormData) {
         try {
             const inputValue = data.name.trim();
-            const email = inputValue.includes("@") ? inputValue : `${inputValue.toLowerCase()}@email.com`;
+            let email = inputValue;
+
+            if (!inputValue.includes("@")) {
+                const foundEmail = await getEmailByUsernameAction(inputValue);
+                if (!foundEmail) {
+                    toast.error("Usuário não encontrado");
+                    return;
+                }
+                email = foundEmail;
+            }
             
             const { error } = await authClient.signIn.email({
                 email: email,
