@@ -35,7 +35,7 @@ function ThemeSwitcherProfile({ theme, setTheme }: { theme: Theme; setTheme: (t:
     </div>
   )
 }
-function EditDialog({ children, user }: { children: React.ReactNode; user: ProfileUser }) {
+function EditDialog({ children, user, isOwner }: { children: React.ReactNode; user: ProfileUser; isOwner: boolean }) {
   const [open, setOpen] = useState(false);
   const [name, setName] = useState(user.name);
   const [bio, setBio] = useState(user.bio || "");
@@ -81,9 +81,11 @@ function EditDialog({ children, user }: { children: React.ReactNode; user: Profi
               <TabsTrigger value="profile" className="flex-1 rounded-lg data-[state=active]:bg-white/10 data-[state=active]:text-white text-white/60">
                 Perfil
               </TabsTrigger>
-              <TabsTrigger value="account" className="flex-1 rounded-lg data-[state=active]:bg-white/10 data-[state=active]:text-white text-white/60">
-                Conta
-              </TabsTrigger>
+              {isOwner && (
+                <TabsTrigger value="account" className="flex-1 rounded-lg data-[state=active]:bg-white/10 data-[state=active]:text-white text-white/60">
+                  Conta
+                </TabsTrigger>
+              )}
             </TabsList>
           </div>
 
@@ -148,9 +150,11 @@ function EditDialog({ children, user }: { children: React.ReactNode; user: Profi
           </TabsContent>
 
           {/* ABA DE CONTA */}
-          <TabsContent value="account" className="px-6 pb-6 m-0 focus-visible:outline-none max-h-[60vh] overflow-y-auto">
-            <AccountSettingsCard user={user} />
-          </TabsContent>
+          {isOwner && (
+            <TabsContent value="account" className="px-6 pb-6 m-0 focus-visible:outline-none max-h-[60vh] overflow-y-auto">
+              <AccountSettingsCard user={user} />
+            </TabsContent>
+          )}
         </Tabs>
       </DialogContent>
     </Dialog>
@@ -219,6 +223,7 @@ function AvatarFrame({
 interface ProfileHeaderProps {
   user: ProfileUser;
   stats: ProfileStats;
+  isOwner: boolean;
 }
 
 function formatHours(minutes: number): string {
@@ -235,7 +240,7 @@ function calcConsistency(studyDays: number, createdAt: Date): string {
   return `${pct}%`;
 }
 
-export function ProfileHeader({ user, stats }: ProfileHeaderProps) {
+export function ProfileHeader({ user, stats, isOwner }: ProfileHeaderProps) {
   const { accent } = useProfileTheme();
 
   const totalHoursLabel = formatHours(stats.totalMinutes);
@@ -287,20 +292,22 @@ export function ProfileHeader({ user, stats }: ProfileHeaderProps) {
         <div className="mb-3 inline-flex items-center gap-2 rounded-full border border-white/8 bg-white/[0.04] px-3.5 py-1.5">
           <span>📖</span>
           <span className="text-[13px] text-white/70">
-            Olá, {firstName}! Bem-vindo ao seu perfil
+            {isOwner ? `Olá, ${firstName}! Bem-vindo ao seu perfil` : `Perfil de ${firstName}`}
           </span>
         </div>
 
-        <EditDialog user={user}>
-          <Button
-            variant="outline"
-            size="sm"
-            className="border-white/20 bg-white/5 text-white hover:bg-white/10"
-          >
-            <Pencil />
-            Editar Perfil
-          </Button>
-        </EditDialog>
+        {isOwner && (
+          <EditDialog user={user} isOwner={isOwner}>
+            <Button
+              variant="outline"
+              size="sm"
+              className="border-white/20 bg-white/5 text-white hover:bg-white/10"
+            >
+              <Pencil />
+              Editar Perfil
+            </Button>
+          </EditDialog>
+        )}
 
         {/* Social Counts & Stat pills 
         <div className="flex flex-wrap items-center gap-2">

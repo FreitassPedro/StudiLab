@@ -10,12 +10,13 @@ import { RecentSessions } from "../components/RecentSessions";
 import { AchievementBadges } from "../components/AchievementBadges";
 import { Suspense } from "react";
 import { ProfileData, Theme } from "../types";
+import { requireAuth } from "@/server/actions/requireAuth";
 
-async function MainPage({ data }: { data: ProfileData }) {
+async function MainPage({ data, isOwner }: { data: ProfileData, isOwner: boolean }) {
   return (
     <main className="mx-auto max-w-5xl px-5 pb-20">
       <Suspense>
-        <ProfileHeader user={data.user} stats={data.stats} />
+        <ProfileHeader user={data.user} stats={data.stats} isOwner={isOwner} />
         <ShowcaseGrid stats={data.stats} />
         <StudyHeatmap heatmap={data.heatmap} />
         <TopSubjects subjects={data.topSubjects} />
@@ -34,6 +35,8 @@ interface PageProps {
 export default async function UsernameProfilePage({ params }: PageProps) {
   const { username } = await params;
   const data = await getProfileDataAction(username);
+  const currentUser = await requireAuth();
+  const isOwner = currentUser.id === data.user.id;
 
   return (
     <ProfileThemeProvider initialTheme={data.user.theme as Theme}>
@@ -44,7 +47,7 @@ export default async function UsernameProfilePage({ params }: PageProps) {
 
         {/* Banner */}
         <ProfileBanner coverImage={data.user.coverImage} />
-        <MainPage data={data} />
+        <MainPage data={data} isOwner={isOwner} />
       </div>
     </ProfileThemeProvider>
   );
