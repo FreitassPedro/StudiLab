@@ -21,9 +21,7 @@ export interface ProfileUser {
   bio?: string | null;
   isPublic?: boolean;
   coverImage?: string | null;
-  website?: string | null;
-  twitter?: string | null;
-  github?: string | null;
+  webSite?: string | null;
   linkedin?: string | null;
   followersCount?: number;
   followingCount?: number;

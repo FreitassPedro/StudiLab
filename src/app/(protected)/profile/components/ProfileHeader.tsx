@@ -146,7 +146,12 @@ function AvatarFrame({
     >
       <div className="flex h-full w-full items-center justify-center overflow-hidden rounded-full border-[3px] border-[#0a0a0f] bg-[#1e1e2e]">
         {image ? (
-          <Image src={image} alt={name} className="h-full w-full object-cover" />
+          /* eslint-disable-next-line @next/next/no-img-element */
+          <img
+            src={image}
+            alt={name}
+            className="h-full w-full object-cover"
+          />
         ) : (
           <span
             className="font-['Space_Grotesk'] text-2xl font-black"
@@ -188,7 +193,7 @@ export function ProfileHeader({ user, stats }: ProfileHeaderProps) {
   const firstName = user.name.split(" ")[0];
 
   return (
-    <div className="mb-8 mt-[-54px] flex flex-wrap items-end gap-5">
+    <div className="mb-8  flex flex-wrap items-end gap-5">
       <AvatarFrame name={user.name} image={user.image} accent={accent} />
 
       <div className="min-w-[200px] flex-1 pb-1">

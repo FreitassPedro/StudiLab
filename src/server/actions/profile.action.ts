@@ -56,10 +56,6 @@ export async function getProfileDataAction(username?: string): Promise<ProfileDa
     bio: userRecord.profile?.bio,
     isPublic: userRecord.profile?.isPublic,
     coverImage: userRecord.profile?.coverImage,
-    website: userRecord.profile?.website,
-    twitter: userRecord.profile?.twitter,
-    github: userRecord.profile?.github,
-    linkedin: userRecord.profile?.linkedin,
     followersCount: userRecord._count.followers,
     followingCount: userRecord._count.following,
   };
