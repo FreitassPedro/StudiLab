@@ -1,6 +1,13 @@
 // ── Theme ──────────────────────────────────────────────────────────────────────
 
-export type Theme = "cyberpunk" | "lofi" | "minimal";
+/* Temas
+midnight: roxo escuro
+sunset: laranja
+sky: azul
+delicatessen: rosa
+forest: verde
+*/
+export type Theme = "midnight" | "sunset" | "sky" | "delicatessen" | "forest";
 
 export interface ThemeConfig {
   key: Theme;

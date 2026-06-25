@@ -12,18 +12,6 @@ import { AchievementBadges } from "./components/AchievementBadges";
 import { Suspense } from "react";
 import { ProfileData } from "./types";
 
-// ── Footer ─────────────────────────────────────────────────────────────────────
-function ProfileFooter({ name }: { name: string }) {
-  return (
-    <footer className="border-t border-white/[0.05] pt-5 text-center">
-      <p className="text-xs text-white/20">
-        Monitor de Estudos · Perfil de {name}
-      </p>
-    </footer>
-  );
-}
-
-
 async function MainPage({ data }: { data: ProfileData }) {
 
   return (
@@ -40,7 +28,6 @@ async function MainPage({ data }: { data: ProfileData }) {
 
         <AchievementBadges badges={data.badges} />
 
-        <ProfileFooter name={data.user.name} />
       </Suspense>
     </main >
   )
