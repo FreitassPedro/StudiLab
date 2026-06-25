@@ -56,6 +56,7 @@ export async function getProfileDataAction(username?: string): Promise<ProfileDa
     bio: userRecord.profile?.bio,
     isPublic: userRecord.profile?.isPublic,
     coverImage: userRecord.profile?.coverImage,
+    theme: userRecord.profile?.theme || "midnight",
     followersCount: userRecord._count.followers,
     followingCount: userRecord._count.following,
   };
@@ -77,7 +78,7 @@ export async function getProfileDataAction(username?: string): Promise<ProfileDa
   const uniqueStudyDays = new Set<string>();
 
   // Basic Stats Calculation
-  const subjectMap = new Map<string, { name: string; color: string; minutes: number }>();
+  const subjectMap = new Map<string, { name: string; color: string; minutes: number, emoji: string }>();
 
   studyLogs.forEach(log => {
     totalMinutes += log.duration_minutes;
@@ -90,7 +91,8 @@ export async function getProfileDataAction(username?: string): Promise<ProfileDa
       subjectMap.set(subjectId, {
         name: log.topic.subject.name,
         color: log.topic.subject.color,
-        minutes: 0
+        minutes: 0,
+        emoji: log.topic.subject.icon || "📚",
       });
     }
     subjectMap.get(subjectId)!.minutes += log.duration_minutes;

@@ -31,10 +31,8 @@ export type ProfileMinAggregateOutputType = {
   bio: string | null
   isPublic: boolean | null
   coverImage: string | null
-  website: string | null
-  twitter: string | null
-  github: string | null
-  linkedin: string | null
+  webSite: string | null
+  theme: string | null
   createdAt: Date | null
   updatedAt: Date | null
 }
@@ -46,10 +44,8 @@ export type ProfileMaxAggregateOutputType = {
   bio: string | null
   isPublic: boolean | null
   coverImage: string | null
-  website: string | null
-  twitter: string | null
-  github: string | null
-  linkedin: string | null
+  webSite: string | null
+  theme: string | null
   createdAt: Date | null
   updatedAt: Date | null
 }
@@ -61,10 +57,8 @@ export type ProfileCountAggregateOutputType = {
   bio: number
   isPublic: number
   coverImage: number
-  website: number
-  twitter: number
-  github: number
-  linkedin: number
+  webSite: number
+  theme: number
   createdAt: number
   updatedAt: number
   _all: number
@@ -78,10 +72,8 @@ export type ProfileMinAggregateInputType = {
   bio?: true
   isPublic?: true
   coverImage?: true
-  website?: true
-  twitter?: true
-  github?: true
-  linkedin?: true
+  webSite?: true
+  theme?: true
   createdAt?: true
   updatedAt?: true
 }
@@ -93,10 +85,8 @@ export type ProfileMaxAggregateInputType = {
   bio?: true
   isPublic?: true
   coverImage?: true
-  website?: true
-  twitter?: true
-  github?: true
-  linkedin?: true
+  webSite?: true
+  theme?: true
   createdAt?: true
   updatedAt?: true
 }
@@ -108,10 +98,8 @@ export type ProfileCountAggregateInputType = {
   bio?: true
   isPublic?: true
   coverImage?: true
-  website?: true
-  twitter?: true
-  github?: true
-  linkedin?: true
+  webSite?: true
+  theme?: true
   createdAt?: true
   updatedAt?: true
   _all?: true
@@ -196,10 +184,8 @@ export type ProfileGroupByOutputType = {
   bio: string | null
   isPublic: boolean
   coverImage: string | null
-  website: string | null
-  twitter: string | null
-  github: string | null
-  linkedin: string | null
+  webSite: string | null
+  theme: string
   createdAt: Date
   updatedAt: Date
   _count: ProfileCountAggregateOutputType | null
@@ -232,10 +218,8 @@ export type ProfileWhereInput = {
   bio?: Prisma.StringNullableFilter<"Profile"> | string | null
   isPublic?: Prisma.BoolFilter<"Profile"> | boolean
   coverImage?: Prisma.StringNullableFilter<"Profile"> | string | null
-  website?: Prisma.StringNullableFilter<"Profile"> | string | null
-  twitter?: Prisma.StringNullableFilter<"Profile"> | string | null
-  github?: Prisma.StringNullableFilter<"Profile"> | string | null
-  linkedin?: Prisma.StringNullableFilter<"Profile"> | string | null
+  webSite?: Prisma.StringNullableFilter<"Profile"> | string | null
+  theme?: Prisma.StringFilter<"Profile"> | string
   createdAt?: Prisma.DateTimeFilter<"Profile"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Profile"> | Date | string
   user?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.UserWhereInput>
@@ -248,10 +232,8 @@ export type ProfileOrderByWithRelationInput = {
   bio?: Prisma.SortOrderInput | Prisma.SortOrder
   isPublic?: Prisma.SortOrder
   coverImage?: Prisma.SortOrderInput | Prisma.SortOrder
-  website?: Prisma.SortOrderInput | Prisma.SortOrder
-  twitter?: Prisma.SortOrderInput | Prisma.SortOrder
-  github?: Prisma.SortOrderInput | Prisma.SortOrder
-  linkedin?: Prisma.SortOrderInput | Prisma.SortOrder
+  webSite?: Prisma.SortOrderInput | Prisma.SortOrder
+  theme?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   user?: Prisma.UserOrderByWithRelationInput
@@ -267,10 +249,8 @@ export type ProfileWhereUniqueInput = Prisma.AtLeast<{
   bio?: Prisma.StringNullableFilter<"Profile"> | string | null
   isPublic?: Prisma.BoolFilter<"Profile"> | boolean
   coverImage?: Prisma.StringNullableFilter<"Profile"> | string | null
-  website?: Prisma.StringNullableFilter<"Profile"> | string | null
-  twitter?: Prisma.StringNullableFilter<"Profile"> | string | null
-  github?: Prisma.StringNullableFilter<"Profile"> | string | null
-  linkedin?: Prisma.StringNullableFilter<"Profile"> | string | null
+  webSite?: Prisma.StringNullableFilter<"Profile"> | string | null
+  theme?: Prisma.StringFilter<"Profile"> | string
   createdAt?: Prisma.DateTimeFilter<"Profile"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Profile"> | Date | string
   user?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.UserWhereInput>
@@ -283,10 +263,8 @@ export type ProfileOrderByWithAggregationInput = {
   bio?: Prisma.SortOrderInput | Prisma.SortOrder
   isPublic?: Prisma.SortOrder
   coverImage?: Prisma.SortOrderInput | Prisma.SortOrder
-  website?: Prisma.SortOrderInput | Prisma.SortOrder
-  twitter?: Prisma.SortOrderInput | Prisma.SortOrder
-  github?: Prisma.SortOrderInput | Prisma.SortOrder
-  linkedin?: Prisma.SortOrderInput | Prisma.SortOrder
+  webSite?: Prisma.SortOrderInput | Prisma.SortOrder
+  theme?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   _count?: Prisma.ProfileCountOrderByAggregateInput
@@ -304,10 +282,8 @@ export type ProfileScalarWhereWithAggregatesInput = {
   bio?: Prisma.StringNullableWithAggregatesFilter<"Profile"> | string | null
   isPublic?: Prisma.BoolWithAggregatesFilter<"Profile"> | boolean
   coverImage?: Prisma.StringNullableWithAggregatesFilter<"Profile"> | string | null
-  website?: Prisma.StringNullableWithAggregatesFilter<"Profile"> | string | null
-  twitter?: Prisma.StringNullableWithAggregatesFilter<"Profile"> | string | null
-  github?: Prisma.StringNullableWithAggregatesFilter<"Profile"> | string | null
-  linkedin?: Prisma.StringNullableWithAggregatesFilter<"Profile"> | string | null
+  webSite?: Prisma.StringNullableWithAggregatesFilter<"Profile"> | string | null
+  theme?: Prisma.StringWithAggregatesFilter<"Profile"> | string
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"Profile"> | Date | string
   updatedAt?: Prisma.DateTimeWithAggregatesFilter<"Profile"> | Date | string
 }
@@ -318,10 +294,8 @@ export type ProfileCreateInput = {
   bio?: string | null
   isPublic?: boolean
   coverImage?: string | null
-  website?: string | null
-  twitter?: string | null
-  github?: string | null
-  linkedin?: string | null
+  webSite?: string | null
+  theme?: string
   createdAt?: Date | string
   updatedAt?: Date | string
   user: Prisma.UserCreateNestedOneWithoutProfileInput
@@ -334,10 +308,8 @@ export type ProfileUncheckedCreateInput = {
   bio?: string | null
   isPublic?: boolean
   coverImage?: string | null
-  website?: string | null
-  twitter?: string | null
-  github?: string | null
-  linkedin?: string | null
+  webSite?: string | null
+  theme?: string
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -348,10 +320,8 @@ export type ProfileUpdateInput = {
   bio?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isPublic?: Prisma.BoolFieldUpdateOperationsInput | boolean
   coverImage?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  website?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  twitter?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  github?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  linkedin?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  webSite?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  theme?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   user?: Prisma.UserUpdateOneRequiredWithoutProfileNestedInput
@@ -364,10 +334,8 @@ export type ProfileUncheckedUpdateInput = {
   bio?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isPublic?: Prisma.BoolFieldUpdateOperationsInput | boolean
   coverImage?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  website?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  twitter?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  github?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  linkedin?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  webSite?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  theme?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -379,10 +347,8 @@ export type ProfileCreateManyInput = {
   bio?: string | null
   isPublic?: boolean
   coverImage?: string | null
-  website?: string | null
-  twitter?: string | null
-  github?: string | null
-  linkedin?: string | null
+  webSite?: string | null
+  theme?: string
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -393,10 +359,8 @@ export type ProfileUpdateManyMutationInput = {
   bio?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isPublic?: Prisma.BoolFieldUpdateOperationsInput | boolean
   coverImage?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  website?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  twitter?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  github?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  linkedin?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  webSite?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  theme?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -408,10 +372,8 @@ export type ProfileUncheckedUpdateManyInput = {
   bio?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isPublic?: Prisma.BoolFieldUpdateOperationsInput | boolean
   coverImage?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  website?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  twitter?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  github?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  linkedin?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  webSite?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  theme?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -428,10 +390,8 @@ export type ProfileCountOrderByAggregateInput = {
   bio?: Prisma.SortOrder
   isPublic?: Prisma.SortOrder
   coverImage?: Prisma.SortOrder
-  website?: Prisma.SortOrder
-  twitter?: Prisma.SortOrder
-  github?: Prisma.SortOrder
-  linkedin?: Prisma.SortOrder
+  webSite?: Prisma.SortOrder
+  theme?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -443,10 +403,8 @@ export type ProfileMaxOrderByAggregateInput = {
   bio?: Prisma.SortOrder
   isPublic?: Prisma.SortOrder
   coverImage?: Prisma.SortOrder
-  website?: Prisma.SortOrder
-  twitter?: Prisma.SortOrder
-  github?: Prisma.SortOrder
-  linkedin?: Prisma.SortOrder
+  webSite?: Prisma.SortOrder
+  theme?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -458,10 +416,8 @@ export type ProfileMinOrderByAggregateInput = {
   bio?: Prisma.SortOrder
   isPublic?: Prisma.SortOrder
   coverImage?: Prisma.SortOrder
-  website?: Prisma.SortOrder
-  twitter?: Prisma.SortOrder
-  github?: Prisma.SortOrder
-  linkedin?: Prisma.SortOrder
+  webSite?: Prisma.SortOrder
+  theme?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -504,10 +460,8 @@ export type ProfileCreateWithoutUserInput = {
   bio?: string | null
   isPublic?: boolean
   coverImage?: string | null
-  website?: string | null
-  twitter?: string | null
-  github?: string | null
-  linkedin?: string | null
+  webSite?: string | null
+  theme?: string
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -518,10 +472,8 @@ export type ProfileUncheckedCreateWithoutUserInput = {
   bio?: string | null
   isPublic?: boolean
   coverImage?: string | null
-  website?: string | null
-  twitter?: string | null
-  github?: string | null
-  linkedin?: string | null
+  webSite?: string | null
+  theme?: string
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -548,10 +500,8 @@ export type ProfileUpdateWithoutUserInput = {
   bio?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isPublic?: Prisma.BoolFieldUpdateOperationsInput | boolean
   coverImage?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  website?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  twitter?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  github?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  linkedin?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  webSite?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  theme?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -562,10 +512,8 @@ export type ProfileUncheckedUpdateWithoutUserInput = {
   bio?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isPublic?: Prisma.BoolFieldUpdateOperationsInput | boolean
   coverImage?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  website?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  twitter?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  github?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  linkedin?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  webSite?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  theme?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -579,10 +527,8 @@ export type ProfileSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs 
   bio?: boolean
   isPublic?: boolean
   coverImage?: boolean
-  website?: boolean
-  twitter?: boolean
-  github?: boolean
-  linkedin?: boolean
+  webSite?: boolean
+  theme?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
@@ -595,10 +541,8 @@ export type ProfileSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Exten
   bio?: boolean
   isPublic?: boolean
   coverImage?: boolean
-  website?: boolean
-  twitter?: boolean
-  github?: boolean
-  linkedin?: boolean
+  webSite?: boolean
+  theme?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
@@ -611,10 +555,8 @@ export type ProfileSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Exten
   bio?: boolean
   isPublic?: boolean
   coverImage?: boolean
-  website?: boolean
-  twitter?: boolean
-  github?: boolean
-  linkedin?: boolean
+  webSite?: boolean
+  theme?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
@@ -627,15 +569,13 @@ export type ProfileSelectScalar = {
   bio?: boolean
   isPublic?: boolean
   coverImage?: boolean
-  website?: boolean
-  twitter?: boolean
-  github?: boolean
-  linkedin?: boolean
+  webSite?: boolean
+  theme?: boolean
   createdAt?: boolean
   updatedAt?: boolean
 }
 
-export type ProfileOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "userId" | "username" | "bio" | "isPublic" | "coverImage" | "website" | "twitter" | "github" | "linkedin" | "createdAt" | "updatedAt", ExtArgs["result"]["profile"]>
+export type ProfileOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "userId" | "username" | "bio" | "isPublic" | "coverImage" | "webSite" | "theme" | "createdAt" | "updatedAt", ExtArgs["result"]["profile"]>
 export type ProfileInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
 }
@@ -658,10 +598,8 @@ export type $ProfilePayload<ExtArgs extends runtime.Types.Extensions.InternalArg
     bio: string | null
     isPublic: boolean
     coverImage: string | null
-    website: string | null
-    twitter: string | null
-    github: string | null
-    linkedin: string | null
+    webSite: string | null
+    theme: string
     createdAt: Date
     updatedAt: Date
   }, ExtArgs["result"]["profile"]>
@@ -1094,10 +1032,8 @@ export interface ProfileFieldRefs {
   readonly bio: Prisma.FieldRef<"Profile", 'String'>
   readonly isPublic: Prisma.FieldRef<"Profile", 'Boolean'>
   readonly coverImage: Prisma.FieldRef<"Profile", 'String'>
-  readonly website: Prisma.FieldRef<"Profile", 'String'>
-  readonly twitter: Prisma.FieldRef<"Profile", 'String'>
-  readonly github: Prisma.FieldRef<"Profile", 'String'>
-  readonly linkedin: Prisma.FieldRef<"Profile", 'String'>
+  readonly webSite: Prisma.FieldRef<"Profile", 'String'>
+  readonly theme: Prisma.FieldRef<"Profile", 'String'>
   readonly createdAt: Prisma.FieldRef<"Profile", 'DateTime'>
   readonly updatedAt: Prisma.FieldRef<"Profile", 'DateTime'>
 }

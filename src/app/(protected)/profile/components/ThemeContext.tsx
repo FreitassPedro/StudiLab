@@ -109,8 +109,8 @@ const ThemeContext = createContext<ThemeContextValue>({
   accent: THEME_ACCENT["midnight"],
 });
 
-export function ProfileThemeProvider({ children }: { children: React.ReactNode }) {
-  const [theme, setThemeState] = useState<Theme>("midnight");
+export function ProfileThemeProvider({ children, initialTheme = "midnight" }: { children: React.ReactNode; initialTheme?: Theme }) {
+  const [theme, setThemeState] = useState<Theme>(initialTheme);
   const setTheme = (t: Theme) => setThemeState(t);
   const accent = THEME_ACCENT[theme];
 

@@ -38,6 +38,7 @@ export interface ProfileUser {
 export interface ProfileSubject {
   name: string;
   color: string;
+  emoji: string,
   minutes: number; // total minutes studied
 }
 

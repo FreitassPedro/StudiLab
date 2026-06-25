@@ -127,7 +127,7 @@ model Profile {
   coverImage  String?
   
   webSite   String?
-  themeColor String
+  theme     String   @default("midnight")
 
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
