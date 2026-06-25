@@ -15,6 +15,7 @@ import { useTopicBySubject } from "@/hooks/useTopics";
 import { Cronometer } from "./Cronometer";
 import { NewTopicDialog } from "../../materias/components/NewTopicDialog";
 import { Label } from "@/components/ui/label";
+import { useRouter } from "next/navigation";
 
 const GOALS = [0, 25, 45, 60, 90];
 const hexToRgba = (hex: string, a: number) => {
@@ -42,6 +43,8 @@ export function MainSection({
     const { watch, setValue, reset } = useFormContext<StudySessionFormData>();
     const subjectId = watch("subjectId");
     const topicId = watch("topicId");
+
+    const router = useRouter();
 
     const isCronometerRunning = useCronometerStore((state) => state.cronometer.isRunning);
     const updateCronometer = useCronometerStore((state) => state.updateCronometer);
@@ -147,39 +150,59 @@ export function MainSection({
 
             <div className="flex flex-col gap-6 mt-2 w-full items-center">
                 <div className="text-center space-y-1">
-                    <p className="text-sm text-muted-foreground">Selecione a matéria e o tópico para registrar sua sessão.</p>
+                    <p className="text-[16px] text-muted-foreground">Selecione a <b>matéria</b> e o <b>tópico</b> para registrar sua sessão.</p>
                 </div>
 
                 <div className="flex flex-col sm:flex-row gap-4 w-full max-w-lg ">
                     {/* Current Subject Indicator */}
                     <div className="flex-1 space-y-1 w-full">
-                        <Label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider ml-1">Matéria</Label>
-                        <Select
-                            value={subjectId}
-                            onValueChange={(value) => setValue("subjectId", value)}
-                        >
-                            <SelectTrigger
-                                className={cn("w-full border-2 text-md rounded-xl transition-all hover:bg-background/80", !subjectId && "border-dashed")} style={{
-                                    borderColor: subjectId ? accentColor : "",
-                                }}
-                            >
-                                <SelectValue placeholder="Selecione..." />
-                            </SelectTrigger>
-                            <SelectContent>
-                                {activeSubjects.map((subject: any) => (
-                                    <SelectItem key={subject.id} value={subject.id}>
-                                        <div className="flex items-center gap-2">
-                                            <span
-                                                className="w-2.5 h-2.5 rounded-full inline-block shrink-0 shadow-sm"
-                                                style={{ backgroundColor: subject.color }}
-                                            />
-                                            {subject.name}
-                                        </div>
-                                    </SelectItem>
-                                ))}
-                            </SelectContent>
-                        </Select>
+                        <div>
+                            <Label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider ml-1">Matéria</Label>
+                            {
+                                activeSubjects.length === 0 ? (
+                                    <div className="flex flex-col items-center justify-center gap-2 w-full">
+                                        <p className="text-sm text-muted-foreground">Você ainda não cadastrou matérias</p>
+                                        <Button
+                                            type="button"
+                                            variant="outline"
+                                            onClick={() => router.push("/materias")}
+                                            className="w-full"
+                                        >
+                                            Criar matéria
+                                        </Button>
+                                    </div>
+                                ) : (
+                                    <Select
+                                        value={subjectId}
+                                        onValueChange={(value) => setValue("subjectId", value)}
+                                    >
+                                        <SelectTrigger
+                                            className={cn("w-full border-2 text-md rounded-xl transition-all hover:bg-background/80", !subjectId && "border-dashed")} style={{
+                                                borderColor: subjectId ? accentColor : "",
+                                            }}
+                                        >
+                                            <SelectValue placeholder="Selecione..." />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                            {activeSubjects.map((subject: any) => (
+                                                <SelectItem key={subject.id} value={subject.id}>
+                                                    <div className="flex items-center gap-2">
+                                                        <span
+                                                            className="w-2.5 h-2.5 rounded-full inline-block shrink-0 shadow-sm"
+                                                            style={{ backgroundColor: subject.color }}
+                                                        />
+                                                        {subject.name}
+                                                    </div>
+                                                </SelectItem>
+                                            ))}
+
+                                        </SelectContent>
+                                    </Select>
+                                )}
+
+                        </div>
                     </div>
+
                     {/* Current Topic Indicator */}
                     {subjectId && (
                         < div className="flex-1 space-y-1 w-full transition-opacity duration-300" style={{ opacity: subjectId ? 1 : 0.5, pointerEvents: subjectId ? 'auto' : 'none' }}>

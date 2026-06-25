@@ -2,9 +2,9 @@ import { createBulkSubjectsWithTopicsAction, createSubjectAction, deleteSubjectA
 import { queryOptions, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { indexSubjectById } from "@/server/normalizers/indexSubject";
 import { metadataKeys } from "@/lib/query-keys";
-import { useTopics } from "./useTopics";
+import { topicsKeys, useTopics } from "./useTopics";
 import { useMemo } from "react";
-import { Subject, SubjectTree, Topic, TopicNode } from "@/types/types";
+import { SubjectTree, TopicNode } from "@/types/types";
 
 /***
  * Options
@@ -49,6 +49,7 @@ export function useCreateSubject() {
         },
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: subjectsKeys.all });
+            queryClient.invalidateQueries({ queryKey: topicsKeys.all });
         },
     });
 }
@@ -62,6 +63,7 @@ export function useBulkCreateSubjects() {
         },
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: subjectsKeys.all });
+            queryClient.invalidateQueries({ queryKey: topicsKeys.all });
         },
     });
 }
@@ -74,19 +76,20 @@ export function useSubjectTree() {
     const { data: subjects, isLoading: isLoadingSubjects } = useSubjects();
     const { data: topicsData, isLoading: isLoadingTopics } = useTopics();
 
+    const topics = topicsData?.topics;
+
     const tree = useMemo(() => {
-        if (!subjects || !topicsData?.topics) return [];
+        if (!subjects || !topics) return [];
 
         return subjects.map((s): SubjectTree => {
-            const subjectTopics = topicsData.topics.filter(t => t.subjectId === s.id);
             const map = new Map<string, TopicNode>();
-
-            // Primeiro criamos todos os nós
-            subjectTopics.forEach((t) => map.set(t.id, { ...t, children: [] }));
-
             const roots: TopicNode[] = [];
+            const subjectsTopics = topics.filter(t => t.subjectId === s.id);
+            // Primeiro criamos todos os nós
+            subjectsTopics.forEach((t) => map.set(t.id, { ...t, children: [] }));
+
             // Depois organizamos a hierarquia
-            subjectTopics.forEach((t) => {
+            subjectsTopics.forEach((t) => {
                 const node = map.get(t.id)!;
                 if (t.parentId) {
                     const parent = map.get(t.parentId);
@@ -105,7 +108,7 @@ export function useSubjectTree() {
                 topics: roots,
             };
         });
-    }, [subjects, topicsData?.topics]);
+    }, [subjects, topics]);
 
     return {
         data: tree,

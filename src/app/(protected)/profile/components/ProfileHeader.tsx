@@ -11,7 +11,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { updateProfile } from "@/server/actions/profile.action";
-import { Pencil } from "lucide-react";
+import { Pencil, Share } from "lucide-react";
 import { AccountSettingsCard } from "./AccountSettingsCard";
 import { FollowButton } from "./FollowButton";
 
@@ -245,10 +245,6 @@ function calcConsistency(studyDays: number, createdAt: Date): string {
 export function ProfileHeader({ user, stats, isOwner, isFollowing }: ProfileHeaderProps) {
   const { accent } = useProfileTheme();
 
-  const totalHoursLabel = formatHours(stats.totalMinutes);
-  const consistency = calcConsistency(stats.studyDays, user.createdAt);
-  const firstName = user.name.split(" ")[0];
-
   return (
     <div className="mb-8  flex flex-wrap items-end gap-5">
       <AvatarFrame name={user.name} image={user.image} accent={accent} />
@@ -302,7 +298,10 @@ export function ProfileHeader({ user, stats, isOwner, isFollowing }: ProfileHead
             </Button>
           </EditDialog>
         )}
-
+        <Button variant="outline" size="sm" className=" bg-white/5 hover:bg-white/10 ">
+          <Share />
+          Compartilhar
+        </Button>
         {!isOwner && (
           <FollowButton targetUserId={user.id} initialIsFollowing={isFollowing} />
         )}

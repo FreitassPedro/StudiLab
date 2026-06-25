@@ -1,8 +1,5 @@
 import SubjectList from "./SubjectList";
 import { NewSubject } from "./components/NewSubject";
-import { EnemSuggestionsDialog } from "./components/EnemSuggestionsDialog";
-
-
 
 export default function MateriasPage() {
 

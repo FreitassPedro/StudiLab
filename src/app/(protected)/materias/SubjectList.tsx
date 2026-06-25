@@ -254,7 +254,7 @@ export default function SubjectList() {
                     <tr className="border-b border-border bg-muted/40">
                         <th className="w-8" />
                         <th className="text-left py-3 px-4 text-xs font-semibold text-muted-foreground uppercase tracking-wider">
-                            Tópico
+
                         </th>
                         <th className="text-center py-3 px-4 text-xs font-semibold text-muted-foreground uppercase tracking-wider w-24">
                             {/* Pendências */}

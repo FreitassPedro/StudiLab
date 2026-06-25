@@ -11,16 +11,26 @@ import { requireAuth } from "./requireAuth";
 export async function createSubjectAction(data: { name: string; color: string }) {
     const user = await requireAuth();
     try {
-        return await prisma.subject.create({
+        const subject = await prisma.subject.create({
             data: {
                 name: data.name,
                 color: data.color,
                 userId: user.id,
                 isOpen: true,
                 isArchived: false,
+                topics: {
+                    create: {
+                        name: "Sem nome",
+                    },
+                },
             },
-
+            include: {
+                topics: true,
+            }
         });
+
+
+        return subject;
     }
     catch (error) {
         if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2002') {
