@@ -217,21 +217,49 @@ export async function updateProfile(data: {
   bio?: string;
   isPublic?: boolean;
   website?: string;
-  twitter?: string;
-  github?: string;
-  linkedin?: string;
+  name?: string;
+  image?: string;
+  coverImage?: string;
 }) {
   const currentUser = await requireAuth();
 
+  const profileData = {
+    username: data.username,
+    bio: data.bio,
+    isPublic: data.isPublic,
+    website: data.website,
+    coverImage: data.coverImage,
+  };
+
+  const cleanedProfileData = Object.fromEntries(
+    Object.entries(profileData).filter(([_, v]) => v !== undefined)
+  );
+
   const profile = await prisma.profile.upsert({
     where: { userId: currentUser.id },
-    update: data,
+    update: cleanedProfileData,
     create: {
       userId: currentUser.id,
-      ...data,
+      ...cleanedProfileData,
       username: data.username || `user_${currentUser.id.slice(0, 8)}`
     }
   });
+
+  const userData = {
+    name: data.name,
+    image: data.image,
+  };
+
+  const cleanedUserData = Object.fromEntries(
+    Object.entries(userData).filter(([_, v]) => v !== undefined)
+  );
+
+  if (Object.keys(cleanedUserData).length > 0) {
+    await prisma.user.update({
+      where: { id: currentUser.id },
+      data: cleanedUserData
+    });
+  }
 
   return profile;
 }

@@ -1,9 +1,111 @@
 "use client";
 
+import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { useProfileTheme } from "./ThemeContext";
 import type { ProfileUser, ProfileStats } from "../types";
 import Image from "next/image";
+import { Button } from "@/components/ui/button";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Label } from "@/components/ui/label";
+import { updateProfile } from "@/server/actions/profile.action";
+import { Pencil } from "lucide-react";
 
+function EditDialog({ children, user }: { children: React.ReactNode; user: ProfileUser }) {
+  const [open, setOpen] = useState(false);
+  const [name, setName] = useState(user.name);
+  const [bio, setBio] = useState(user.bio || "");
+  const [coverImage, setCoverImage] = useState(user.coverImage || "");
+  const [image, setImage] = useState(user.image || "");
+  const [loading, setLoading] = useState(false);
+  const router = useRouter();
+
+  async function handleSave() {
+    try {
+      setLoading(true);
+      await updateProfile({
+        name,
+        bio,
+        coverImage,
+        image
+      });
+      setOpen(false);
+      router.refresh();
+    } catch (e) {
+      console.error(e);
+      alert("Erro ao salvar perfil");
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  return (
+    <Dialog open={open} onOpenChange={setOpen}>
+      <DialogTrigger asChild>
+        {children}
+      </DialogTrigger>
+      <DialogContent className="bg-[#12121a] border-white/10 text-white max-w-md">
+        <DialogHeader>
+          <DialogTitle>Editar Perfil</DialogTitle>
+        </DialogHeader>
+        <div className="grid gap-4 py-4">
+          <div className="grid gap-2">
+            <Label htmlFor="coverImage">URL da Foto de Fundo</Label>
+            <Input
+              id="coverImage"
+              value={coverImage}
+              onChange={(e) => setCoverImage(e.target.value)}
+              className="bg-white/5 border-white/10 text-white"
+              placeholder="https://..."
+            />
+          </div>
+          <div className="grid gap-2">
+            <Label htmlFor="image">URL da Foto de Perfil</Label>
+            <Input
+              id="image"
+              value={image}
+              onChange={(e) => setImage(e.target.value)}
+              className="bg-white/5 border-white/10 text-white"
+              placeholder="https://..."
+            />
+          </div>
+          <div className="grid gap-2">
+            <Label htmlFor="name">Nome</Label>
+            <Input
+              id="name"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              className="bg-white/5 border-white/10 text-white"
+            />
+          </div>
+          <div className="grid gap-2">
+            <Label htmlFor="bio">Biografia</Label>
+            <Textarea
+              id="bio"
+              value={bio}
+              onChange={(e) => setBio(e.target.value)}
+              className="bg-white/5 border-white/10 text-white min-h-[100px]"
+            />
+          </div>
+        </div>
+        <div className="flex justify-end gap-2">
+          <Button variant="ghost" onClick={() => setOpen(false)}>
+            Cancelar
+          </Button>
+          <Button
+            onClick={handleSave}
+            disabled={loading}
+            className="bg-white text-black hover:bg-white/90"
+          >
+            {loading ? "Salvando..." : "Salvar"}
+          </Button>
+        </div>
+      </DialogContent>
+    </Dialog>
+  );
+}
 // ── Stat pill ──────────────────────────────────────────────────────────────────
 function StatPill({ value, label }: { value: string; label: string }) {
   const { accent } = useProfileTheme();
@@ -134,6 +236,16 @@ export function ProfileHeader({ user, stats }: ProfileHeaderProps) {
           </span>
         </div>
 
+        <EditDialog user={user}>
+          <Button
+            variant="outline"
+            size="sm"
+            className="border-white/20 bg-white/5 text-white hover:bg-white/10"
+          >
+            <Pencil />
+            Editar Perfil
+          </Button>
+        </EditDialog>
 
         {/* Social Counts & Stat pills 
         <div className="flex flex-wrap items-center gap-2">

@@ -36,7 +36,6 @@ async function MainPage({ data }: { data: ProfileData }) {
         <StudyHeatmap heatmap={data.heatmap} />
         <TopSubjects subjects={data.topSubjects} />
 
-
         <RecentSessions sessions={data.recentSessions} />
 
         <AchievementBadges badges={data.badges} />
