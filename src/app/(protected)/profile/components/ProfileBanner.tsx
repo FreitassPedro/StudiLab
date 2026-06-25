@@ -50,15 +50,7 @@ export function ProfileBanner({ coverImage }: { coverImage?: string | null }) {
           backgroundSize: "40px 40px",
           maskImage: "linear-gradient(to bottom, transparent, rgba(0,0,0,0.5) 40%, transparent)",
         }}
-      />
-
-      {/* Decorative labels */}
-      <span className="absolute right-[15%] top-7 select-none font-['Space_Grotesk'] text-[11px] font-bold uppercase tracking-[0.15em] text-white/[0.08] z-10">
-        MONITOR DE ESTUDOS
-      </span>
-      <span className="absolute bottom-5 left-[5%] select-none font-['Space_Grotesk'] text-[80px] font-black leading-none text-white/[0.02] z-10">
-        2025
-      </span>
+      />     
     </div>
   );
 }

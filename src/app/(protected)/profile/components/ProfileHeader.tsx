@@ -14,6 +14,7 @@ import { updateProfile } from "@/server/actions/profile.action";
 import { Pencil, Share } from "lucide-react";
 import { AccountSettingsCard } from "./AccountSettingsCard";
 import { FollowButton } from "./FollowButton";
+import { toast } from "sonner";
 
 function ThemeSwitcherProfile({ theme, setTheme }: { theme: Theme; setTheme: (t: Theme) => void }) {
   return (
@@ -298,7 +299,10 @@ export function ProfileHeader({ user, stats, isOwner, isFollowing }: ProfileHead
             </Button>
           </EditDialog>
         )}
-        <Button variant="outline" size="sm" className=" bg-white/5 hover:bg-white/10 ">
+        <Button variant="outline" size="sm" onClick={async () => {
+          await navigator.clipboard.writeText(`https://studilab.vercel.app/profile/${user.username}`);
+          toast.success("Link copiado para a área de transferência!");
+        }} className=" bg-white/5 hover:bg-white/10 ">
           <Share />
           Compartilhar
         </Button>

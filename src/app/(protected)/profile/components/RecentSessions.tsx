@@ -98,7 +98,7 @@ export function RecentSessions({ sessions }: RecentSessionsProps) {
   return (
     <section className="mb-10">
       <SectionLabel>Sessões Recentes</SectionLabel>
-      <div className="grid grid-cols-3 gap-2.5">
+      <div className="grid grid-cols-4 gap-2.5">
         {sessions.slice(0, 9).map((session) => (
           <SessionCard key={session.id} session={session} accent={accent} />
         ))}
