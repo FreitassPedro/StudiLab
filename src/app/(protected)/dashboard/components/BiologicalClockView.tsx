@@ -23,7 +23,7 @@ const MyCustomRectangle = (props: BarShapeProps) => {
     // Se for 60 exato (100%), fica amarela (#eab308)
     const minutes = payload.minutes || 0;
     const isMax = minutes >= 60;
-    
+
     // Calcula a opacidade baseada nos minutos (mínimo 0.2, máximo 1.0)
     const opacity = Math.min(1, Math.max(0.2, minutes / 60));
     const rectFill = isMax ? `rgba(234, 179, 8, 1)` : `rgba(139, 92, 246, ${opacity})`;

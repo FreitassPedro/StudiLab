@@ -2,7 +2,7 @@
 
 import { Card, CardContent } from "@/components/ui/card";
 import { useDashboardData } from "@/hooks/useDashboard";
-import { BookOpen, Target, Pencil } from "lucide-react";
+import { BookOpen, Target } from "lucide-react";
 import { TodaySummarySkeleton } from "./Skeletons";
 import { DailyProgress } from "./DailyProgress";
 
@@ -22,7 +22,7 @@ export function TodaySummary() {
     return (
         <div className="grid gap-4 md:grid-cols-4">
 
-            <DailyProgress 
+            <DailyProgress
                 totalMinutes={summary.totalMinutes}
             />
 

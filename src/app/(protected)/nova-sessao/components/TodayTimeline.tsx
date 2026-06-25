@@ -165,7 +165,7 @@ const RenderCurrentSessionCard = ({
             style={{
                 top: `${currentCard.top}%`,
                 height: `${currentCard.height}%`,
-                backgroundColor: `${resolvedBorderColor}33`,
+                backgroundColor: `${resolvedBorderColor}60`,
                 borderLeftColor: `${resolvedBorderColor}`,
             }}
         >
@@ -193,25 +193,26 @@ const RenderLogCardItem = ({ log, subject }: { log: TimelineLog; subject?: Timel
     return (
         <div
             key={log.id}
-            className="absolute z-0 left-2 right-2 rounded-lg p-2 border-l-4 overflow-hidden cursor-pointer hover:scale-[1.01] hover:z-20 transition-all
+            className="absolute z-10 left-2 right-2 rounded p-2 border-l-4 overflow-hidden cursor-pointer hover:scale-[1.01] hover:z-20 transition-all
                                     border-blue-500"
             style={{
                 top: `${calculateTop(log.start_time)}%`,
                 height: `${calculateFinalHeight(log.start_time, log.end_time)}%`,
-                backgroundColor: `${subject?.color}45`,
+                backgroundColor: `${subject?.color}95`,
                 borderLeftColor: `${subject?.color}`,
             }}
         >
             <div className="flex justify-between h-full">
-                <div>
-                    <h4 className="font-semibold text-xs text-secondary truncate">{log.topic?.name}</h4>
-                    <span className="text-xs text-muted-foreground truncate">{subject?.name}</span>
+                <div className="pl-4 flex flex-col items-start justify-center space-y-2">
+                    <h4 className="font-semibold text-[16px] text-foreground/80 truncate">{subject?.name}</h4>
+                    <span className="text-[14px] text-foreground/60 truncate">{log.topic.name}</span>
                 </div>
-                <div className="text-xs text-muted-foreground flex items-center gap-1  flex-row justify-between">
+                <div className="text-sm text-muted-foreground flex items-center gap-1  flex-row justify-between">
                     <div className='flex flex-row items-center gap-1'>
                         <Clock className="w-3 h-3" />
                         {formatTimeFromTimestamp(log.start_time)}
                     </div>
+                    <span>-</span>
                     <div className='flex flex-row items-center gap-1'>
                         <Clock className="w-3 h-3" />
                         {formatTimeFromTimestamp(log.end_time)}
@@ -260,9 +261,8 @@ const RenderLogsCard = ({
         );
     }
 
-    return (
-        <>{renderedLogCards}</>
-    )
+    return renderedLogCards;
+
 };
 
 const NowLine = () => {
@@ -352,7 +352,7 @@ export function TodayTimeline() {
 
     return (
         <div className="h-auto md:h-full md:min-h-0 md:overflow-hidden">
-            <Card className="h-auto md:flex md:h-full md:min-h-0 md:flex-col md:overflow-hidden">
+            <Card className="h-auto md:flex md:h-full md:min-h-0 md:flex-col md:overflow-hidden border-none">
                 <CardHeader>
                     <CardTitle className="flex items-center gap-2">
                         <Clock className="w-5 h-5 text-violet-500" />
@@ -367,9 +367,9 @@ export function TodayTimeline() {
                     <div className="">
                         <div className={`flex flex-row`} style={{ height: TimelineCardProps.height }}>
                             {/* Hour markers */}
-                            <div className="flex flex-col text-xs text-muted-foreground/60 space-y-0 sticky left-0 bg-card z-10" >
+                            <div className="flex flex-col text-xs text-muted-foreground space-y-0 sticky left-0 bg-card z-10" >
                                 {Array.from({ length: 24 }, (_, i) => i).map(hour => (
-                                    <div key={hour} className="flex-1 text-right pr-2 border-r border-slate-200">
+                                    <div key={hour} className="flex-1 text-right pr-2">
                                         {`${hour.toString().padStart(2, '0')}:00`}
                                     </div>
                                 ))}
@@ -381,7 +381,7 @@ export function TodayTimeline() {
                                 {Array.from({ length: 24 }, (_, i) => i + 1).map(hour => (
                                     <div
                                         key={hour}
-                                        className="absolute left-0  right-0 border-t border-slate-200/20"
+                                        className="absolute left-0 right-0 border-t border-slate-200/20"
                                         style={{ top: `${(hour / 24) * 100}%` }}
                                     />
                                 ))}

@@ -61,6 +61,11 @@ export function TimelineLogs() {
     const latestLogRef = useRef<HTMLDivElement>(null);
 
     // Scroll to the log with latest end_time when logs are loaded
+    useEffect(() => {
+        if (logs && logs.length > 0 && latestLogRef.current) {
+            latestLogRef.current.scrollIntoView({ behavior: "smooth", block: "nearest" });
+        }
+    }, [logs]);
 
     if (!isSingleDay || rangeType !== "day") return null;
 
@@ -76,7 +81,7 @@ export function TimelineLogs() {
 
 
     return (
-        <Card>
+        <Card className="border-none ">
             <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                     <Clock className="w-5 h-5 text-violet-500" />
@@ -93,9 +98,9 @@ export function TimelineLogs() {
                 {logs && logs.length > 0 && (
                     <div className={`flex flex-row`} style={{ height: TimelineCardProps.height }}>
                         {/* Hour markers */}
-                        <div className="flex flex-col text-xs text-slate-500 space-y-0" >
+                        <div className="flex flex-col text-xs text-muted-foreground space-y-0" >
                             {Array.from({ length: 24 }, (_, i) => i).map(hour => (
-                                <div key={hour} className="flex-1 text-right pr-2 border-r border-slate-200">
+                                <div key={hour} className="flex-1 text-right pr-2">
                                     {`${hour.toString().padStart(2, '0')}:00`}
                                 </div>
                             ))}
@@ -107,7 +112,7 @@ export function TimelineLogs() {
                             {Array.from({ length: 24 }, (_, i) => i + 1).map(hour => (
                                 <div
                                     key={hour}
-                                    className="absolute left-0 right-0 border-t border-slate-200"
+                                    className="absolute left-0 right-0 border-t border-slate-100"
                                     style={{ top: `${(hour / 24) * 100}%` }}
                                 />
                             ))}
@@ -128,11 +133,11 @@ export function TimelineLogs() {
                                 return (
                                     <div
                                         key={dayLog.id}
-                                        className="absolute z-10 left-2 right-2 rounded-lg p-2 border-l-4 overflow-hidden cursor-pointer hover:scale-[1.01] hover:z-20 transition-all duration-200"
+                                        className="absolute z-10 left-2 right-2 rounded p-2 border-l-4 overflow-hidden cursor-pointer hover:scale-[1.01] hover:z-20 transition-all duration-200"
                                         style={{
                                             top: `${top}%`,
                                             height: `${finalHeight}%`,
-                                            backgroundColor: subject ? `${subject.color}10` : '#a1a1aa33',
+                                            backgroundColor: subject ? `${subject.color}50` : '#a1a1aa33',
                                             borderLeftColor: subject ? `${subject.color}` : '#a1a1aa',
                                         }}
                                     >
