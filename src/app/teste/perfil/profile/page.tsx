@@ -1,0 +1,70 @@
+
+import { getProfileDataAction } from "@/server/actions/profile.action";
+import { ProfileThemeProvider } from "./components/ThemeContext";
+import { ThemeSwitcher } from "./components/ThemeSwitcher";
+import { ProfileBanner } from "./components/ProfileBanner";
+import { ProfileHeader } from "./components/ProfileHeader";
+import { ShowcaseGrid } from "./components/ShowcaseGrid";
+import { TopSubjects } from "./components/TopSubjects";
+import { StudyHeatmap } from "./components/StudyHeatmap";
+import { RecentSessions } from "./components/RecentSessions";
+import { AchievementBadges } from "./components/AchievementBadges";
+import { Suspense } from "react";
+import { ProfileData } from "./types";
+
+// ── Footer ─────────────────────────────────────────────────────────────────────
+function ProfileFooter({ name }: { name: string }) {
+  return (
+    <footer className="border-t border-white/[0.05] pt-5 text-center">
+      <p className="text-xs text-white/20">
+        Monitor de Estudos · Perfil de {name}
+      </p>
+    </footer>
+  );
+}
+
+
+async function MainPage({ data }: { data: ProfileData }) {
+
+  return (
+    <main className="mx-auto max-w-[900px] px-5 pb-20">
+      <Suspense>
+        <ProfileHeader user={data.user} stats={data.stats} />
+
+        <ShowcaseGrid stats={data.stats} />
+
+        <TopSubjects subjects={data.topSubjects} />
+
+        <StudyHeatmap heatmap={data.heatmap} />
+
+        <RecentSessions sessions={data.recentSessions} />
+
+        <AchievementBadges badges={data.badges} />
+
+        <ProfileFooter name={data.user.name} />
+      </Suspense>
+    </main >
+  )
+}
+// ── Page (RSC) ─────────────────────────────────────────────────────────────────
+export default async function ProfilePage() {
+  const data = await getProfileDataAction();
+
+  // Dados retornados da action (mock por enquanto — sem tocar no banco real)
+
+  return (
+    <ProfileThemeProvider>
+      {/* Page background */}
+      <div className="min-h-screen bg-[#0a0a0f] font-['Inter',sans-serif] text-[#e2e8f0]">
+        {/* Floating theme switcher */}
+        <ThemeSwitcher />
+
+        {/* Banner */}
+        <ProfileBanner coverImage={data.user.coverImage} />
+        <MainPage data={data} />
+
+
+      </div>
+    </ProfileThemeProvider>
+  );
+}
