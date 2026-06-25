@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { getFollowing } from "@/server/actions/follow.action";
+import { Avatar, AvatarImage } from "@/components/ui/avatar";
 
 export async function FollowingList() {
   const following = await getFollowing();
@@ -16,9 +17,11 @@ export async function FollowingList() {
             href={`/profile/${user.username || user.id}`}
             className="flex flex-col items-center gap-2 group transition-transform hover:-translate-y-1"
           >
-            <div className="w-12 h-12 rounded-full border-2 border-white/10 overflow-hidden bg-white/5 group-hover:border-white/30 transition-colors">
+            <div className="rounded-full border-2 border-white/10 overflow-hidden bg-white/5 group-hover:border-white/30 transition-colors">
               {user.image ? (
-                <img src={user.image} alt={user.name} className="w-full h-full object-cover" />
+                <Avatar size="lg">
+                  <AvatarImage src={user.image} alt={user.name} />
+                </Avatar>
               ) : (
                 <div className="w-full h-full flex items-center justify-center font-bold text-lg text-white">
                   {user.name.charAt(0).toUpperCase()}

@@ -26,11 +26,10 @@ export function FollowButton({ targetUserId, initialIsFollowing }: { targetUserI
   if (isFollowing) {
     return (
       <Button
-        variant="outline"
+        variant="ghost"
         size="sm"
         onClick={handleToggleFollow}
         disabled={loading}
-        className="border-white/20 bg-white/5 text-white hover:bg-white/10"
       >
         {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <UserCheck className="h-4 w-4 mr-2" />}
         Seguindo
@@ -43,7 +42,6 @@ export function FollowButton({ targetUserId, initialIsFollowing }: { targetUserI
       size="sm"
       onClick={handleToggleFollow}
       disabled={loading}
-      style={{ backgroundColor: accent.accent, color: "black" }}
       className="font-bold hover:brightness-110"
     >
       {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <UserPlus className="h-4 w-4 mr-2" />}

@@ -40,6 +40,8 @@ export default async function UsernameProfilePage({ params }: PageProps) {
   const isOwner = currentUser.id === data.user.id;
   const isFollowing = !isOwner ? await checkIsFollowing(data.user.id) : false;
 
+  
+
   return (
     <ProfileThemeProvider initialTheme={data.user.theme as Theme}>
       {/* Page background */}

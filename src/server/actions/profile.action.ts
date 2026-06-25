@@ -10,6 +10,7 @@ import type {
   ProfileSession,
   ProfileUser,
 } from "@/app/(protected)/profile/types";
+import { notFound } from "next/navigation";
 
 export async function getProfileDataAction(username?: string): Promise<ProfileData> {
   const currentUser = await requireAuth();
@@ -23,10 +24,10 @@ export async function getProfileDataAction(username?: string): Promise<ProfileDa
     });
 
     if (!targetProfile) {
-      throw new Error("Perfil não encontrado");
+      notFound();
     }
     if (targetProfile.userId !== currentUser.id && !targetProfile.isPublic) {
-      throw new Error("Este perfil é privado");
+      notFound();
     }
     targetUserId = targetProfile.userId;
   }

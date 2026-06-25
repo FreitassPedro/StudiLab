@@ -44,7 +44,6 @@ export default async function ProfilePage() {
       {/* Page background */}
       <div className="min-h-screen bg-[#0a0a0f] font-['Inter',sans-serif] text-[#e2e8f0]">
         {/* Floating theme switcher */}
-        <ThemeSwitcher />
 
         {/* Banner */}
         <ProfileBanner coverImage={data.user.coverImage} />
