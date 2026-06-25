@@ -15,7 +15,7 @@ import { notFound } from "next/navigation";
 export async function getProfileDataAction(username?: string): Promise<ProfileData> {
   const currentUser = await requireAuth();
 
-  const targetUserWhere = username ? { profile: { username: { equals: username, mode: "insensitive" } } } : { id: currentUser.id };
+  const targetUserWhere = username ? { profile: { username: { equals: username, mode: "insensitive" as const } } } : { id: currentUser.id };
 
   console.log("Searching for:", targetUserWhere);
 

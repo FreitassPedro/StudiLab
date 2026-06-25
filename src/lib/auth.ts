@@ -17,6 +17,17 @@ export const auth = betterAuth({
         enabled: true,
         autoSignIn: true,
     },
+    user: {
+        changeEmail: {
+            enabled: true,
+            autoSignIn: true,
+            updateEmailWithoutVerification: true
+        },
+        changePassword: {
+            enabled: true,
+            autoSignIn: true,
+        }
+    },
     plugins: [
         nextCookies()
     ],

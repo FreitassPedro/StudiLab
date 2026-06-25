@@ -36,6 +36,7 @@ export default function SignInPage() {
         try {
             const inputValue = data.name.trim();
             let email = inputValue;
+            console.log(email, inputValue);
 
             if (!inputValue.includes("@")) {
                 const foundEmail = await getEmailByUsernameAction(inputValue);
@@ -45,7 +46,7 @@ export default function SignInPage() {
                 }
                 email = foundEmail;
             }
-            
+            console.log(email, inputValue);
             const { error } = await authClient.signIn.email({
                 email: email,
                 password: data.password
