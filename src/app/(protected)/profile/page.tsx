@@ -27,15 +27,15 @@ function ProfileFooter({ name }: { name: string }) {
 async function MainPage({ data }: { data: ProfileData }) {
 
   return (
-    <main className="mx-auto max-w-[900px] px-5 pb-20">
+    <main className="mx-auto max-w-5xl px-5 pb-20">
       <Suspense>
         <ProfileHeader user={data.user} stats={data.stats} />
 
         <ShowcaseGrid stats={data.stats} />
 
+        <StudyHeatmap heatmap={data.heatmap} />
         <TopSubjects subjects={data.topSubjects} />
 
-        <StudyHeatmap heatmap={data.heatmap} />
 
         <RecentSessions sessions={data.recentSessions} />
 

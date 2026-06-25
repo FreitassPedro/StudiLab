@@ -133,12 +133,9 @@ export function ProfileHeader({ user, stats }: ProfileHeaderProps) {
             Olá, {firstName}! Bem-vindo ao seu perfil
           </span>
         </div>
-        {/*}
-        <div>
 
-        </div>
 
-        {/* Social Counts & Stat pills */}
+        {/* Social Counts & Stat pills 
         <div className="flex flex-wrap items-center gap-2">
           {user.followersCount !== undefined && (
             <StatPill value={String(user.followersCount)} label="Seguidores" />
@@ -151,7 +148,6 @@ export function ProfileHeader({ user, stats }: ProfileHeaderProps) {
           <StatPill value={consistency} label="consistência" />
           <StatPill value={String(stats.studyDays)} label="dias registrados" />
 
-          {/* Streak indicator */}
           <div className="inline-flex items-center gap-1.5 rounded-full border border-white/15 bg-white/[0.03] px-3 py-[5px] text-xs">
             <span>🔥</span>
             <span className="font-semibold text-white/70">
@@ -159,6 +155,7 @@ export function ProfileHeader({ user, stats }: ProfileHeaderProps) {
             </span>
           </div>
         </div>
+        */}
       </div>
     </div>
   );
