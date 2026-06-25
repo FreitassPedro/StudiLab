@@ -10,24 +10,38 @@ import { StudyHeatmap } from "./components/StudyHeatmap";
 import { RecentSessions } from "./components/RecentSessions";
 import { AchievementBadges } from "./components/AchievementBadges";
 import { Suspense } from "react";
-import { ProfileData, Theme } from "./types";
+import { ProfileData } from "./types";
 
-async function MainPage({ data, isOwner, isFollowing }: { data: ProfileData, isOwner: boolean, isFollowing: boolean }) {
+// ── Footer ─────────────────────────────────────────────────────────────────────
+function ProfileFooter({ name }: { name: string }) {
+  return (
+    <footer className="border-t border-white/[0.05] pt-5 text-center">
+      <p className="text-xs text-white/20">
+        Monitor de Estudos · Perfil de {name}
+      </p>
+    </footer>
+  );
+}
+
+
+async function MainPage({ data }: { data: ProfileData }) {
 
   return (
-    <main className="mx-auto max-w-5xl px-5 pb-20">
+    <main className="mx-auto max-w-[900px] px-5 pb-20">
       <Suspense>
-        <ProfileHeader user={data.user} stats={data.stats} isOwner={isOwner} isFollowing={isFollowing} />
+        <ProfileHeader user={data.user} stats={data.stats} />
 
         <ShowcaseGrid stats={data.stats} />
 
-        <StudyHeatmap heatmap={data.heatmap} />
         <TopSubjects subjects={data.topSubjects} />
+
+        <StudyHeatmap heatmap={data.heatmap} />
 
         <RecentSessions sessions={data.recentSessions} />
 
         <AchievementBadges badges={data.badges} />
 
+        <ProfileFooter name={data.user.name} />
       </Suspense>
     </main >
   )
@@ -38,16 +52,16 @@ export default async function ProfilePage() {
 
   // Dados retornados da action (mock por enquanto — sem tocar no banco real)
 
-
   return (
-    <ProfileThemeProvider initialTheme={data.user.theme as Theme}>
+    <ProfileThemeProvider>
       {/* Page background */}
       <div className="min-h-screen bg-[#0a0a0f] font-['Inter',sans-serif] text-[#e2e8f0]">
         {/* Floating theme switcher */}
+        <ThemeSwitcher />
 
         {/* Banner */}
         <ProfileBanner coverImage={data.user.coverImage} />
-        <MainPage data={data} isOwner={true} isFollowing={false} />
+        <MainPage data={data} />
 
 
       </div>

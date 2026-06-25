@@ -118,7 +118,7 @@ export function TopSubjects({ subjects }: TopSubjectsProps) {
 
   return (
     <section className="mb-10">
-      <SectionLabel>Top Matérias — Semanal</SectionLabel>
+      <SectionLabel>Top Matérias — Todo o Período</SectionLabel>
 
       <div className="overflow-hidden rounded-[18px] border border-white/[0.06] bg-white/[0.02]">
         {/* Header */}

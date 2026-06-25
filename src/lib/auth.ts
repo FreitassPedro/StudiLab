@@ -25,6 +25,21 @@ export const auth = betterAuth({
             enabled: true,
             maxAge: 60 * 15 // 15 minutes
         }
+    },
+    databaseHooks: {
+        user: {
+            create: {
+                after: async (user) => {
+                    await prisma.profile.create({
+                        data: {
+                            userId: user.id,
+                            username: user.email.split("@")[0],
+                            isPublic: true,
+                        }
+                    });
+                }
+            }
+        }
     }
 
 });

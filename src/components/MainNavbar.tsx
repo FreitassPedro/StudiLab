@@ -9,6 +9,7 @@ import ThemeSwitch from './ThemeSwtich';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuGroup, DropdownMenuItem, DropdownMenuTrigger } from './ui/dropdown-menu';
 import { Separator } from './ui/separator';
 import { authClient } from '@/lib/auth-client';
+import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 
 const navItems = [
     { href: '/dashboard', label: 'Dashboard', icon: LibraryBig, isEnabled: true },
@@ -21,15 +22,16 @@ const navItems = [
     { href: '/', label: 'Ciclos', icon: CalendarClock, isEnabled: false },
 ];
 
-export default function MainNavbar() {
-    const router = useRouter();
-    const currentPath = usePathname();
-
-    const { data: session } = authClient.useSession();
+function UserDropdown() {
+    const { data: session, isPending } = authClient.useSession();
     const user = session?.user;
+    const router = useRouter();
 
-    const enabledItems = navItems.filter(item => item.isEnabled);
+    if (isPending) {
+        return <div className="h-8 w-8 rounded-full" />;
+    }
 
+    if (!user) return null;
     async function handleSignOut() {
         await authClient.signOut({
             fetchOptions: {
@@ -38,9 +40,53 @@ export default function MainNavbar() {
                     router.push("/sign-in");
                 }
             },
-
         });
     }
+    return (
+        <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+                <div className="flex items-center gap-1 sm:gap-2 rounded-full border border-border bg-secondary px-2 py-1 shrink-0 cursor-pointer hover:bg-secondary/80 transition-colors">
+                    <span className="text-xs sm:text-sm text-muted-foreground hidden sm:inline truncate max-w-30">
+                        {user.name || user.email}
+                    </span>
+
+                    <Avatar className="h-6 w-6 sm:h-8 sm:w-8">
+                        <AvatarImage src={user?.image || ''} alt={user.name || ''} />
+                        <AvatarFallback className="text-xs"><User className="h-4 w-4" /></AvatarFallback>
+                    </Avatar>
+
+                </div>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent>
+                <DropdownMenuGroup>
+                    <DropdownMenuItem
+                        onClick={() => router.push("/profile")}
+                    >
+                        <User />
+                        Perfil
+                    </DropdownMenuItem>
+                </DropdownMenuGroup>
+                <Separator />
+                <DropdownMenuGroup>
+                    <DropdownMenuItem variant='destructive'
+                        onSelect={() => handleSignOut()}
+                    >
+                        <LogOut />
+                        Sair
+                    </DropdownMenuItem>
+                </DropdownMenuGroup>
+            </DropdownMenuContent>
+        </DropdownMenu>
+    )
+}
+export default function MainNavbar() {
+    const router = useRouter();
+    const currentPath = usePathname();
+
+    const { data: session } = authClient.useSession();
+    const user = session?.user;
+
+    const enabledItems = navItems.filter(item => item.isEnabled);
 
     return (
         <header className="sticky top-0 z-50 w-full">
@@ -110,38 +156,7 @@ export default function MainNavbar() {
                             })}
                         </div>
 
-                        {/* User Info */}
-                        {user && (
-                            <DropdownMenu>
-                                <DropdownMenuTrigger asChild>
-                                    <div className="flex items-center gap-1 sm:gap-2 rounded-full border border-border bg-secondary px-2 sm:px-3 py-1 shrink-0 max-w-35 sm:max-w-none">
-                                        <span className="text-xs sm:text-sm text-muted-foreground sm:inline truncate max-w-30">
-                                            {user.name || user.email}
-                                        </span>
-
-                                        <User className="h-4 w-4" />
-
-                                    </div>
-                                </DropdownMenuTrigger>
-                                <DropdownMenuContent>
-                                    <DropdownMenuGroup>
-                                        <DropdownMenuItem
-                                            onSelect={() => { }}
-                                        >Perfil</DropdownMenuItem>
-                                    </DropdownMenuGroup>
-                                    <Separator />
-                                    <DropdownMenuGroup>
-                                        <DropdownMenuItem variant='destructive'
-                                            onSelect={() => handleSignOut()}
-                                        >
-                                            <LogOut />
-                                            SIgnOUt
-                                        </DropdownMenuItem>
-                                    </DropdownMenuGroup>
-                                </DropdownMenuContent>
-                            </DropdownMenu>
-
-                        )}
+                        <UserDropdown />
                         <ThemeSwitch />
                     </div>
                 </div>

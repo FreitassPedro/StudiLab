@@ -1,14 +1,171 @@
 "use client";
 
-import { useProfileTheme } from "./ThemeContext";
-import type { ProfileUser, ProfileStats } from "../types";
-import Image from "next/image";
+import { useState } from "react";
+import { useRouter } from "next/navigation";
+import { THEME_CONFIGS, useProfileTheme } from "./ThemeContext";
+import type { ProfileUser, ProfileStats, Theme } from "../types";
+import { Button } from "@/components/ui/button";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Label } from "@/components/ui/label";
+import { updateProfile } from "@/server/actions/profile.action";
+import { Pencil } from "lucide-react";
+import { AccountSettingsCard } from "./AccountSettingsCard";
+import { FollowButton } from "./FollowButton";
 
+function ThemeSwitcherProfile({ theme, setTheme }: { theme: Theme; setTheme: (t: Theme) => void }) {
+  return (
+    <div className="flex items-center gap-2.5 rounded-xl border border-white/10 bg-[#0a0a0f]/85 px-3 py-2 backdrop-blur-xl">
+      <span className="text-[10px] font-semibold uppercase tracking-widest text-white/40">
+        Tema
+      </span>
+      {THEME_CONFIGS.map((cfg) => (
+        <button
+          key={cfg.key}
+          title={cfg.tooltip}
+          onClick={() => setTheme(cfg.key as Theme)}
+          className={`relative h-[18px] w-[18px] rounded-full bg-linear-to-br ${cfg.gradient} transition-all duration-200 hover:scale-125 ${theme === cfg.key
+            ? "ring-2 ring-white ring-offset-1 ring-offset-[#0a0a0f]"
+            : ""
+            }`}
+          aria-label={cfg.label}
+        />
+      ))}
+    </div>
+  )
+}
+function EditDialog({ children, user, isOwner }: { children: React.ReactNode; user: ProfileUser; isOwner: boolean }) {
+  const [open, setOpen] = useState(false);
+  const [name, setName] = useState(user.name);
+  const [bio, setBio] = useState(user.bio || "");
+  const [coverImage, setCoverImage] = useState(user.coverImage || "");
+  const [image, setImage] = useState(user.image || "");
+  const [loading, setLoading] = useState(false);
+  const [theme, setTheme] = useState(user.theme || "midnight");
+  const router = useRouter();
+
+  async function handleSave() {
+    try {
+      setLoading(true);
+      await updateProfile({
+        name,
+        bio,
+        coverImage,
+        image,
+        theme
+      });
+      setOpen(false);
+      router.refresh();
+    } catch (e) {
+      console.error(e);
+      alert("Erro ao salvar perfil");
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  return (
+    <Dialog open={open} onOpenChange={setOpen}>
+      <DialogTrigger asChild>
+        {children}
+      </DialogTrigger>
+      <DialogContent className="bg-[#12121a] border-white/10 text-white max-w-md p-0 overflow-hidden">
+        <DialogHeader className="px-6 pt-6">
+          <DialogTitle>Configurações</DialogTitle>
+        </DialogHeader>
+
+        <Tabs defaultValue="profile" className="w-full">
+          <div className="px-6">
+            <TabsList className="w-full bg-white/5 border border-white/10 p-1 rounded-xl mb-2">
+              <TabsTrigger value="profile" className="flex-1 rounded-lg data-[state=active]:bg-white/10 data-[state=active]:text-white text-white/60">
+                Perfil
+              </TabsTrigger>
+              {isOwner && (
+                <TabsTrigger value="account" className="flex-1 rounded-lg data-[state=active]:bg-white/10 data-[state=active]:text-white text-white/60">
+                  Conta
+                </TabsTrigger>
+              )}
+            </TabsList>
+          </div>
+
+          {/* ABA DE PERFIL */}
+          <TabsContent value="profile" className="px-6 pb-6 m-0 focus-visible:outline-none">
+            <div className="grid gap-4 py-2">
+              <div className="grid gap-2">
+                <Label htmlFor="coverImage">URL da Foto de Fundo</Label>
+                <Input
+                  id="coverImage"
+                  value={coverImage}
+                  onChange={(e) => setCoverImage(e.target.value)}
+                  className="bg-white/5 border-white/10 text-white"
+                  placeholder="https://..."
+                />
+              </div>
+              <div className="grid gap-2">
+                <Label htmlFor="image">URL da Foto de Perfil</Label>
+                <Input
+                  id="image"
+                  value={image}
+                  onChange={(e) => setImage(e.target.value)}
+                  className="bg-white/5 border-white/10 text-white"
+                  placeholder="https://..."
+                />
+              </div>
+              <div className="grid gap-2">
+                <Label htmlFor="name">Nome</Label>
+                <Input
+                  id="name"
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  className="bg-white/5 border-white/10 text-white"
+                />
+              </div>
+              <div className="grid gap-2">
+                <Label htmlFor="bio">Biografia</Label>
+                <Textarea
+                  id="bio"
+                  value={bio}
+                  onChange={(e) => setBio(e.target.value)}
+                  className="bg-white/5 border-white/10 text-white min-h-[100px]"
+                />
+              </div>
+              <ThemeSwitcherProfile
+                theme={theme as Theme}
+                setTheme={setTheme}
+              />
+            </div>
+            <div className="flex justify-end gap-2 mt-4">
+              <Button variant="ghost" onClick={() => setOpen(false)} className="hover:bg-white/5 hover:text-white">
+                Cancelar
+              </Button>
+              <Button
+                onClick={handleSave}
+                disabled={loading}
+                className="bg-white text-black hover:bg-white/90"
+              >
+                {loading ? "Salvando..." : "Salvar"}
+              </Button>
+            </div>
+          </TabsContent>
+
+          {/* ABA DE CONTA */}
+          {isOwner && (
+            <TabsContent value="account" className="px-6 pb-6 m-0 focus-visible:outline-none max-h-[60vh] overflow-y-auto">
+              <AccountSettingsCard user={user} />
+            </TabsContent>
+          )}
+        </Tabs>
+      </DialogContent>
+    </Dialog>
+  );
+}
 // ── Stat pill ──────────────────────────────────────────────────────────────────
 function StatPill({ value, label }: { value: string; label: string }) {
   const { accent } = useProfileTheme();
   return (
-    <div className="flex items-center gap-1.5 rounded-full border border-white/[0.09] bg-white/[0.05] px-3.5 py-1.5 text-xs">
+    <div className="flex items-center gap-1.5 rounded-full border px-3.5 py-1.5 text-xs">
       <span className="font-bold" style={{ color: accent.accent }}>
         {value}
       </span>
@@ -37,14 +194,19 @@ function AvatarFrame({
 
   return (
     <div
-      className="h-[108px] w-[108px] flex-shrink-0 z-10 rounded-full p-[3px]"
+      className="h-[180px] w-[180px] shrink-0 z-10 rounded-full p-[3px]"
       style={{
         background: `linear-gradient(135deg, ${accent.accent}, ${accent.accent2})`,
       }}
     >
       <div className="flex h-full w-full items-center justify-center overflow-hidden rounded-full border-[3px] border-[#0a0a0f] bg-[#1e1e2e]">
         {image ? (
-          <Image src={image} alt={name} className="h-full w-full object-cover" />
+          /* eslint-disable-next-line @next/next/no-img-element */
+          <img
+            src={image}
+            alt={name}
+            className="h-full w-full object-cover"
+          />
         ) : (
           <span
             className="font-['Space_Grotesk'] text-2xl font-black"
@@ -62,6 +224,8 @@ function AvatarFrame({
 interface ProfileHeaderProps {
   user: ProfileUser;
   stats: ProfileStats;
+  isOwner: boolean;
+  isFollowing: boolean;
 }
 
 function formatHours(minutes: number): string {
@@ -78,7 +242,7 @@ function calcConsistency(studyDays: number, createdAt: Date): string {
   return `${pct}%`;
 }
 
-export function ProfileHeader({ user, stats }: ProfileHeaderProps) {
+export function ProfileHeader({ user, stats, isOwner, isFollowing }: ProfileHeaderProps) {
   const { accent } = useProfileTheme();
 
   const totalHoursLabel = formatHours(stats.totalMinutes);
@@ -86,7 +250,7 @@ export function ProfileHeader({ user, stats }: ProfileHeaderProps) {
   const firstName = user.name.split(" ")[0];
 
   return (
-    <div className="mb-8 mt-[-54px] flex flex-wrap items-end gap-5">
+    <div className="mb-8  flex flex-wrap items-end gap-5">
       <AvatarFrame name={user.name} image={user.image} accent={accent} />
 
       <div className="min-w-[200px] flex-1 pb-1">
@@ -114,32 +278,55 @@ export function ProfileHeader({ user, stats }: ProfileHeaderProps) {
           </span>
         </div>
 
-        {/* Email as username */}
+        {/* Username / Email */}
         <div className="mb-2.5 text-[13px] text-white/40">
-          @{user.email.split("@")[0]}
+          @{user.username || user.email.split("@")[0]}
         </div>
 
-        {/* Status based on last subject */}
-        <div className="mb-3 inline-flex items-center gap-2 rounded-full border border-white/[0.08] bg-white/[0.04] px-3.5 py-1.5">
-          <span>📖</span>
-          <span className="text-[13px] text-white/70">
-            Olá, {firstName}! Bem-vindo ao seu perfil
-          </span>
-        </div>
+        {/* Bio */}
+        {user.bio && (
+          <div className="mb-3 text-[14px] text-white/80 max-w-xl">
+            {user.bio}
+          </div>
+        )}
 
-        {/* Stat pills */}
-        <div className="flex flex-wrap items-center gap-2">
+        {isOwner && (
+          <EditDialog user={user} isOwner={isOwner}>
+            <Button
+              variant="outline"
+              size="sm"
+              className="border-white/20 bg-white/5 text-white hover:bg-white/10 "
+            >
+              <Pencil />
+              Editar Perfil
+            </Button>
+          </EditDialog>
+        )}
+
+        {!isOwner && (
+          <FollowButton targetUserId={user.id} initialIsFollowing={isFollowing} />
+        )}
+
+        <div className="flex flex-wrap items-center gap-2 mt-4">
+          {user.followersCount !== undefined && (
+            <StatPill value={String(user.followersCount)} label="Seguidores" />
+          )}
+          {user.followingCount !== undefined && (
+            <StatPill value={String(user.followingCount)} label="Seguindo" />
+          )}
+
+          {/*
           <StatPill value={totalHoursLabel} label="estudadas" />
           <StatPill value={consistency} label="consistência" />
           <StatPill value={String(stats.studyDays)} label="dias registrados" />
 
-          {/* Streak indicator */}
           <div className="inline-flex items-center gap-1.5 rounded-full border border-white/15 bg-white/[0.03] px-3 py-[5px] text-xs">
             <span>🔥</span>
             <span className="font-semibold text-white/70">
               {stats.currentStreak} dias de ofensiva
             </span>
           </div>
+          */}
         </div>
       </div>
     </div>

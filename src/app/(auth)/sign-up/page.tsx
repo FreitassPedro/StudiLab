@@ -18,7 +18,12 @@ import { cn } from "@/lib/utils";
 
 const formSchema = z.object({
     name: z.string().min(2, "O nome deve ter pelo menos 2 caracteres"),
+    username: z.string().min(2, "O username deve ter pelo menos 2 caracteres").regex(/^[a-zA-Z0-9_]+$/, "Apenas letras, números e underline (_)"),
     password: z.string().min(6, "A senha deve ter pelo menos 6 caracteres"),
+    confirmPassword: z.string().min(6, "A senha deve ter pelo menos 6 caracteres"),
+}).refine(data => data.password === data.confirmPassword, {
+    message: "As senhas não coincidem",
+    path: ["confirmPassword"],
 });
 
 type FormData = z.infer<typeof formSchema>;
@@ -27,12 +32,18 @@ export default function SignUpPage() {
     const router = useRouter();
 
     const { register, handleSubmit, formState: { errors, isSubmitting } } = useForm<FormData>({
-        resolver: zodResolver(formSchema)
+        resolver: zodResolver(formSchema),
+        mode: "onChange",
     });
 
+
     const onSubmit = async (data: FormData) => {
+        if (errors.confirmPassword) {
+            toast.error(errors.confirmPassword.message);
+            return;
+        };
         try {
-            const email = `${data.name.toLowerCase().replace(/\s+/g, "")}@example.com`;
+            const email = `${data.username.toLowerCase().replace(/\s+/g, "")}@email.com`;
             const { error } = await authClient.signUp.email({
                 name: data.name,
                 email: email,
@@ -44,7 +55,7 @@ export default function SignUpPage() {
                 return;
             }
             toast.success("Conta criada com sucesso!");
-            router.push("/sign-in");
+            router.push("/");
 
         } catch (error) {
             toast.error("Ocorreu um erro inesperado");
@@ -92,14 +103,25 @@ export default function SignUpPage() {
                         <CardContent>
                             <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
                                 <div className="space-y-2">
-                                    <Label htmlFor="name">Nome de Usuário</Label>
+                                    <Label htmlFor="name">Nome de Exibição</Label>
                                     <Input
                                         id="name"
-                                        placeholder="Seu usuário"
+                                        placeholder="Seu Nome"
                                         {...register("name")}
                                         className={errors.name ? "border-destructive" : ""}
                                     />
                                     {errors.name && <p className="text-xs text-destructive font-medium">{errors.name.message}</p>}
+                                </div>
+
+                                <div className="space-y-2">
+                                    <Label htmlFor="username">Username (@)</Label>
+                                    <Input
+                                        id="username"
+                                        placeholder="seu_usuario"
+                                        {...register("username")}
+                                        className={errors.username ? "border-destructive" : ""}
+                                    />
+                                    {errors.username && <p className="text-xs text-destructive font-medium">{errors.username.message}</p>}
                                 </div>
 
                                 {/*
@@ -115,8 +137,8 @@ export default function SignUpPage() {
                                     {errors.email && <p className="text-xs text-destructive font-medium">{errors.email.message}</p>}
                                 </div>
 */}
-                                <div className="space-y-2">
-                                    <Label htmlFor="password">Senha</Label>
+                                <div className="space-y-1">
+                                    <Label className="text-muted-foreground font-normal" htmlFor="password">Senha</Label>
                                     <Input
                                         id="password"
                                         type="password"
@@ -125,6 +147,17 @@ export default function SignUpPage() {
                                         className={errors.password ? "border-destructive" : ""}
                                     />
                                     {errors.password && <p className="text-xs text-destructive font-medium">{errors.password.message}</p>}
+                                </div>
+                                <div className="space-y-1">
+                                    <Label className="text-muted-foreground font-normal" htmlFor="confirmPassword">Confirmar Senha</Label>
+                                    <Input
+                                        id="confirmPassword"
+                                        type="password"
+                                        placeholder="Confirme sua senha"
+                                        {...register("confirmPassword")}
+                                        className={errors.confirmPassword ? "border-destructive" : ""}
+                                    />
+                                    {errors.confirmPassword && <p className="text-xs text-destructive font-medium">{errors.confirmPassword.message}</p>}
                                 </div>
 
                                 <Button type="submit" className={cn("w-full mt-2", isSubmitting ? "opacity-50 cursor-not-allowed" : "")} disabled={isSubmitting}>

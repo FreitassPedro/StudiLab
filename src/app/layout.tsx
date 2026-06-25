@@ -42,7 +42,9 @@ export default function RootLayout({
           defaultTheme="system"
           enableSystem
         >
-          <MainNavbar />
+          <Suspense fallback={<div className="h-14 sm:h-16 border-b border-border bg-card"></div>}>
+            <MainNavbar />
+          </Suspense>
           <QueryProvider>
             <Suspense fallback={<div className="flex items-center justify-center h-screen">Carregando...</div>}>
 

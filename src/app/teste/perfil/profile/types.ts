@@ -1,13 +1,6 @@
 // ── Theme ──────────────────────────────────────────────────────────────────────
 
-/* Temas
-midnight: roxo escuro
-sunset: laranja
-sky: azul
-delicatessen: rosa
-forest: verde
-*/
-export type Theme = "midnight" | "sunset" | "sky" | "delicatessen" | "forest";
+export type Theme = "cyberpunk" | "lofi" | "minimal";
 
 export interface ThemeConfig {
   key: Theme;
@@ -25,11 +18,12 @@ export interface ProfileUser {
   image?: string | null;
   createdAt: Date;
   username?: string | null;
-  theme: string;
   bio?: string | null;
   isPublic?: boolean;
   coverImage?: string | null;
-  webSite?: string | null;
+  website?: string | null;
+  twitter?: string | null;
+  github?: string | null;
   linkedin?: string | null;
   followersCount?: number;
   followingCount?: number;
@@ -38,7 +32,6 @@ export interface ProfileUser {
 export interface ProfileSubject {
   name: string;
   color: string;
-  emoji: string,
   minutes: number; // total minutes studied
 }
 

@@ -397,7 +397,7 @@ function RecentSessions() {
 
 // Se TodayTimeline vier de outro arquivo, importe normalmente.
 // Aqui deixamos um slot compatível:
-import { TodayTimeline } from "../../nova-sessao/components/TodayTimeline";
+
 
 // ─── Page ─────────────────────────────────────────────────────────────────────
 
@@ -444,14 +444,7 @@ export default function DashboardPage() {
                         <RecentSessions />
                     </div>
 
-                    {/* Timeline ocupa 1 coluna, com scroll interno */}
-                    <div className="md:col-span-1 md:h-[520px] relative">
-                        <div className="md:absolute md:inset-0 md:overflow-y-auto [&>*]:min-h-full">
-                            <Suspense fallback={<SessionsSkeleton />}>
-                                <TodayTimeline />
-                            </Suspense>
-                        </div>
-                    </div>
+                    
                 </div>
 
             </div>
