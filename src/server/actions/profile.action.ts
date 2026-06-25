@@ -31,46 +31,41 @@ export async function getProfileDataAction(username?: string): Promise<ProfileDa
     targetUserId = targetProfile.userId;
   }
 
-  // Fetch User and Profile
-  const userRecord = await prisma.user.findUnique({
-    where: { id: targetUserId },
-    include: {
-      profile: true,
-      _count: {
-        select: { followers: true, following: true }
+  // Fetch User, Study Logs, and Badges in parallel
+  const today = new Date();
+  const fifteenDaysAgo = new Date();
+  fifteenDaysAgo.setDate(today.getDate() - 14);
+
+  const [userRecord, studyLogs, allBadges] = await Promise.all([
+    prisma.user.findUnique({
+      where: { id: targetUserId },
+      include: {
+        profile: true,
+        _count: {
+          select: { followers: true, following: true }
+        },
+        badges: {
+          include: { badge: true }
+        }
       }
-    }
-  });
-
-  if (!userRecord) {
-    throw new Error("Usuário não encontrado");
-  }
-
-  const profileUser: ProfileUser = {
-    id: userRecord.id,
-    name: userRecord.name,
-    email: userRecord.email,
-    image: userRecord.image,
-    createdAt: userRecord.createdAt,
-    username: userRecord.profile?.username,
-    bio: userRecord.profile?.bio,
-    isPublic: userRecord.profile?.isPublic,
-    coverImage: userRecord.profile?.coverImage,
-    theme: userRecord.profile?.theme || "midnight",
-    followersCount: userRecord._count.followers,
-    followingCount: userRecord._count.following,
-  };
-
-  // Fetch Study Logs
-  const studyLogs = await prisma.studyLogs.findMany({
-    where: {
-      topic: { subject: { userId: targetUserId } }
-    },
-    include: {
-      topic: { include: { subject: true } }
-    },
-    orderBy: { start_time: "desc" }
-  });
+    }),
+    prisma.studyLogs.findMany({
+      where: {
+        topic: {
+          subject: { userId: targetUserId }
+        },
+        study_date: {
+          gte: fifteenDaysAgo,
+          lte: today,
+        },
+      },
+      include: {
+        topic: { include: { subject: true } }
+      },
+      orderBy: { start_time: "desc" }
+    }),
+    prisma.badge.findMany()
+  ]);
 
   // Calculate Heatmap
   const heatmap: Record<string, number> = {};
@@ -147,20 +142,32 @@ export async function getProfileDataAction(username?: string): Promise<ProfileDa
     avgMinutesPerDay: uniqueStudyDays.size > 0 ? Math.round(totalMinutes / uniqueStudyDays.size) : 0,
   };
 
+  if (!userRecord) {
+    throw new Error("Usuário não encontrado");
+  }
+
+  const profileUser: ProfileUser = {
+    id: userRecord.id,
+    name: userRecord.name,
+    email: userRecord.email,
+    image: userRecord.image,
+    createdAt: userRecord.createdAt,
+    username: userRecord.profile?.username,
+    bio: userRecord.profile?.bio,
+    isPublic: userRecord.profile?.isPublic,
+    coverImage: userRecord.profile?.coverImage,
+    theme: userRecord.profile?.theme || "midnight",
+    followersCount: userRecord._count.followers,
+    followingCount: userRecord._count.following,
+  };
+
   // Badges
-  const userBadges = await prisma.userBadge.findMany({
-    where: { userId: targetUserId },
-    include: { badge: true }
-  });
-
-  const allBadges = await prisma.badge.findMany();
-
   const badges: ProfileBadge[] = allBadges.map(b => ({
     emoji: b.emoji,
     name: b.name,
     desc: b.description,
     rarity: b.rarity as any,
-    locked: !userBadges.some(ub => ub.badgeId === b.id)
+    locked: !userRecord.badges.some(ub => ub.badgeId === b.id)
   }));
 
   return {

@@ -10,7 +10,7 @@ import { StudyHeatmap } from "./components/StudyHeatmap";
 import { RecentSessions } from "./components/RecentSessions";
 import { AchievementBadges } from "./components/AchievementBadges";
 import { Suspense } from "react";
-import { ProfileData } from "./types";
+import { ProfileData, Theme } from "./types";
 
 async function MainPage({ data }: { data: ProfileData }) {
 
@@ -37,7 +37,7 @@ export default async function ProfilePage() {
   const data = await getProfileDataAction();
 
   // Dados retornados da action (mock por enquanto — sem tocar no banco real)
-  
+
 
   return (
     <ProfileThemeProvider initialTheme={data.user.theme as Theme}>
