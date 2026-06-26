@@ -1,9 +1,8 @@
 "use server";
 
 import { prisma } from "@/lib/prisma";
-import { connection } from "next/server";
 import { requireAuth } from "./requireAuth";
-import { revalidatePath } from "next/cache";
+import { revalidatePath, revalidateTag } from "next/cache";
 
 const include = {
     topic: {
@@ -12,9 +11,6 @@ const include = {
         },
     },
 } as const;
-
-
-
 
 export async function getStudyLogDetailsAction(logId: string) {
     await requireAuth();
@@ -34,7 +30,6 @@ export async function getStudyLogDetailsAction(logId: string) {
 }
 
 
-
 export interface StudyLogInput {
     topic_id: string;
     study_date: string;
@@ -46,7 +41,7 @@ export interface StudyLogInput {
 }
 
 export async function createStudyLogAction(data: StudyLogInput) {
-    await requireAuth();
+    const user = await requireAuth();
     const result = await prisma.studyLogs.create({
         data: {
             topicId: data.topic_id,
@@ -61,6 +56,8 @@ export async function createStudyLogAction(data: StudyLogInput) {
     });
     revalidatePath("/dashboard");
     revalidatePath("/historico");
+    revalidateTag(`study-logs-${user.id}`, "max");
+    revalidateTag(`profile-stats-${user.id}`, "max");
     return result;
 }
 
@@ -74,7 +71,7 @@ export interface UpdateStudyLogInput {
 }
 
 export async function updateStudyLogAction(data: UpdateStudyLogInput) {
-    await requireAuth();
+    const user = await requireAuth();
     const updateData = {} as {
         topicId?: string;
         start_time?: Date;
@@ -97,16 +94,20 @@ export async function updateStudyLogAction(data: UpdateStudyLogInput) {
     });
     revalidatePath("/dashboard");
     revalidatePath("/historico");
+    revalidateTag(`study-logs-${user.id}`, "max");
+    revalidateTag(`profile-stats-${user.id}`, "max");
     return result;
 }
 
 export async function deleteStudyLogAction(id: string) {
-    await requireAuth();
+    const user = await requireAuth();
     const result = await prisma.studyLogs.delete({
         where: { id },
     });
     revalidatePath("/dashboard");
     revalidatePath("/historico");
+    revalidateTag(`study-logs-${user.id}`, "max");
+    revalidateTag(`profile-stats-${user.id}`, "max");
     return result;
 }
 

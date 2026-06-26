@@ -34,6 +34,25 @@ Este arquivo contém o contexto central do projeto para orientar agentes de IA d
 5. **Lidando com Datas e Fuso Horário**:
    - Cuidado especial com os fusos horários. Em operações de exibição local, use os helpers definidos em `src/lib/utils.ts` (como `getTodayLocal`, `formatDateToLocal`).
 
+## 🚀 Estratégia de Cache e Performance
+
+Para lidar com consultas massivas (ex: logs de meses) que são consumidas simultaneamente no Dashboard (Client-side) e Perfis de Usuários (Server-side), o projeto implementa uma arquitetura de cache de 3 camadas:
+
+1. **Next.js Data Cache (`unstable_cache`) com Invalidação por Tags**:
+   - As funções pesadas que geram estatísticas (`analysis.action.ts` e `profile.action.ts`) são protegidas por `unstable_cache`. Elas possuem tags como `study-logs-[userId]` e `profile-stats-[userId]`.
+   - Se o usuário navegar por semanas ou meses passados, o cálculo é feito **uma única vez** pelo BD/Servidor e fica salvo na memória (JSON cacheado). Visitas subsequentes (de si mesmo ou terceiros) consomem 0 operações de DB.
+
+2. **On-Demand Revalidation (`revalidateTag`)**:
+   - Sempre que um usuário altera dados do **dia atual** (Criar/Editar/Deletar log em `studyLogs.action.ts`), invoca-se o `revalidateTag` para limpar imediatamente a memória apenas dos dados dele.
+   - Na próxima requisição, o servidor busca tudo de novo e gera um novo cache consolidado. Isso elimina a complexidade de mesclar o "cache do mês vs dados de hoje" manualmente.
+
+3. **Request Memoization (`cache()` do React)**:
+   - Funções chamadas por Server Components (ex: metadados básicos como `getSubjectsAction`, `getTopicsAction`, e sessão do usuário com `getCurrentUser`) estão protegidas pelo `cache()` do React.
+   - Isso evita chamadas idênticas ao banco de dados no mesmo ciclo de renderização.
+
+4. **Client Cache (TanStack Query)**:
+   - Os hooks na pasta `src/hooks` continuam controlando a experiência do cliente e os tempos de `staleTime`. Porém, mesmo quando o React Query acha que os dados estão "stale" e faz um refetch silencioso no fundo, **o Servidor responde em ms através do `unstable_cache`**, sem bater no banco de dados.
+
 ## 📁 Estrutura de Diretórios Importante
 
 - `src/app/(protected)/`: Rotas acessíveis apenas para usuários autenticados (Dashboard, Histórico, Matérias, Nova Sessão).

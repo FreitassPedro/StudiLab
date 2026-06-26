@@ -122,35 +122,39 @@ const getCachedProfileStats = async (targetUserId: string) => {
       return { heatmap, topSubjects, recentSessions, stats };
     },
     [`profile-stats-${targetUserId}`],
-    { revalidate: 60 } // Cache for 60 seconds
+    { tags: [`profile-stats-${targetUserId}`] } 
   )();
 };
 
-const getCachedUserRecord = unstable_cache(
-  async (username: string | undefined, currentUserId: string) => {
-    const targetUserWhere = username ? { profile: { username: { equals: username, mode: "insensitive" as const } } } : { id: currentUserId };
+const getCachedUserRecord = async (username: string | undefined, currentUserId: string) => {
+  const cacheKeyStr = username ? `username-${username}` : `id-${currentUserId}`;
+  const tagStr = username ? `user-${username}` : `user-${currentUserId}`;
+  return unstable_cache(
+    async () => {
+      const targetUserWhere = username ? { profile: { username: { equals: username, mode: "insensitive" as const } } } : { id: currentUserId };
 
-    return await prisma.user.findFirst({
-      where: targetUserWhere,
-      select: {
-        id: true,
-        name: true,
-        email: true,
-        image: true,
-        createdAt: true,
-        profile: true,
-        _count: {
-          select: { followers: true, following: true }
-        },
-        badges: {
-          select: { badgeId: true }
+      return await prisma.user.findFirst({
+        where: targetUserWhere,
+        select: {
+          id: true,
+          name: true,
+          email: true,
+          image: true,
+          createdAt: true,
+          profile: true,
+          _count: {
+            select: { followers: true, following: true }
+          },
+          badges: {
+            select: { badgeId: true }
+          }
         }
-      }
-    });
-  },
-  ["user-record"],
-  { revalidate: 60 } // Cache for 60 seconds
-);
+      });
+    },
+    [`user-record-${cacheKeyStr}`],
+    { tags: [tagStr] } 
+  )();
+};
 
 export async function getProfileDataAction(username?: string): Promise<ProfileData> {
   const currentUser = await requireAuth();

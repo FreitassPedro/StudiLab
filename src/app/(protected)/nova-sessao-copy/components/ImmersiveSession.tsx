@@ -65,7 +65,7 @@ export function ImmersiveSession() {
       await createStudyLog.mutateAsync(payload);
       toast.success("Sessão registrada com sucesso!");
       resetCronometer();
-      router.refresh();
+      
       router.push("/dashboard");
     } catch (error) {
       toast.error("Erro ao salvar sessão.");

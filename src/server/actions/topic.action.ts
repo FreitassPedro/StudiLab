@@ -6,7 +6,9 @@ import { prisma } from "@/lib/prisma";
 import { Topic } from "@/types/types";
 import { requireAuth } from "./requireAuth";
 
-export async function getTopicsAction(): Promise<Topic[]> {
+import { cache } from "react";
+
+export const getTopicsAction = cache(async (): Promise<Topic[]> => {
     const user = await requireAuth();
     const topics = await prisma.topic.findMany({
         where: {
@@ -16,7 +18,7 @@ export async function getTopicsAction(): Promise<Topic[]> {
         }
     });
     return topics;
-}
+});
 
 
 export async function postCreateTopic(name: string, subjectId: string, parentId: string | null): Promise<Topic> {
