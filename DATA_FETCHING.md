@@ -2,6 +2,31 @@
 
 Este documento define a arquitetura final de busca de dados, projetada para máxima performance (Single-Pass Server Processing) e economia de banco de dados.
 
+## 🧠 Guia Didático: Qual Cache Devo Usar?
+
+No ecossistema moderno do Next.js com React Query, temos **4 tipos diferentes de cache**. É crucial saber quando usar cada um ao criar novas funções:
+
+### 1. Request Memoization (React `cache()`)
+- **O que faz:** Memoriza o resultado de uma função **apenas durante o tempo de vida de 1 requisição no servidor**. Assim que a página termina de carregar, esse cache é destruído.
+- **Quando usar:** Quando você tem múltiplos *Server Components* que precisam do mesmo dado básico (ex: `getCurrentUser` ou `getSubjectsAction`). Se o Header e a Sidebar chamarem `getCurrentUser()` no servidor, a função só vai no banco de dados 1 vez.
+- **Como usar:** Envolva a função com `cache(async () => { ... })`.
+
+### 2. Data Cache (Next.js `unstable_cache`)
+- **O que faz:** Memoriza o resultado no servidor de forma **persistente**, sobrevivendo a milhares de requisições e diferentes usuários, até que você explicitamente o destrua (Invalidação por Tag).
+- **Quando usar:** Para cálculos massivos ou consultas caras ao banco de dados que não precisam ser recalculadas a cada F5 (ex: total de horas de estudo do mês, geração de mapas de calor do perfil).
+- **Como usar:** Envolva a lógica com `unstable_cache(async () => { ... }, ['chave'], { tags: ['minha-tag'] })`. E quando o dado mudar, chame `revalidateTag('minha-tag')`.
+
+### 3. Client Cache (TanStack / React Query)
+- **O que faz:** Memoriza dados no navegador do usuário (Client-side) para navegação instantânea.
+- **Quando usar:** Para absolutamente **toda** busca de dados que ocorra em componentes do cliente (`"use client"`). É o que usamos na pasta `src/hooks`.
+- **Como usar:** Use `useQuery` com chaves bem definidas em `src/lib/query-keys.ts`. Quando o usuário alterar algo, chame `queryClient.invalidateQueries`.
+
+### 4. Router Cache (Next.js)
+- **O que faz:** O Next.js guarda pedaços das páginas que você já visitou na memória do seu navegador para não recarregá-las se você apertar o botão "Voltar".
+- **Quando usar:** É automático. Mas se você fizer uma mutação (ex: Deletar matéria), precisa avisar ao Next.js para limpar a página via `revalidatePath('/materias')`.
+
+---
+
 ## 🏗️ A Nova Mentalidade: "Processar no Servidor, Consumir no Cliente"
 
 A arquitetura evoluiu de múltiplos hooks independentes para um modelo de **Análise Centralizada**.
