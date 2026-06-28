@@ -29,7 +29,7 @@ function ThemeSwitcherProfile({ theme, setTheme }: { theme: Theme; setTheme: (t:
           title={cfg.tooltip}
           onClick={() => setTheme(cfg.key as Theme)}
           className={`relative h-[18px] w-[18px] rounded-full bg-linear-to-br ${cfg.gradient} transition-all duration-200 hover:scale-125 ${theme === cfg.key
-            ? "ring-2 ring-white ring-offset-1 ring-offset-[#0a0a0f]"
+            ? "ring-2 ring-ring ring-offset-1 ring-offset-background"
             : ""
             }`}
           aria-label={cfg.label}
@@ -261,15 +261,15 @@ export function ProfileHeader({ user, stats, isOwner, isFollowing }: ProfileHead
           {stats.currentStreak > 0 && (
             <div className="inline-flex items-center gap-1.5 rounded-full border px-3 py-1 text-xs transition-all shadow-sm"
               style={{
-                background: stats.currentStreak >= 3 ? `${accent.accent}20` : 'rgba(255,255,255,0.05)',
+                background: stats.currentStreak >= 3 ? `${accent.accent}20` : "var(--muted)",
                 boxShadow: stats.currentStreak >= 3 ? `0 0 20px -5px ${accent.accent}` : 'none',
-                borderColor: stats.currentStreak >= 3 ? `${accent.accent}80` : 'rgba(255,255,255,0.15)'
+                borderColor: stats.currentStreak >= 3 ? `${accent.accent}80` : "var(--border)"
               }}>
               <span className={stats.currentStreak >= 3 ? "animate-pulse drop-shadow-md" : ""}
                 style={stats.currentStreak >= 3 ? { filter: `drop-shadow(0 0 5px ${accent.accent})` } : {}}>
                 🔥
               </span>
-              <span className="font-semibold" style={{ color: stats.currentStreak >= 3 ? accent.accent : 'rgba(255,255,255,0.8)' }}>
+              <span className="font-semibold" style={{ color: stats.currentStreak >= 3 ? accent.accent : "var(--foreground)" }}>
                 {stats.currentStreak} dias
               </span>
             </div>

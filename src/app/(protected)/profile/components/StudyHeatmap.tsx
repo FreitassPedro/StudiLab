@@ -92,7 +92,7 @@ function HeatCell({
   accent: Record<string, string>;
 }) {
   const intensityMap: Record<number, string> = {
-    0: "rgba(255,255,255,0.06)",
+    0: "var(--muted)",
     1: `${accent.accent}33`,
     2: `${accent.accent}66`,
     3: `${accent.accent}a6`,

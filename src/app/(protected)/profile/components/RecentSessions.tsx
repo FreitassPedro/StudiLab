@@ -42,9 +42,8 @@ function SessionCard({ session, accent }: SessionCardProps) {
 
   return (
     <div
-      className="group relative flex aspect-square min-h-[130px] cursor-default flex-col justify-end overflow-hidden rounded-[14px] border p-3.5 transition-all duration-200 hover:-translate-y-0.5"
+      className="group bg-card/60 relative flex aspect-square min-h-[130px] cursor-default flex-col justify-end overflow-hidden rounded-[14px] border p-3.5 transition-all duration-200 hover:-translate-y-0.5"
       style={{
-        background: "rgba(255,255,255,0.03)",
         borderColor: `${session.subjectColor}33`,
       }}
       onMouseEnter={(e) => {
@@ -61,7 +60,7 @@ function SessionCard({ session, accent }: SessionCardProps) {
 
       {/* Content */}
       <div className="relative z-10">
-        <div className="mb-1 text-[10px] font-bold uppercase tracking-[0.1em] text-foreground/35">
+        <div className="mb-1 text-[10px] font-bold uppercase tracking-widest text-foreground/35">
           {session.subjectName}
         </div>
         <div className="font-['Space_Grotesk'] text-xl font-black leading-none text-foreground">

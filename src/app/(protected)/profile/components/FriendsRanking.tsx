@@ -64,7 +64,7 @@ export function FriendsRanking({ ranking }: FriendsRankingProps) {
                 style={{
                   background: isFirst
                     ? `linear-gradient(135deg, ${accent.accent}, ${accent.accent2})`
-                    : "rgba(255,255,255,0.08)",
+                    : "var(--muted)",
                 }}
               >
                 {friend.image ? (
@@ -86,7 +86,7 @@ export function FriendsRanking({ ranking }: FriendsRankingProps) {
                 <Clock className="w-3.5 h-3.5 text-foreground/30" />
                 <span
                   className="text-sm font-semibold"
-                  style={{ color: isFirst ? accent.accent : "rgba(255,255,255,0.6)" }}
+                  style={{ color: isFirst ? accent.accent : "var(--muted-foreground)" }}
                 >
                   {formatHours(friend.minutes)}
                 </span>

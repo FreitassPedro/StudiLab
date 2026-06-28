@@ -22,12 +22,12 @@ interface BadgeCardProps {
 
 function BadgeCard({ badge, accent }: BadgeCardProps) {
   const rarityColor = badge.locked
-    ? "rgba(255,255,255,0.2)"
+    ? "var(--border)"
     : RARITY_COLORS[badge.rarity] || accent.accent;
 
   return (
     <div
-      className={`flex cursor-default flex-col items-center gap-2 rounded-[14px] border border-border bg-foreground/3 p-4 text-center transition-all duration-200 hover:-translate-y-0.5 hover:border-accent hover:bg-[var(--accent-muted)] ${
+      className={`flex cursor-default flex-col items-center gap-2 rounded-[14px] border border-border bg-foreground/3 p-4 text-center transition-all duration-200 hover:-translate-y-0.5 hover:border-accent hover:bg-(--accent-muted) ${
         badge.locked ? "opacity-30 grayscale" : ""
       }`}
       style={{
@@ -50,7 +50,7 @@ function BadgeCard({ badge, accent }: BadgeCardProps) {
       <div className="text-[10px] leading-snug text-foreground/35">{badge.desc}</div>
 
       <div
-        className="text-[9px] font-bold uppercase tracking-[0.1em]"
+        className="text-[9px] font-bold uppercase tracking-widest"
         style={{ color: rarityColor }}
       >
         {badge.rarity}

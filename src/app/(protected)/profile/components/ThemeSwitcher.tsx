@@ -18,7 +18,7 @@ export function ThemeSwitcher() {
           onClick={() => setTheme(cfg.key as Theme)}
           className={`relative h-[18px] w-[18px] rounded-full bg-gradient-to-br ${cfg.gradient} transition-all duration-200 hover:scale-125 ${
             theme === cfg.key
-              ? "ring-2 ring-white ring-offset-1 ring-offset-[#0a0a0f]"
+              ? "ring-2 ring-ring ring-offset-1 ring-offset-background"
               : ""
           }`}
           aria-label={cfg.label}

@@ -23,7 +23,7 @@ const CHART_DATA = [
   { name: "Dom", minutes: 150 },
 ];
 
-const ACCENT = "#8b5cf6";
+const ACCENT = "var(--muted)";
 
 const CustomTooltip = ({ active, payload, label }: any) => {
   if (active && payload && payload.length) {
@@ -32,9 +32,9 @@ const CustomTooltip = ({ active, payload, label }: any) => {
     const m = mins % 60;
     const label2 = h > 0 ? `${h}h ${m}m` : `${m}m`;
     return (
-      <div className="bg-[#1a1a24] border border-white/10 p-3 rounded-xl shadow-xl text-white">
+      <div className="bg-card border border-border/40 p-3 rounded-xl shadow-xl text-white">
         <p className="text-white/50 text-xs mb-1">{label}</p>
-        <p className="text-base font-bold" style={{ color: ACCENT }}>
+        <p className="text-base" >
           {label2}
         </p>
       </div>
@@ -67,11 +67,10 @@ export function DashboardWeeklyChart() {
             <button
               key={t}
               onClick={() => setTab(t)}
-              className={`px-3 py-1 text-xs rounded-md font-semibold transition-all ${
-                tab === t
-                  ? "bg-background text-foreground shadow-sm"
-                  : "text-muted-foreground hover:text-foreground"
-              }`}
+              className={`px-3 py-1 text-xs rounded-md font-semibold transition-all ${tab === t
+                ? "bg-background text-foreground shadow-sm"
+                : "text-muted-foreground hover:text-foreground"
+                }`}
             >
               {t === "bar" ? "Barras" : "Linha"}
             </button>
@@ -83,35 +82,35 @@ export function DashboardWeeklyChart() {
         <ResponsiveContainer width="100%" height="100%">
           {tab === "bar" ? (
             <BarChart data={CHART_DATA} margin={{ top: 4, right: 4, left: -20, bottom: 0 }}>
-              <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.04)" vertical={false} />
+              <CartesianGrid strokeDasharray="3 3" vertical={false} />
               <XAxis
                 dataKey="name"
-                tick={{ fill: "rgba(255,255,255,0.35)", fontSize: 11 }}
+                tick={{ fontSize: 11 }}
                 tickLine={false}
                 axisLine={false}
                 dy={6}
               />
               <YAxis
-                tick={{ fill: "rgba(255,255,255,0.25)", fontSize: 10 }}
+                tick={{ fontSize: 10 }}
                 tickLine={false}
                 axisLine={false}
                 tickFormatter={(v) => `${v}m`}
               />
-              <Tooltip content={<CustomTooltip />} cursor={{ fill: "rgba(255,255,255,0.03)" }} />
+              <Tooltip content={<CustomTooltip />} />
               <Bar dataKey="minutes" fill={ACCENT} radius={[5, 5, 0, 0]} barSize={26} opacity={0.85} />
             </BarChart>
           ) : (
             <LineChart data={CHART_DATA} margin={{ top: 4, right: 4, left: -20, bottom: 0 }}>
-              <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.04)" vertical={false} />
+              <CartesianGrid strokeDasharray="3 3" vertical={false} />
               <XAxis
                 dataKey="name"
-                tick={{ fill: "rgba(255,255,255,0.35)", fontSize: 11 }}
+                tick={{ fontSize: 11 }}
                 tickLine={false}
                 axisLine={false}
                 dy={6}
               />
               <YAxis
-                tick={{ fill: "rgba(255,255,255,0.25)", fontSize: 10 }}
+                tick={{ fontSize: 10 }}
                 tickLine={false}
                 axisLine={false}
                 tickFormatter={(v) => `${v}m`}
@@ -122,8 +121,8 @@ export function DashboardWeeklyChart() {
                 dataKey="minutes"
                 stroke={ACCENT}
                 strokeWidth={2.5}
-                dot={{ fill: "#0a0a0f", stroke: ACCENT, strokeWidth: 2, r: 4 }}
-                activeDot={{ r: 6, fill: ACCENT, stroke: "#0a0a0f", strokeWidth: 2 }}
+                dot={{ fill: "var(--muted-foreground)", stroke: ACCENT, strokeWidth: 0.5, r: 4 }}
+                activeDot={{ r: 6, fill: ACCENT, stroke: "var(--muted-foreground)", strokeWidth: 2 }}
               />
             </LineChart>
           )}

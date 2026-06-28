@@ -17,7 +17,7 @@ function StreakCard({
 
   return (
     <div
-      className="flex flex-col gap-2 bg-orange-500 rounded-2xl border border-border p-4 transition-all duration-300 hover:-translate-y-0.5"
+      className="flex flex-col gap-2 bg-accent rounded-2xl border border-border p-4 transition-all duration-300 hover:-translate-y-0.5"
       style={
         isOnFire
           ? {
@@ -123,7 +123,7 @@ function BestWeekCard({
   const hours = Math.round(minutes / 60);
   return (
     <div
-      className="flex flex-col gap-2 rounded-2xl border border-border bg-foreground/[0.03] p-5 transition-all duration-300 hover:-translate-y-0.5 hover:border-accent hover:bg-(--accent-muted)"
+      className="flex flex-col gap-2 rounded-2xl border border-border bg-foreground/[0.03] p-5 transition-all duration-300 hover:-translate-y-0.5 hover:border-[var(--accent)] hover:bg-[var(--accent-muted)]"
       style={{
         ["--accent" as string]: accent.accent,
         ["--accent-muted" as string]: `${accent.accent}1a`,
@@ -159,7 +159,7 @@ function WeekGoalCard({
 
   return (
     <div
-      className="flex flex-col gap-3 rounded-2xl border border-border bg-foreground/5 transition-all duration-300 hover:-translate-y-0.5 hover:border-[var(--accent)] hover:bg-(--accent-muted)"
+      className="flex flex-col gap-3 rounded-2xl border border-border bg-foreground/5 transition-all duration-300 hover:-translate-y-0.5 hover:border-[var(--accent)] hover:bg-[var(--accent-muted)]"
       style={{
         ["--accent" as string]: accent.accent,
         ["--accent-muted" as string]: `${accent.accent}1a`,

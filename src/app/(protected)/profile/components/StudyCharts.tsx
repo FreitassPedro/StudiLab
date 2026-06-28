@@ -64,7 +64,7 @@ export function StudyCharts({ data }: StudyChartsProps) {
               style={
                 tab === t
                   ? { background: `${accent.accent}25`, color: accent.accent }
-                  : { color: "rgba(255,255,255,0.35)" }
+                  : { color: "var(--muted-foreground)" }
               }
             >
               {t === "bar" ? "Barras" : "Linha"}
@@ -95,38 +95,38 @@ export function StudyCharts({ data }: StudyChartsProps) {
           <ResponsiveContainer width="100%" height="100%">
             {tab === "bar" ? (
               <BarChart data={data} margin={{ top: 0, right: 0, left: -20, bottom: 0 }}>
-                <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.04)" vertical={false} />
+                <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" vertical={false} />
                 <XAxis
                   dataKey="name"
-                  stroke="rgba(255,255,255,0.2)"
+                  stroke="var(--muted-foreground)"
                   fontSize={10}
                   tickLine={false}
                   axisLine={false}
                   dy={10}
                 />
                 <YAxis
-                  stroke="rgba(255,255,255,0.2)"
+                  stroke="var(--muted-foreground)"
                   fontSize={10}
                   tickLine={false}
                   axisLine={false}
                   tickFormatter={(val) => `${val}m`}
                 />
-                <Tooltip content={<CustomTooltip />} cursor={{ fill: "rgba(255,255,255,0.02)" }} />
+                <Tooltip content={<CustomTooltip />} cursor={{ fill: "var(--muted)" }} />
                 <Bar dataKey="minutes" fill={accent.accent} radius={[5, 5, 0, 0]} barSize={24} />
               </BarChart>
             ) : (
               <LineChart data={data} margin={{ top: 0, right: 0, left: -20, bottom: 0 }}>
-                <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.04)" vertical={false} />
+                <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" vertical={false} />
                 <XAxis
                   dataKey="name"
-                  stroke="rgba(255,255,255,0.2)"
+                  stroke="var(--muted-foreground)"
                   fontSize={10}
                   tickLine={false}
                   axisLine={false}
                   dy={10}
                 />
                 <YAxis
-                  stroke="rgba(255,255,255,0.2)"
+                  stroke="var(--muted-foreground)"
                   fontSize={10}
                   tickLine={false}
                   axisLine={false}
@@ -138,8 +138,8 @@ export function StudyCharts({ data }: StudyChartsProps) {
                   dataKey="minutes"
                   stroke={accent.accent2}
                   strokeWidth={2.5}
-                  dot={{ fill: "#0a0a0f", stroke: accent.accent2, strokeWidth: 2, r: 4 }}
-                  activeDot={{ r: 6, fill: accent.accent, stroke: "#0a0a0f", strokeWidth: 2 }}
+                  dot={{ fill: "var(--background)", stroke: accent.accent2, strokeWidth: 2, r: 4 }}
+                  activeDot={{ r: 6, fill: accent.accent, stroke: "var(--background)", strokeWidth: 2 }}
                 />
               </LineChart>
             )}
