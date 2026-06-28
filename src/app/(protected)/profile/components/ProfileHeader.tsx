@@ -11,10 +11,11 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { updateProfile } from "@/server/actions/profile.action";
-import { Pencil, Share } from "lucide-react";
+import { Pencil, Share, Search } from "lucide-react";
 import { AccountSettingsCard } from "./AccountSettingsCard";
 import { FollowButton } from "./FollowButton";
 import { toast } from "sonner";
+import { UserSearchModal } from "./UserSearchModal";
 
 function ThemeSwitcherProfile({ theme, setTheme }: { theme: Theme; setTheme: (t: Theme) => void }) {
   return (
@@ -256,6 +257,24 @@ export function ProfileHeader({ user, stats, isOwner, isFollowing }: ProfileHead
           <h1 className="font-['Space_Grotesk'] text-[26px] font-black leading-none tracking-[-0.5px] text-white">
             {user.name}
           </h1>
+          {/* Streak badge */}
+          {stats.currentStreak > 0 && (
+            <div className="inline-flex items-center gap-1.5 rounded-full border px-3 py-1 text-xs transition-all shadow-sm"
+              style={{
+                background: stats.currentStreak >= 3 ? `${accent.accent}20` : 'rgba(255,255,255,0.05)',
+                boxShadow: stats.currentStreak >= 3 ? `0 0 20px -5px ${accent.accent}` : 'none',
+                borderColor: stats.currentStreak >= 3 ? `${accent.accent}80` : 'rgba(255,255,255,0.15)'
+              }}>
+              <span className={stats.currentStreak >= 3 ? "animate-pulse drop-shadow-md" : ""}
+                style={stats.currentStreak >= 3 ? { filter: `drop-shadow(0 0 5px ${accent.accent})` } : {}}>
+                🔥
+              </span>
+              <span className="font-semibold" style={{ color: stats.currentStreak >= 3 ? accent.accent : 'rgba(255,255,255,0.8)' }}>
+                {stats.currentStreak} dias
+              </span>
+            </div>
+          )}
+
           {/* Streak tier badge */}
           <span
             className="rounded-full border px-2 py-0.5 text-[10px] font-bold uppercase tracking-[0.1em]"
@@ -292,22 +311,33 @@ export function ProfileHeader({ user, stats, isOwner, isFollowing }: ProfileHead
             <Button
               variant="outline"
               size="sm"
-              className="border-white/20 bg-white/5 text-white hover:bg-white/10 "
+              className=" "
             >
               <Pencil />
               Editar Perfil
             </Button>
           </EditDialog>
         )}
-        <Button variant="outline" size="sm" onClick={async () => {
-          await navigator.clipboard.writeText(`https://studilab.vercel.app/profile/${user.username}`);
-          toast.success("Link copiado para a área de transferência!");
-        }} className=" bg-white/5 hover:bg-white/10 ">
-          <Share />
+        <Button
+          variant="outline" size="sm"
+          onClick={async () => {
+            await navigator.clipboard.writeText(`https://studilab.vercel.app/profile/${user.username}`);
+            toast.success("Link copiado para a área de transferência!");
+          }}
+          className="  ">
+          <Share className="w-4 h-4" />
           Compartilhar
         </Button>
         {!isOwner && (
           <FollowButton targetUserId={user.id} initialIsFollowing={isFollowing} />
+        )}
+        {isOwner && (
+          <UserSearchModal>
+            <Button variant="outline" size="sm" className="bg-white/5 hover:bg-white/10 ml-2 border-white/20 text-white">
+              <Search className="mr-2 h-4 w-4" />
+              Buscar Amigos
+            </Button>
+          </UserSearchModal>
         )}
 
         <div className="flex flex-wrap items-center gap-2 mt-4">

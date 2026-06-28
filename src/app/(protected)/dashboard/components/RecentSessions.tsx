@@ -62,7 +62,7 @@ export const StudyLogItemResume = ({
 
                 {log.notes && (
                     <div className="mt-2 text-sm text-muted-foreground line-clamp-1 italic bg-muted/30 px-2 py-1 rounded border-l-2 border-muted">
-                        "{log?.notes}"
+                        &quot;{log?.notes}&quot;
                     </div>
                 )}
             </div>

@@ -117,6 +117,7 @@ const getCachedProfileStats = async (targetUserId: string) => {
         bestWeekLabel: "Última Semana",
         weeklyMinutes: 0,
         avgMinutesPerDay: uniqueStudyDays.size > 0 ? Math.round(totalMinutes / uniqueStudyDays.size) : 0,
+        todayMinutes: 0,
       };
 
       return { heatmap, topSubjects, recentSessions, stats };
@@ -238,6 +239,8 @@ export async function getProfileDataAction(username?: string): Promise<ProfileDa
     badges,
     isOwner,
     isFollowing: !!isFollowingData,
+    friendsRanking: [],
+    chartData: [],
   };
 }
 

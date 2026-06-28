@@ -3,8 +3,9 @@
 import { SectionLabel } from "./SectionLabel";
 import { useProfileTheme } from "./ThemeContext";
 import type { ProfileStats } from "../types";
+import { FlameIcon } from "lucide-react";
 
-// ── Streak card ────────────────────────────────────────────────────────────────
+// ── Streak card (melhorado com animação e tier) ──────────────────────────────
 function StreakCard({
   streak,
   accent,
@@ -12,34 +13,104 @@ function StreakCard({
   streak: number;
   accent: Record<string, string>;
 }) {
+  const isOnFire = streak >= 3;
+
   return (
     <div
-      className="flex flex-col gap-2 rounded-2xl border border-white/[0.07] bg-white/[0.03] p-5 transition-all duration-300 hover:-translate-y-0.5 hover:border-[var(--accent)] hover:bg-[var(--accent-muted)]"
-      style={{
-        ["--accent" as string]: accent.accent,
-        ["--accent-muted" as string]: `${accent.accent}1a`,
-      }}
+      className="flex flex-col gap-2 rounded-2xl border border-white/[0.07] bg-white/3 p-5 transition-all duration-300 hover:-translate-y-0.5"
+      style={
+        isOnFire
+          ? {
+            boxShadow: `0 0 30px -10px ${accent.accent}40`,
+            borderColor: `${accent.accent}30`,
+          }
+          : {}
+      }
     >
-      <div className="text-[11px] font-bold uppercase tracking-[0.1em] text-white/30">
-        🔥 Ofensiva Atual
+      <div className="flex items-center justify-between">
+        <div className="text-[11px] font-bold uppercase tracking-widest text-white/30">
+          Ofensiva
+        </div>
+        <span
+          className={isOnFire ? "animate-pulse" : ""}
+          style={isOnFire ? { filter: `drop-shadow(0 0 6px ${accent.accent})` } : {}}
+        >
+          🔥
+        </span>
       </div>
       <div className="flex items-baseline gap-1.5">
+        <FlameIcon className="h-12 w-12 text-red-500 animate-pulse bg-red-500/10" />
         <span
-          className="font-['Space_Grotesk'] text-[64px] font-black leading-none tracking-[-3px]"
+          className="font-['Space_Grotesk'] text-[56px] font-black leading-none tracking-[-3px]"
           style={{ color: accent.accent }}
         >
           {streak}
         </span>
         <span className="text-sm font-semibold text-white/40">dias</span>
       </div>
-      <div className="text-xs text-white/45">
-        {streak > 0 ? "Não perca amanhã ↗" : "Comece hoje! 💪"}
+      <div className="text-xs text-white/40">
+        {streak >= 30
+          ? "🌟 Lendário!"
+          : streak >= 14
+            ? "⚡ Elite"
+            : streak > 0
+              ? "Não perca amanhã ↗"
+              : "Comece hoje! 💪"}
       </div>
     </div>
   );
 }
 
-// ── Best week card ─────────────────────────────────────────────────────────────
+// ── Today Hours card ─────────────────────────────────────────────────────────
+function TodayHoursCard({
+  todayMinutes,
+  accent,
+}: {
+  todayMinutes: number;
+  accent: Record<string, string>;
+}) {
+  const h = Math.floor(todayMinutes / 60);
+  const m = todayMinutes % 60;
+
+  return (
+    <div
+      className="flex flex-col gap-2 rounded-2xl border border-white/[0.07] bg-white/3 p-5 transition-all duration-300 hover:-translate-y-0.5 hover:border-[var(--accent)] hover:bg-[var(--accent-muted)]"
+      style={{
+        ["--accent" as string]: accent.accent,
+        ["--accent-muted" as string]: `${accent.accent}1a`,
+      }}
+    >
+      <div className="text-[11px] font-bold uppercase tracking-[0.1em] text-white/30">
+        ☀️ Hoje
+      </div>
+      <div className="flex items-baseline gap-1">
+        <span
+          className="font-['Space_Grotesk'] text-[48px] font-black leading-none tracking-[-3px]"
+          style={{ color: accent.accent }}
+        >
+          {h}
+        </span>
+        <span className="text-2xl font-bold text-white/40">h</span>
+        {m > 0 && (
+          <>
+            <span
+              className="font-['Space_Grotesk'] text-[32px] font-black leading-none tracking-[-2px] ml-1"
+              style={{ color: `${accent.accent}bb` }}
+            >
+              {m}
+            </span>
+            <span className="text-sm font-bold text-white/30">m</span>
+          </>
+        )}
+      </div>
+      <div className="text-xs text-white/40">
+        {todayMinutes === 0 ? "Nenhuma sessão hoje ainda" : "estudados hoje"}
+      </div>
+    </div>
+  );
+}
+
+// ── Best week card ────────────────────────────────────────────────────────────
 function BestWeekCard({
   minutes,
   weekLabel,
@@ -49,31 +120,31 @@ function BestWeekCard({
   weekLabel: string;
   accent: Record<string, string>;
 }) {
-  const hours = (minutes / 60).toFixed(0);
+  const hours = Math.round(minutes / 60);
   return (
     <div
-      className="flex flex-col gap-2 rounded-2xl border border-white/[0.07] bg-white/[0.03] p-5 transition-all duration-300 hover:-translate-y-0.5 hover:border-[var(--accent)] hover:bg-[var(--accent-muted)]"
+      className="flex flex-col gap-2 rounded-2xl border border-white/[0.07] bg-white/[0.03] p-5 transition-all duration-300 hover:-translate-y-0.5 hover:border-accent hover:bg-[var(--accent-muted)]"
       style={{
         ["--accent" as string]: accent.accent,
         ["--accent-muted" as string]: `${accent.accent}1a`,
       }}
     >
-      <div className="text-[11px] font-bold uppercase tracking-[0.1em] text-white/30">
+      <div className="text-[11px] font-bold uppercase tracking-widest text-white/30">
         📅 Melhor Semana
       </div>
       <span
-        className="font-['Space_Grotesk'] text-[52px] font-black leading-none tracking-[-3px]"
+        className="font-['Space_Grotesk'] text-[48px] font-black leading-none tracking-[-3px]"
         style={{ color: accent.accent }}
       >
         {hours}h
       </span>
-      <div className="text-xs text-white/45">{weekLabel}</div>
+      <div className="text-xs text-white/40">{weekLabel}</div>
     </div>
   );
 }
 
-// ── Week goal card ─────────────────────────────────────────────────────────────
-const WEEK_GOAL_MINUTES = 2400; // 40h default goal
+// ── Week goal card ────────────────────────────────────────────────────────────
+const WEEK_GOAL_MINUTES = 2400;
 
 function WeekGoalCard({
   weeklyMinutes,
@@ -88,17 +159,20 @@ function WeekGoalCard({
 
   return (
     <div
-      className="flex flex-col gap-2.5 rounded-2xl border border-white/[0.07] bg-white/[0.03] p-5 transition-all duration-300 hover:-translate-y-0.5 hover:border-[var(--accent)] hover:bg-[var(--accent-muted)]"
+      className="flex flex-col gap-3 rounded-2xl border border-white/[0.07] bg-white/3transition-all duration-300 hover:-translate-y-0.5 hover:border-accent hover:bg-(--accent-muted)"
       style={{
         ["--accent" as string]: accent.accent,
         ["--accent-muted" as string]: `${accent.accent}1a`,
       }}
     >
       <div className="text-[11px] font-bold uppercase tracking-[0.1em] text-white/30">
-        🎯 Meta da Semana
+        🎯 Meta Semanal
       </div>
-      <div className="text-[13px] font-semibold text-white/80">
-        {goal}h estudadas
+      <div>
+        <span className="font-['Space_Grotesk'] text-[32px] font-black leading-none tracking-[-2px]" style={{ color: accent.accent }}>
+          {progress}
+        </span>
+        <span className="text-base font-bold text-white/40">%</span>
       </div>
       <div className="h-1.5 overflow-hidden rounded-full bg-white/[0.07]">
         <div
@@ -109,55 +183,14 @@ function WeekGoalCard({
           }}
         />
       </div>
-      <div className="flex justify-between text-[11px] text-white/35">
-        <span>
-          {done}h / {goal}h
-        </span>
-        <span className="font-bold" style={{ color: accent.accent }}>
-          {progress}%
-        </span>
+      <div className="text-[11px] text-white/35">
+        {done}h de {goal}h
       </div>
     </div>
   );
 }
 
-// ── Total hours card ───────────────────────────────────────────────────────────
-function TotalHoursCard({
-  totalMinutes,
-  totalSessions,
-  accent,
-}: {
-  totalMinutes: number;
-  totalSessions: number;
-  accent: Record<string, string>;
-}) {
-  const hours = Math.round(totalMinutes / 60).toLocaleString("pt-BR");
-  return (
-    <div
-      className="flex flex-col gap-2 rounded-2xl border border-white/[0.07] bg-white/[0.03] p-5 transition-all duration-300 hover:-translate-y-0.5 hover:border-[var(--accent)] hover:bg-[var(--accent-muted)]"
-      style={{
-        ["--accent" as string]: accent.accent,
-        ["--accent-muted" as string]: `${accent.accent}1a`,
-      }}
-    >
-      <div className="text-[11px] font-bold uppercase tracking-[0.1em] text-white/30">
-        ⏱ Total Histórico
-      </div>
-      <div className="flex items-baseline gap-1.5">
-        <span
-          className="font-['Space_Grotesk'] text-[48px] font-black leading-none tracking-[-3px]"
-          style={{ color: accent.accent }}
-        >
-          {hours}
-        </span>
-        <span className="text-sm font-semibold text-white/40">horas</span>
-      </div>
-      <div className="text-xs text-white/45">{totalSessions} sessões registradas</div>
-    </div>
-  );
-}
-
-// ── Main ───────────────────────────────────────────────────────────────────────
+// ── Main ──────────────────────────────────────────────────────────────────────
 interface ShowcaseGridProps {
   stats: ProfileStats;
 }
@@ -168,13 +201,9 @@ export function ShowcaseGrid({ stats }: ShowcaseGridProps) {
   return (
     <section className="mb-10">
       <SectionLabel>Vitrine</SectionLabel>
-      <div className="grid grid-cols-2 gap-3.5 sm:grid-cols-4">
+      <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
         <StreakCard streak={stats.currentStreak} accent={accent} />
-        <TotalHoursCard
-          totalMinutes={stats.totalMinutes}
-          totalSessions={stats.totalSessions}
-          accent={accent}
-        />
+        <TodayHoursCard todayMinutes={stats.todayMinutes ?? 0} accent={accent} />
         <BestWeekCard
           minutes={stats.bestWeekMinutes}
           weekLabel={stats.bestWeekLabel}

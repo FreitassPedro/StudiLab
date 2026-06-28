@@ -86,6 +86,38 @@ export const THEME_ACCENT: Record<Theme, Record<string, string>> = {
     ringColor: "border-emerald-400/80",
     avatarGradient: "from-emerald-300 to-indigo-400",
   },
+  gold: {
+    accent: "#fbbf24",
+    accent2: "#d97706",
+    accentText: "text-yellow-300",
+    accentBorder: "border-yellow-500",
+    accentBg: "bg-yellow-500/15",
+    accentGlow: "shadow-yellow-500/25",
+    bannerFrom: "#141005",
+    bannerMid: "#2a200a",
+    bannerTo: "#1c1405",
+    gradientFrom: "from-yellow-900/40",
+    gradientTo: "to-orange-900/20",
+    barGradient: "from-yellow-400 to-orange-400",
+    ringColor: "border-yellow-500/80",
+    avatarGradient: "from-yellow-300 to-amber-500",
+  },
+  void: {
+    accent: "#94a3b8",
+    accent2: "#334155",
+    accentText: "text-slate-300",
+    accentBorder: "border-slate-500",
+    accentBg: "bg-slate-500/15",
+    accentGlow: "shadow-slate-500/25",
+    bannerFrom: "#020617",
+    bannerMid: "#0f172a",
+    bannerTo: "#020617",
+    gradientFrom: "from-slate-900/40",
+    gradientTo: "to-slate-800/20",
+    barGradient: "from-slate-400 to-slate-600",
+    ringColor: "border-slate-500/80",
+    avatarGradient: "from-slate-300 to-slate-500",
+  },
 };
 
 export const THEME_CONFIGS: { key: Theme, label: string, gradient: string, tooltip: string }[] = [
@@ -94,6 +126,8 @@ export const THEME_CONFIGS: { key: Theme, label: string, gradient: string, toolt
   { key: "delicatessen", label: "Delicatessen", gradient: "from-fuchsia-400 to-pink-300", tooltip: "Delicatessen" },
   { key: "forest", label: "Forest", gradient: "from-emerald-300 to-indigo-400", tooltip: "Forest" },
   { key: "sky", label: "Sky", gradient: "from-blue-400 to-sky-400", tooltip: "Sky" },
+  { key: "gold", label: "Gold", gradient: "from-yellow-300 to-amber-500", tooltip: "Gold" },
+  { key: "void", label: "Void", gradient: "from-slate-300 to-slate-600", tooltip: "Void" },
 ];
 
 // ── Context ────────────────────────────────────────────────────────────────────

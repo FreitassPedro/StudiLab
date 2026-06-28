@@ -1,0 +1,151 @@
+"use client";
+
+import { useProfileTheme } from "./ThemeContext";
+import { ChartDataPoint } from "../types";
+import { SectionLabel } from "./SectionLabel";
+import { useState } from "react";
+import {
+  BarChart,
+  Bar,
+  LineChart,
+  Line,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  ResponsiveContainer,
+} from "recharts";
+
+interface StudyChartsProps {
+  data: ChartDataPoint[];
+}
+
+type ChartTab = "bar" | "line";
+
+export function StudyCharts({ data }: StudyChartsProps) {
+  const { accent } = useProfileTheme();
+  const [tab, setTab] = useState<ChartTab>("bar");
+
+  if (!data || data.length === 0) return null;
+
+  const totalMins = data.reduce((s, d) => s + d.minutes, 0);
+  const avgMins = Math.round(totalMins / data.length);
+  const h = Math.floor(totalMins / 60);
+  const m = totalMins % 60;
+
+  const CustomTooltip = ({ active, payload, label }: any) => {
+    if (active && payload && payload.length) {
+      const mins = payload[0].value;
+      const ph = Math.floor(mins / 60);
+      const pm = mins % 60;
+      const formatted = ph > 0 ? `${ph}h ${pm}m` : `${pm}m`;
+      return (
+        <div className="bg-[#1a1a24] border border-white/10 p-3 rounded-xl shadow-xl">
+          <p className="text-white/50 text-xs mb-1">{label}</p>
+          <p className="text-base font-bold" style={{ color: accent.accent }}>
+            {formatted}
+          </p>
+        </div>
+      );
+    }
+    return null;
+  };
+
+  return (
+    <div className="flex flex-col gap-4">
+      <div className="flex items-center justify-between">
+        <SectionLabel>Evolução — 7 dias</SectionLabel>
+        <div className="flex gap-1 bg-white/5 p-1 rounded-lg mb-4">
+          {(["bar", "line"] as ChartTab[]).map((t) => (
+            <button
+              key={t}
+              onClick={() => setTab(t)}
+              className="px-3 py-1 text-[11px] font-semibold rounded-md transition-all"
+              style={
+                tab === t
+                  ? { background: `${accent.accent}25`, color: accent.accent }
+                  : { color: "rgba(255,255,255,0.35)" }
+              }
+            >
+              {t === "bar" ? "Barras" : "Linha"}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* Summary row */}
+      <div className="flex items-center gap-6 px-1 mb-1">
+        <div>
+          <p className="text-[11px] text-white/35 uppercase tracking-wider font-semibold">Total</p>
+          <p className="text-xl font-bold" style={{ color: accent.accent }}>
+            {h}h {m}m
+          </p>
+        </div>
+        <div className="w-px h-8 bg-white/10" />
+        <div>
+          <p className="text-[11px] text-white/35 uppercase tracking-wider font-semibold">Média/dia</p>
+          <p className="text-xl font-bold text-white/70">
+            {Math.floor(avgMins / 60)}h {avgMins % 60}m
+          </p>
+        </div>
+      </div>
+
+      <div className="p-5 rounded-2xl border border-white/[0.07] bg-white/[0.02]">
+        <div className="h-[200px] w-full">
+          <ResponsiveContainer width="100%" height="100%">
+            {tab === "bar" ? (
+              <BarChart data={data} margin={{ top: 0, right: 0, left: -20, bottom: 0 }}>
+                <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.04)" vertical={false} />
+                <XAxis
+                  dataKey="name"
+                  stroke="rgba(255,255,255,0.2)"
+                  fontSize={10}
+                  tickLine={false}
+                  axisLine={false}
+                  dy={10}
+                />
+                <YAxis
+                  stroke="rgba(255,255,255,0.2)"
+                  fontSize={10}
+                  tickLine={false}
+                  axisLine={false}
+                  tickFormatter={(val) => `${val}m`}
+                />
+                <Tooltip content={<CustomTooltip />} cursor={{ fill: "rgba(255,255,255,0.02)" }} />
+                <Bar dataKey="minutes" fill={accent.accent} radius={[5, 5, 0, 0]} barSize={24} />
+              </BarChart>
+            ) : (
+              <LineChart data={data} margin={{ top: 0, right: 0, left: -20, bottom: 0 }}>
+                <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.04)" vertical={false} />
+                <XAxis
+                  dataKey="name"
+                  stroke="rgba(255,255,255,0.2)"
+                  fontSize={10}
+                  tickLine={false}
+                  axisLine={false}
+                  dy={10}
+                />
+                <YAxis
+                  stroke="rgba(255,255,255,0.2)"
+                  fontSize={10}
+                  tickLine={false}
+                  axisLine={false}
+                  tickFormatter={(val) => `${val}m`}
+                />
+                <Tooltip content={<CustomTooltip />} />
+                <Line
+                  type="monotone"
+                  dataKey="minutes"
+                  stroke={accent.accent2}
+                  strokeWidth={2.5}
+                  dot={{ fill: "#0a0a0f", stroke: accent.accent2, strokeWidth: 2, r: 4 }}
+                  activeDot={{ r: 6, fill: accent.accent, stroke: "#0a0a0f", strokeWidth: 2 }}
+                />
+              </LineChart>
+            )}
+          </ResponsiveContainer>
+        </div>
+      </div>
+    </div>
+  );
+}

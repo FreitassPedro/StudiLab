@@ -7,7 +7,7 @@ sky: azul
 delicatessen: rosa
 forest: verde
 */
-export type Theme = "midnight" | "sunset" | "sky" | "delicatessen" | "forest";
+export type Theme = "midnight" | "sunset" | "sky" | "delicatessen" | "forest" | "gold" | "void";
 
 export interface ThemeConfig {
   key: Theme;
@@ -79,6 +79,20 @@ export interface ProfileStats {
   bestWeekLabel: string;       // e.g. "18 Nov – 24 Nov"
   weeklyMinutes: number;       // current week total (Mon–today)
   avgMinutesPerDay: number;
+  todayMinutes: number;        // minutes studied today
+}
+
+export interface FriendRanking {
+  id: string;
+  name: string;
+  username: string;
+  image?: string;
+  minutes: number;
+}
+
+export interface ChartDataPoint {
+  name: string;
+  minutes: number;
 }
 
 // ── Full profile data returned by the action ──────────────────────────────────
@@ -92,4 +106,11 @@ export interface ProfileData {
   badges: ProfileBadge[];
   isOwner: boolean;
   isFollowing: boolean;
+  friendsRanking: FriendRanking[];
+  chartData: ChartDataPoint[];
+  objective?: {
+    name: string;
+    date: string;
+    daysLeft: number;
+  };
 }

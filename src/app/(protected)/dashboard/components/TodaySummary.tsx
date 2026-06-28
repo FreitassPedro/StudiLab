@@ -2,10 +2,9 @@
 
 import { Card, CardContent } from "@/components/ui/card";
 import { useDashboardData } from "@/hooks/useDashboard";
-import { BookOpen, Target } from "lucide-react";
 import { TodaySummarySkeleton } from "./Skeletons";
+import { Flame, Target } from "lucide-react";
 import { DailyProgress } from "./DailyProgress";
-
 
 export function TodaySummary() {
     const { data: dashboardData, isLoading } = useDashboardData();
@@ -16,39 +15,40 @@ export function TodaySummary() {
         return <TodaySummarySkeleton />;
     }
 
-
-    const lastSubject = summary.topSubject?.name || 'Nenhuma';
+    const lastSubject = summary.topSubject?.name || "Nenhuma";
+    const streak = 10; // mock — substituir por dado real quando disponível
 
     return (
-        <div className="grid gap-4 md:grid-cols-4">
+        <div className="grid gap-4 md:grid-cols-4 bg-card border-none bg-linear-to-br from-card/50 via-background to-secondary/20 shadow-inner">
+            {/* Progress circular — ocupa 2 colunas */}
+            <DailyProgress totalMinutes={summary.totalMinutes} />
 
-            <DailyProgress
-                totalMinutes={summary.totalMinutes}
-            />
+            {/* Streak / Ofensiva */}
+            <Card className="bg-transparent border-none">
+                <CardContent className="p-5 h-full flex flex-row items-center justify-center">
+                    <div className="p-2 w-fit rounded-xl bg-orange-500/10 mb-3">
+                        <Flame className="h-12 w-12 text-orange-500" />
+                    </div>
+                    <div className="ml-2">
+                        <p className="text-3xl font-extrabold leading-none">
+                            {streak}
+                            <span className="text-base font-semibold text-muted-foreground ml-1">dias</span>
+                        </p>
+                        <p className="text-sm text-muted-foreground font-medium mt-1">Ofensiva</p>
+                    </div>
+                    {/* Divisor vertical*/}
 
-            {/* Quick Stats Cards */}
-            <Card className="hover:shadow-md transition-all border-border/40">
-                <CardContent className="p-6 flex flex-col justify-between h-full">
-                    <div className="p-2 w-fit bg-orange-500/10 rounded-lg">
-                        <BookOpen className="h-5 w-5 text-orange-500" />
-                    </div>
-                    <div>
-                        <p className="text-2xl font-bold">{logs.length}</p>
-                        <p className="text-sm text-muted-foreground font-medium">Sessões Concluídas</p>
-                    </div>
                 </CardContent>
             </Card>
 
-            <Card className="hover:shadow-md transition-all border-border/40">
-                <CardContent className="p-6 flex flex-col justify-between h-full">
-                    <div className="p-2 w-fit bg-blue-500/10 rounded-lg">
-                        <Target className="h-5 w-5 text-blue-500" />
+            <Card className="flex-1 bg-transparent border-none">
+                <CardContent className="p-5 h-full flex flex-col justify-between">
+                    <div className="p-2 w-fit rounded-xl bg-emerald-500/10 mb-2">
+                        <Target className="h-4 w-4 text-emerald-500" />
                     </div>
-                    <div className="min-w-0">
-                        <p className="text-xl font-bold truncate" title={lastSubject}>
-                            {lastSubject}
-                        </p>
-                        <p className="text-sm text-muted-foreground font-medium">Última Matéria</p>
+                    <div>
+                        <p className="text-base font-bold truncate" title={lastSubject}>{lastSubject}</p>
+                        <p className="text-xs text-muted-foreground font-medium">Última matéria</p>
                     </div>
                 </CardContent>
             </Card>

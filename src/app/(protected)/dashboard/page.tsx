@@ -5,19 +5,28 @@ import { TodayTimeline } from "../nova-sessao/components/TodayTimeline";
 import { TodaySummarySkeleton, RecentSessionsSkeleton } from "./components/Skeletons";
 import { BiologicalClock } from "./components/BiologicalClock";
 import { FollowingList } from "./components/FollowingList";
+import { StandaloneFriendsRanking } from "./components/FriendsRankingDashboard";
+import { DashboardWeeklyChart } from "./components/WeeklyChart";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
-import { Play, Calendar, Clock } from "lucide-react";
+import { Play, Calendar, Clock, BarChart2 } from "lucide-react";
 import { getCurrentUser } from "@/server/actions/getCurrentUser";
 import { ComfortSection } from "./components/Comfort";
 
 export default async function DashboardPage() {
     const user = await getCurrentUser();
-    const firstName = user?.name?.split(' ')[0] || 'Estudante';
+    const firstName = user?.name?.split(" ")[0] || "Estudante";
+
+    const ranking = [
+        { id: "1", name: "Ana Silva", username: "anasilva", minutes: 320 },
+        { id: "2", name: "Carlos Edu", username: "carlosedu", minutes: 210 },
+        { id: "3", name: "Você", username: "voce", minutes: 150 },
+        { id: "4", name: "Maria Clara", username: "mariac", minutes: 45 },
+    ];
 
     return (
         <div className="container mx-auto p-4 md:p-8 space-y-8 animate-in fade-in duration-700">
-            {/* Header com Saudação Personalizada */}
+            {/* Header com Saudação */}
             <header className="flex flex-col md:flex-row md:items-end justify-between gap-4 border-b pb-6">
                 <div>
                     <h1 className="text-4xl font-extrabold tracking-tight">
@@ -27,39 +36,50 @@ export default async function DashboardPage() {
                         Pronto para transformar conhecimento em progresso hoje?
                     </p>
                 </div>
-                <div className="flex gap-2">
+                <div className="flex gap-2 flex-wrap">
                     <Link href="/nova-sessao">
-                        <Button size="lg" className="rounded-full px-8 font-bold shadow-md hover:shadow-lg transition-all gap-2">
-                            <Play className="w-5 h-5 fill-current" />
+                        <Button
+                            className="rounded-full px-7 font-bold shadow-md hover:shadow-lg transition-all gap-2 text-lg"
+                        >
+                            <Play className="w-4 h-4 fill-current" />
                             Iniciar Sessão
                         </Button>
                     </Link>
-                    <Link href="/nova-sessao">
-                        <Button size="lg" className="rounded-full px-8 font-bold shadow-md hover:shadow-lg transition-all gap-2">
-                            <Play className="w-5 h-5 fill-current" />
-                            Retomar Sessão
+                    <Link href="/historico">
+                        <Button
+                            variant="outline"
+                            size="lg"
+                            className="rounded-full px-7 font-semibold gap-2 border-border/60"
+                        >
+                            <BarChart2 className="w-4 h-4" />
+                            Histórico
                         </Button>
                     </Link>
                 </div>
             </header>
 
-            {/* Resumo Visual e Interativo */}
+            {/* Resumo do Dia */}
             <section>
                 <Suspense fallback={<TodaySummarySkeleton />}>
                     <TodaySummary />
                 </Suspense>
             </section>
-            {
-                user?.name.toLocaleLowerCase() === "laura" && (
-                    <ComfortSection />
-                )
-            }
-            {/* Grid de Atividade e Inteligência */}
+
+            {/* Easter egg especial */}
+            {user?.id?.toLocaleLowerCase() === "laura" && <ComfortSection />}
+
+            {/* Grid principal */}
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
-                {/* Coluna Principal: Sessões e Timeline */}
+                {/* Coluna principal */}
                 <div className="lg:col-span-8 space-y-8">
+                    {/* Gráfico semanal */}
+                    <div>
+                        <DashboardWeeklyChart />
+                    </div>
+
+                    {/* Sessões de Hoje */}
                     <div className="space-y-4">
-                        <div className="flex items-center justify-between px-2">
+                        <div className="flex items-center justify-between px-1">
                             <h2 className="text-xl font-bold flex items-center gap-2">
                                 <Clock className="w-5 h-5 text-primary" />
                                 Sessões de Hoje
@@ -73,9 +93,9 @@ export default async function DashboardPage() {
                         <RecentSessions />
                     </div>
 
-
+                    {/* Linha do Tempo */}
                     <div className="space-y-4">
-                        <h2 className="text-xl font-bold flex items-center gap-2 px-2">
+                        <h2 className="text-xl font-bold flex items-center gap-2 px-1">
                             <Calendar className="w-5 h-5 text-primary" />
                             Linha do Tempo
                         </h2>
@@ -87,15 +107,14 @@ export default async function DashboardPage() {
                     </div>
                 </div>
 
-                {/* Coluna Lateral: Insights e Inteligência */}
+                {/* Coluna lateral */}
                 <aside className="lg:col-span-4 space-y-6">
+                    {/* Ranking diário de amigos */}
+                    <StandaloneFriendsRanking ranking={ranking} />
 
-
-                    <Suspense fallback={<div className="h-48 bg-muted animate-pulse rounded-xl" />}>
+                    {/* Ritmo circadiano */}
+                    <Suspense fallback={<div className="h-48 bg-muted/40 animate-pulse rounded-2xl" />}>
                         <BiologicalClock />
-                    </Suspense>
-                    <Suspense fallback={<div className="h-24 bg-muted animate-pulse rounded-xl" />}>
-                        <FollowingList />
                     </Suspense>
                 </aside>
             </div>

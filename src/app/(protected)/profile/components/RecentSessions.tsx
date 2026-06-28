@@ -67,9 +67,6 @@ function SessionCard({ session, accent }: SessionCardProps) {
         <div className="font-['Space_Grotesk'] text-xl font-black leading-none text-white">
           {formatDuration(session.duration_minutes)}
         </div>
-        <div className="mt-1 line-clamp-1 text-[11px] text-white/45">
-          {session.topicName}
-        </div>
         <div className="mt-1.5 text-[10px] text-white/25">
           às {formatTime(session.start_time)}
         </div>
