@@ -54,9 +54,9 @@ function SubjectRow({ subject, rank, maxMinutes, accent }: SubjectRowProps) {
   const emoji = getEmoji(subject.name);
 
   return (
-    <div className="flex items-center gap-3.5 rounded-lg px-2 py-3 transition-colors duration-200 hover:bg-white/[0.04] border-b border-white/[0.05] last:border-b-0">
+    <div className="flex items-center gap-3.5 rounded-lg px-2 py-3 transition-colors duration-200 hover:bg-foreground/[0.04] border-b border-border last:border-b-0">
       {/* Rank */}
-      <span className="w-5 text-center text-[11px] font-bold text-white/25">
+      <span className="w-5 text-center text-[11px] font-bold text-foreground/25">
         {rank}
       </span>
 
@@ -84,7 +84,7 @@ function SubjectRow({ subject, rank, maxMinutes, accent }: SubjectRowProps) {
         >
           {formatMinutes(subject.minutes)}
         </span>
-        <div className="h-[3px] w-full min-w-[60px] rounded-full bg-white/[0.08]">
+        <div className="h-[3px] w-full min-w-[60px] rounded-full bg-foreground/[0.08]">
           <div
             className="h-full rounded-full transition-[width] duration-700"
             style={{
@@ -111,7 +111,7 @@ export function TopSubjects({ subjects }: TopSubjectsProps) {
     return (
       <section className="mb-10">
         <SectionLabel>Top Matérias</SectionLabel>
-        <p className="text-sm text-white/30">Nenhuma sessão registrada ainda.</p>
+        <p className="text-sm text-foreground/30">Nenhuma sessão registrada ainda.</p>
       </section>
     );
   }
@@ -120,11 +120,11 @@ export function TopSubjects({ subjects }: TopSubjectsProps) {
     <section className="mb-10">
       <SectionLabel>Top Matérias — Semanal</SectionLabel>
 
-      <div className="overflow-hidden rounded-[18px] border border-white/[0.06] bg-white/[0.02]">
+      <div className="overflow-hidden rounded-[18px] border border-border bg-foreground/[0.02]">
         {/* Header */}
-        <div className="flex items-center justify-between border-b border-white/[0.05] bg-white/[0.03] px-4 py-2">
-          <span className="text-[11px] font-semibold text-white/25">#</span>
-          <span className="text-[11px] font-semibold text-white/25">HORAS</span>
+        <div className="flex items-center justify-between border-b border-border bg-foreground/[0.03] px-4 py-2">
+          <span className="text-[11px] font-semibold text-foreground/25">#</span>
+          <span className="text-[11px] font-semibold text-foreground/25">HORAS</span>
         </div>
 
         {/* Rows */}

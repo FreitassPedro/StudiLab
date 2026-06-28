@@ -18,13 +18,13 @@ export function ObjectiveCard({ objective }: ObjectiveCardProps) {
 
   return (
     <div
-      className="flex flex-col gap-3 rounded-2xl border border-white/[0.07] bg-white/[0.03] p-5 transition-all duration-300 hover:-translate-y-0.5"
+      className="flex flex-col gap-3 rounded-2xl border border-border bg-foreground/[0.03] p-5 transition-all duration-300 hover:-translate-y-0.5"
       style={{
         boxShadow: `inset 0 0 40px -20px ${accent.accent}20`,
       }}
     >
       <div className="flex items-center justify-between">
-        <div className="text-[11px] font-bold uppercase tracking-[0.1em] text-white/40 flex items-center gap-1.5">
+        <div className="text-[11px] font-bold uppercase tracking-[0.1em] text-foreground/40 flex items-center gap-1.5">
           <Target className="h-3.5 w-3.5" style={{ color: accent.accent }} />
           Objetivo Atual
         </div>
@@ -37,16 +37,16 @@ export function ObjectiveCard({ objective }: ObjectiveCardProps) {
       </div>
       
       <div className="mt-2">
-        <h3 className="font-['Space_Grotesk'] text-2xl font-bold tracking-tight text-white">
+        <h3 className="font-['Space_Grotesk'] text-2xl font-bold tracking-tight text-foreground">
           {objective.name}
         </h3>
-        <div className="flex items-center gap-1.5 mt-1 text-sm text-white/50">
+        <div className="flex items-center gap-1.5 mt-1 text-sm text-foreground/50">
           <CalendarDays className="h-4 w-4" />
           {objective.date}
         </div>
       </div>
 
-      <div className="mt-2 h-1 w-full bg-white/5 rounded-full overflow-hidden">
+      <div className="mt-2 h-1 w-full bg-foreground/5 rounded-full overflow-hidden">
          {/* Decorative progress bar, could be actual progress if we had start date */}
         <div 
           className="h-full rounded-full" 

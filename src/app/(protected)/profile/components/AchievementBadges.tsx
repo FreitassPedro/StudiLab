@@ -27,7 +27,7 @@ function BadgeCard({ badge, accent }: BadgeCardProps) {
 
   return (
     <div
-      className={`flex cursor-default flex-col items-center gap-2 rounded-[14px] border border-white/[0.07] bg-white/3 p-4 text-center transition-all duration-200 hover:-translate-y-0.5 hover:border-accent hover:bg-[var(--accent-muted)] ${
+      className={`flex cursor-default flex-col items-center gap-2 rounded-[14px] border border-border bg-foreground/3 p-4 text-center transition-all duration-200 hover:-translate-y-0.5 hover:border-accent hover:bg-[var(--accent-muted)] ${
         badge.locked ? "opacity-30 grayscale" : ""
       }`}
       style={{
@@ -47,7 +47,7 @@ function BadgeCard({ badge, accent }: BadgeCardProps) {
       </div>
 
       <div className="text-xs font-bold leading-snug">{badge.name}</div>
-      <div className="text-[10px] leading-snug text-white/35">{badge.desc}</div>
+      <div className="text-[10px] leading-snug text-foreground/35">{badge.desc}</div>
 
       <div
         className="text-[9px] font-bold uppercase tracking-[0.1em]"
@@ -72,7 +72,7 @@ export function AchievementBadges({ badges }: AchievementBadgesProps) {
     <section className="mb-10">
       <div className="mb-4 flex items-center justify-between">
         <SectionLabel>Conquistas</SectionLabel>
-        <span className="mb-4 text-xs text-white/30">
+        <span className="mb-4 text-xs text-foreground/30">
           {unlockedCount} de {badges.length}
         </span>
       </div>

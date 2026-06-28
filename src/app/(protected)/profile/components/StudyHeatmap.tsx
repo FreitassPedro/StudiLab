@@ -105,7 +105,7 @@ function HeatCell({
       style={{ background: intensityMap[level] }}
       title={label}
     >
-      <div className="pointer-events-none absolute bottom-full left-1/2 z-50 mb-1.5 -translate-x-1/2 whitespace-nowrap rounded-md border border-white/10 bg-[#1e1e2e] px-2 py-1 text-[11px] text-[#e2e8f0] opacity-0 transition-opacity group-hover:opacity-100">
+      <div className="pointer-events-none absolute bottom-full left-1/2 z-50 mb-1.5 -translate-x-1/2 whitespace-nowrap rounded-md border border-border bg-card px-2 py-1 text-[11px] text-foreground opacity-0 transition-opacity group-hover:opacity-100">
         {label}
       </div>
     </div>
@@ -129,14 +129,14 @@ export function StudyHeatmap({ heatmap }: StudyHeatmapProps) {
     <section className="mb-10">
       <SectionLabel>Diário de Bordo · Últimos 6 meses</SectionLabel>
 
-      <div className="overflow-x-auto rounded-[18px] border border-white/[0.06] bg-white/[0.02] p-6">
+      <div className="overflow-x-auto rounded-[18px] border border-border bg-foreground/[0.02] p-6">
         {/* Month labels */}
         <div className="mb-1.5 flex gap-0.5 pl-[22px]">
           {columns.map((col, i) =>
             col.monthLabel ? (
               <span
                 key={i}
-                className="min-w-[28px] flex-shrink-0 text-[9px] font-semibold text-white/25"
+                className="min-w-[28px] flex-shrink-0 text-[9px] font-semibold text-foreground/25"
               >
                 {col.monthLabel}
               </span>
@@ -152,7 +152,7 @@ export function StudyHeatmap({ heatmap }: StudyHeatmapProps) {
             {DAY_LABELS.map((label, i) => (
               <span
                 key={i}
-                className="flex h-[13px] items-center text-[9px] text-white/20"
+                className="flex h-[13px] items-center text-[9px] text-foreground/20"
               >
                 {label}
               </span>
@@ -178,7 +178,7 @@ export function StudyHeatmap({ heatmap }: StudyHeatmapProps) {
 
         {/* Legend */}
         <div className="mt-3.5 flex items-center gap-1.5">
-          <span className="text-[10px] text-white/25">Menos</span>
+          <span className="text-[10px] text-foreground/25">Menos</span>
           {([0, 1, 2, 3, 4] as const).map((level) => (
             <HeatCell
               key={level}
@@ -187,7 +187,7 @@ export function StudyHeatmap({ heatmap }: StudyHeatmapProps) {
               accent={accent}
             />
           ))}
-          <span className="text-[10px] text-white/25">Mais</span>
+          <span className="text-[10px] text-foreground/25">Mais</span>
         </div>
       </div>
     </section>

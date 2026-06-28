@@ -8,9 +8,9 @@ interface SectionLabelProps {
 
 export function SectionLabel({ children }: SectionLabelProps) {
   return (
-    <div className="mb-4 flex items-center gap-2 text-[11px] font-bold uppercase tracking-[0.12em] text-white/35">
+    <div className="mb-4 flex items-center gap-2 text-[11px] font-bold uppercase tracking-[0.12em] text-foreground/35">
       {children}
-      <span className="h-px flex-1 bg-white/[0.07]" />
+      <span className="h-px flex-1 bg-foreground/[0.07]" />
     </div>
   );
 }

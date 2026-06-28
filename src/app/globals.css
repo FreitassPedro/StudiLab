@@ -6,14 +6,24 @@
 /* EXPLICAÇÂO DAS VARIÁVEIS DE COR:
 - background: cor de fundo principal da aplicação
 - foreground: cor do texto principal da aplicação
+- card: cor de fundo para cards
+- card-foreground: texto de destaque para cards
+- popover: cor de fundo para popovers
+- popover-foreground: texto de destaque para popovers
 - primary: cor de destaque para ações primárias (ex: botões principais)
+- primary-foreground: texto de destaque para ações primárias
 - secondary: cor de destaque para ações secundárias (ex: botões secundários)
-- accent: cor de destaque para elementos de interface (ex: links, ícones)
+- secondary-foreground: texto de destaque para ações secundárias
 - destructive: cor para ações destrutivas (ex: botões de excluir)
 - border: cor para bordas e divisórias
 - input: cor de fundo para campos de entrada
 - ring: cor para anéis de foco e destaque
 - chart-1 a chart-5: cores para gráficos e visualizações de dados
+
+- muted: tom de fundo neutro para elementos secundários. Seções inativas, não selecionadas, áreas skeleton
+- muted-foreground: texto com menor contraste, legendas, textos secundários
+- accent: cor de destaque para elementos de interface. Botões ativos, links, ícones, botões hover
+- accent-foreground: texto com maior contraste, destacado.
 
 */
 
@@ -57,6 +67,7 @@
   --radius-3xl: calc(var(--radius) * 2.2);
   --radius-4xl: calc(var(--radius) * 2.6);
 }
+
 :root {
   --radius: 0.625rem;
   --background: oklch(1 0 0);
@@ -108,7 +119,7 @@
   --accent: oklch(0.269 0 0);
   --accent-foreground: oklch(0.985 0 0);
   --destructive: oklch(0.704 0.191 22.216);
-  --border: oklch(1 0 0 / 10%);
+  --border: oklch(100% 0.00011 271.152 / 0.082);
   --input: oklch(1 0 0 / 15%);
   --ring: oklch(0.556 0 0);
   --chart-1: oklch(0.488 0.243 264.376);

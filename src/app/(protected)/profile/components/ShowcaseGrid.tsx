@@ -17,7 +17,7 @@ function StreakCard({
 
   return (
     <div
-      className="flex flex-col gap-2 rounded-2xl border border-white/[0.07] bg-white/3 p-5 transition-all duration-300 hover:-translate-y-0.5"
+      className="flex flex-col gap-2 bg-orange-500 rounded-2xl border border-border p-4 transition-all duration-300 hover:-translate-y-0.5"
       style={
         isOnFire
           ? {
@@ -28,7 +28,7 @@ function StreakCard({
       }
     >
       <div className="flex items-center justify-between">
-        <div className="text-[11px] font-bold uppercase tracking-widest text-white/30">
+        <div className="text-[11px] font-bold uppercase tracking-widest text-foreground/30">
           Ofensiva
         </div>
         <span
@@ -39,16 +39,16 @@ function StreakCard({
         </span>
       </div>
       <div className="flex items-baseline gap-1.5">
-        <FlameIcon className="h-12 w-12 text-red-500 animate-pulse bg-red-500/10" />
+        <FlameIcon className="h-12 w-12 text-red-600" />
         <span
           className="font-['Space_Grotesk'] text-[56px] font-black leading-none tracking-[-3px]"
           style={{ color: accent.accent }}
         >
           {streak}
         </span>
-        <span className="text-sm font-semibold text-white/40">dias</span>
+        <span className="text-sm font-semibold text-foreground/40">dias</span>
       </div>
-      <div className="text-xs text-white/40">
+      <div className="text-xs text-foreground/40">
         {streak >= 30
           ? "🌟 Lendário!"
           : streak >= 14
@@ -74,13 +74,13 @@ function TodayHoursCard({
 
   return (
     <div
-      className="flex flex-col gap-2 rounded-2xl border border-white/[0.07] bg-white/3 p-5 transition-all duration-300 hover:-translate-y-0.5 hover:border-[var(--accent)] hover:bg-[var(--accent-muted)]"
+      className="flex flex-col gap-2 rounded-2xl border border-border bg-foreground/3 p-4 transition-all duration-300 hover:-translate-y-0.5 hover:border-accent hover:bg-(--accent-muted)"
       style={{
         ["--accent" as string]: accent.accent,
         ["--accent-muted" as string]: `${accent.accent}1a`,
       }}
     >
-      <div className="text-[11px] font-bold uppercase tracking-[0.1em] text-white/30">
+      <div className="text-[11px] font-bold uppercase tracking-widest text-foreground/30">
         ☀️ Hoje
       </div>
       <div className="flex items-baseline gap-1">
@@ -90,7 +90,7 @@ function TodayHoursCard({
         >
           {h}
         </span>
-        <span className="text-2xl font-bold text-white/40">h</span>
+        <span className="text-2xl font-bold text-foreground/40">h</span>
         {m > 0 && (
           <>
             <span
@@ -99,11 +99,11 @@ function TodayHoursCard({
             >
               {m}
             </span>
-            <span className="text-sm font-bold text-white/30">m</span>
+            <span className="text-sm font-bold text-foreground/30">m</span>
           </>
         )}
       </div>
-      <div className="text-xs text-white/40">
+      <div className="text-xs text-foreground/40">
         {todayMinutes === 0 ? "Nenhuma sessão hoje ainda" : "estudados hoje"}
       </div>
     </div>
@@ -123,13 +123,13 @@ function BestWeekCard({
   const hours = Math.round(minutes / 60);
   return (
     <div
-      className="flex flex-col gap-2 rounded-2xl border border-white/[0.07] bg-white/[0.03] p-5 transition-all duration-300 hover:-translate-y-0.5 hover:border-accent hover:bg-[var(--accent-muted)]"
+      className="flex flex-col gap-2 rounded-2xl border border-border bg-foreground/[0.03] p-5 transition-all duration-300 hover:-translate-y-0.5 hover:border-accent hover:bg-(--accent-muted)"
       style={{
         ["--accent" as string]: accent.accent,
         ["--accent-muted" as string]: `${accent.accent}1a`,
       }}
     >
-      <div className="text-[11px] font-bold uppercase tracking-widest text-white/30">
+      <div className="text-[11px] font-bold uppercase tracking-widest text-foreground/30">
         📅 Melhor Semana
       </div>
       <span
@@ -138,7 +138,7 @@ function BestWeekCard({
       >
         {hours}h
       </span>
-      <div className="text-xs text-white/40">{weekLabel}</div>
+      <div className="text-xs text-foreground/40">{weekLabel}</div>
     </div>
   );
 }
@@ -159,22 +159,22 @@ function WeekGoalCard({
 
   return (
     <div
-      className="flex flex-col gap-3 rounded-2xl border border-white/[0.07] bg-white/3transition-all duration-300 hover:-translate-y-0.5 hover:border-accent hover:bg-(--accent-muted)"
+      className="flex flex-col gap-3 rounded-2xl border border-border bg-foreground/5 transition-all duration-300 hover:-translate-y-0.5 hover:border-[var(--accent)] hover:bg-(--accent-muted)"
       style={{
         ["--accent" as string]: accent.accent,
         ["--accent-muted" as string]: `${accent.accent}1a`,
       }}
     >
-      <div className="text-[11px] font-bold uppercase tracking-[0.1em] text-white/30">
+      <div className="text-[11px] font-bold uppercase tracking-[0.1em] text-foreground/30">
         🎯 Meta Semanal
       </div>
       <div>
         <span className="font-['Space_Grotesk'] text-[32px] font-black leading-none tracking-[-2px]" style={{ color: accent.accent }}>
           {progress}
         </span>
-        <span className="text-base font-bold text-white/40">%</span>
+        <span className="text-base font-bold text-foreground/40">%</span>
       </div>
-      <div className="h-1.5 overflow-hidden rounded-full bg-white/[0.07]">
+      <div className="h-1.5 overflow-hidden rounded-full bg-foreground/[0.07]">
         <div
           className="h-full rounded-full transition-[width] duration-700"
           style={{
@@ -183,7 +183,7 @@ function WeekGoalCard({
           }}
         />
       </div>
-      <div className="text-[11px] text-white/35">
+      <div className="text-[11px] text-foreground/35">
         {done}h de {goal}h
       </div>
     </div>
@@ -209,7 +209,8 @@ export function ShowcaseGrid({ stats }: ShowcaseGridProps) {
           weekLabel={stats.bestWeekLabel}
           accent={accent}
         />
-        <WeekGoalCard weeklyMinutes={stats.weeklyMinutes} accent={accent} />
+        {/* TODO: Implementar meta*/}
+        {/* <WeekGoalCard weeklyMinutes={stats.weeklyMinutes} accent={accent} /> */}
       </div>
     </section>
   );

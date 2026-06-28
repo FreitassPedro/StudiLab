@@ -19,8 +19,8 @@ import { UserSearchModal } from "./UserSearchModal";
 
 function ThemeSwitcherProfile({ theme, setTheme }: { theme: Theme; setTheme: (t: Theme) => void }) {
   return (
-    <div className="flex items-center gap-2.5 rounded-xl border border-white/10 bg-[#0a0a0f]/85 px-3 py-2 backdrop-blur-xl">
-      <span className="text-[10px] font-semibold uppercase tracking-widest text-white/40">
+    <div className="flex items-center gap-2.5 rounded-xl border border-border bg-background/85 px-3 py-2 backdrop-blur-xl">
+      <span className="text-[10px] font-semibold uppercase tracking-widest text-foreground/40">
         Tema
       </span>
       {THEME_CONFIGS.map((cfg) => (
@@ -73,19 +73,19 @@ function EditDialog({ children, user, isOwner }: { children: React.ReactNode; us
       <DialogTrigger asChild>
         {children}
       </DialogTrigger>
-      <DialogContent className="bg-[#12121a] border-white/10 text-white max-w-md p-0 overflow-hidden">
+      <DialogContent className="bg-popover border-border text-foreground max-w-md p-0 overflow-hidden">
         <DialogHeader className="px-6 pt-6">
           <DialogTitle>Configurações</DialogTitle>
         </DialogHeader>
 
         <Tabs defaultValue="profile" className="w-full">
           <div className="px-6">
-            <TabsList className="w-full bg-white/5 border border-white/10 p-1 rounded-xl mb-2">
-              <TabsTrigger value="profile" className="flex-1 rounded-lg data-[state=active]:bg-white/10 data-[state=active]:text-white text-white/60">
+            <TabsList className="w-full bg-foreground/5 border border-border p-1 rounded-xl mb-2">
+              <TabsTrigger value="profile" className="flex-1 rounded-lg data-[state=active]:bg-foreground/10 data-[state=active]:text-foreground text-foreground/60">
                 Perfil
               </TabsTrigger>
               {isOwner && (
-                <TabsTrigger value="account" className="flex-1 rounded-lg data-[state=active]:bg-white/10 data-[state=active]:text-white text-white/60">
+                <TabsTrigger value="account" className="flex-1 rounded-lg data-[state=active]:bg-foreground/10 data-[state=active]:text-foreground text-foreground/60">
                   Conta
                 </TabsTrigger>
               )}
@@ -101,7 +101,7 @@ function EditDialog({ children, user, isOwner }: { children: React.ReactNode; us
                   id="coverImage"
                   value={coverImage}
                   onChange={(e) => setCoverImage(e.target.value)}
-                  className="bg-white/5 border-white/10 text-white"
+                  className="bg-foreground/5 border-border text-foreground"
                   placeholder="https://..."
                 />
               </div>
@@ -111,7 +111,7 @@ function EditDialog({ children, user, isOwner }: { children: React.ReactNode; us
                   id="image"
                   value={image}
                   onChange={(e) => setImage(e.target.value)}
-                  className="bg-white/5 border-white/10 text-white"
+                  className="bg-foreground/5 border-border text-foreground"
                   placeholder="https://..."
                 />
               </div>
@@ -121,7 +121,7 @@ function EditDialog({ children, user, isOwner }: { children: React.ReactNode; us
                   id="name"
                   value={name}
                   onChange={(e) => setName(e.target.value)}
-                  className="bg-white/5 border-white/10 text-white"
+                  className="bg-foreground/5 border-border text-foreground"
                 />
               </div>
               <div className="grid gap-2">
@@ -130,7 +130,7 @@ function EditDialog({ children, user, isOwner }: { children: React.ReactNode; us
                   id="bio"
                   value={bio}
                   onChange={(e) => setBio(e.target.value)}
-                  className="bg-white/5 border-white/10 text-white min-h-[100px]"
+                  className="bg-foreground/5 border-border text-foreground min-h-[100px]"
                 />
               </div>
               <ThemeSwitcherProfile
@@ -139,13 +139,13 @@ function EditDialog({ children, user, isOwner }: { children: React.ReactNode; us
               />
             </div>
             <div className="flex justify-end gap-2 mt-4">
-              <Button variant="ghost" onClick={() => setOpen(false)} className="hover:bg-white/5 hover:text-white">
+              <Button variant="ghost" onClick={() => setOpen(false)} className="hover:bg-foreground/5 hover:text-foreground">
                 Cancelar
               </Button>
               <Button
                 onClick={handleSave}
                 disabled={loading}
-                className="bg-white text-black hover:bg-white/90"
+                className="bg-card text-foreground hover:bg-foreground/90"
               >
                 {loading ? "Salvando..." : "Salvar"}
               </Button>
@@ -171,7 +171,7 @@ function StatPill({ value, label }: { value: string; label: string }) {
       <span className="font-bold" style={{ color: accent.accent }}>
         {value}
       </span>
-      <span className="text-white/45">{label}</span>
+      <span className="text-foreground/45">{label}</span>
     </div>
   );
 }
@@ -201,7 +201,7 @@ function AvatarFrame({
         background: `linear-gradient(135deg, ${accent.accent}, ${accent.accent2})`,
       }}
     >
-      <div className="flex h-full w-full items-center justify-center overflow-hidden rounded-full border-[3px] border-[#0a0a0f] bg-[#1e1e2e]">
+      <div className="flex h-full w-full items-center justify-center overflow-hidden rounded-full border-[3px] border-background bg-card">
         {image ? (
           /* eslint-disable-next-line @next/next/no-img-element */
           <img
@@ -254,7 +254,7 @@ export function ProfileHeader({ user, stats, isOwner, isFollowing }: ProfileHead
       <div className="min-w-[200px] flex-1 pb-1">
         {/* Name */}
         <div className="mb-1 flex flex-wrap items-center gap-2.5">
-          <h1 className="font-['Space_Grotesk'] text-[26px] font-black leading-none tracking-[-0.5px] text-white">
+          <h1 className="font-['Space_Grotesk'] text-[26px] font-black leading-none tracking-[-0.5px] text-foreground">
             {user.name}
           </h1>
           {/* Streak badge */}
@@ -295,13 +295,13 @@ export function ProfileHeader({ user, stats, isOwner, isFollowing }: ProfileHead
         </div>
 
         {/* Username / Email */}
-        <div className="mb-2.5 text-[13px] text-white/40">
+        <div className="mb-2.5 text-[13px] text-foreground/40">
           @{user.username || user.email.split("@")[0]}
         </div>
 
         {/* Bio */}
         {user.bio && (
-          <div className="mb-3 text-[14px] text-white/80 max-w-xl">
+          <div className="mb-3 text-[14px] text-foreground/80 max-w-xl">
             {user.bio}
           </div>
         )}
@@ -333,7 +333,7 @@ export function ProfileHeader({ user, stats, isOwner, isFollowing }: ProfileHead
         )}
         {isOwner && (
           <UserSearchModal>
-            <Button variant="outline" size="sm" className="bg-white/5 hover:bg-white/10 ml-2 border-white/20 text-white">
+            <Button variant="outline" size="sm" className="bg-foreground/5 hover:bg-foreground/10 ml-2 border-border text-foreground">
               <Search className="mr-2 h-4 w-4" />
               Buscar Amigos
             </Button>
@@ -353,9 +353,9 @@ export function ProfileHeader({ user, stats, isOwner, isFollowing }: ProfileHead
           <StatPill value={consistency} label="consistência" />
           <StatPill value={String(stats.studyDays)} label="dias registrados" />
 
-          <div className="inline-flex items-center gap-1.5 rounded-full border border-white/15 bg-white/[0.03] px-3 py-[5px] text-xs">
+          <div className="inline-flex items-center gap-1.5 rounded-full border border-border bg-foreground/[0.03] px-3 py-[5px] text-xs">
             <span>🔥</span>
-            <span className="font-semibold text-white/70">
+            <span className="font-semibold text-foreground/70">
               {stats.currentStreak} dias de ofensiva
             </span>
           </div>

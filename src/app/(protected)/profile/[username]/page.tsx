@@ -40,7 +40,7 @@ export default async function UsernameProfilePage({ params }: PageProps) {
   return (
     <ProfileThemeProvider initialTheme={data.user.theme as Theme}>
       {/* Page background */}
-      <div className="min-h-screen bg-[#0a0a0f] font-['Inter',sans-serif] text-[#e2e8f0]">
+      <div className="min-h-screen bg-background font-['Inter',sans-serif] text-foreground">
         {/* Banner */}
         <ProfileBanner coverImage={data.user.coverImage} />
         <MainPage data={data} />

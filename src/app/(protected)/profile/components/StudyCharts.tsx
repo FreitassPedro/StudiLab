@@ -40,8 +40,8 @@ export function StudyCharts({ data }: StudyChartsProps) {
       const pm = mins % 60;
       const formatted = ph > 0 ? `${ph}h ${pm}m` : `${pm}m`;
       return (
-        <div className="bg-[#1a1a24] border border-white/10 p-3 rounded-xl shadow-xl">
-          <p className="text-white/50 text-xs mb-1">{label}</p>
+        <div className="bg-card border border-border p-3 rounded-xl shadow-xl">
+          <p className="text-foreground/50 text-xs mb-1">{label}</p>
           <p className="text-base font-bold" style={{ color: accent.accent }}>
             {formatted}
           </p>
@@ -55,7 +55,7 @@ export function StudyCharts({ data }: StudyChartsProps) {
     <div className="flex flex-col gap-4">
       <div className="flex items-center justify-between">
         <SectionLabel>Evolução — 7 dias</SectionLabel>
-        <div className="flex gap-1 bg-white/5 p-1 rounded-lg mb-4">
+        <div className="flex gap-1 bg-foreground/5 p-1 rounded-lg mb-4">
           {(["bar", "line"] as ChartTab[]).map((t) => (
             <button
               key={t}
@@ -76,21 +76,21 @@ export function StudyCharts({ data }: StudyChartsProps) {
       {/* Summary row */}
       <div className="flex items-center gap-6 px-1 mb-1">
         <div>
-          <p className="text-[11px] text-white/35 uppercase tracking-wider font-semibold">Total</p>
+          <p className="text-[11px] text-foreground/35 uppercase tracking-wider font-semibold">Total</p>
           <p className="text-xl font-bold" style={{ color: accent.accent }}>
             {h}h {m}m
           </p>
         </div>
-        <div className="w-px h-8 bg-white/10" />
+        <div className="w-px h-8 bg-foreground/10" />
         <div>
-          <p className="text-[11px] text-white/35 uppercase tracking-wider font-semibold">Média/dia</p>
-          <p className="text-xl font-bold text-white/70">
+          <p className="text-[11px] text-foreground/35 uppercase tracking-wider font-semibold">Média/dia</p>
+          <p className="text-xl font-bold text-foreground/70">
             {Math.floor(avgMins / 60)}h {avgMins % 60}m
           </p>
         </div>
       </div>
 
-      <div className="p-5 rounded-2xl border border-white/[0.07] bg-white/[0.02]">
+      <div className="p-5 rounded-2xl border border-border bg-foreground/[0.02]">
         <div className="h-[200px] w-full">
           <ResponsiveContainer width="100%" height="100%">
             {tab === "bar" ? (

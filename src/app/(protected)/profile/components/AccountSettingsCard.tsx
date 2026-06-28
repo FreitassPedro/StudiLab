@@ -74,21 +74,21 @@ export function AccountSettingsCard({ user }: { user: ProfileUser }) {
       <div className="grid gap-3">
         <div>
           <Label htmlFor="account-username">Username</Label>
-          <p className="text-xs text-white/50 mb-2">Seu identificador único na plataforma.</p>
+          <p className="text-xs text-foreground/50 mb-2">Seu identificador único na plataforma.</p>
         </div>
         <div className="flex gap-2">
           <Input
             id="account-username"
             value={username}
             onChange={(e) => setUsername(e.target.value)}
-            className="bg-white/5 border-white/10 text-white flex-1"
+            className="bg-foreground/5 border-border text-foreground flex-1"
             placeholder="Seu username"
           />
           <Button 
             onClick={handleSaveUsername} 
             disabled={loadingUsername || username === user.username}
             variant="outline"
-            className="border-white/10 bg-white/5 hover:bg-white/10 text-white"
+            className="border-border bg-foreground/5 hover:bg-foreground/10 text-foreground"
           >
             {loadingUsername ? <Loader2 className="h-4 w-4 animate-spin" /> : "Salvar"}
           </Button>
@@ -99,7 +99,7 @@ export function AccountSettingsCard({ user }: { user: ProfileUser }) {
       <div className="grid gap-3">
         <div>
           <Label htmlFor="account-email">Endereço de Email</Label>
-          <p className="text-xs text-white/50 mb-2">O email que você usa para fazer login.</p>
+          <p className="text-xs text-foreground/50 mb-2">O email que você usa para fazer login.</p>
         </div>
         <div className="flex gap-2">
           <Input
@@ -107,14 +107,14 @@ export function AccountSettingsCard({ user }: { user: ProfileUser }) {
             type="email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            className="bg-white/5 border-white/10 text-white flex-1"
+            className="bg-foreground/5 border-border text-foreground flex-1"
             placeholder="voce@exemplo.com"
           />
           <Button 
             onClick={handleSaveEmail} 
             disabled={loadingEmail || email === user.email}
             variant="outline"
-            className="border-white/10 bg-white/5 hover:bg-white/10 text-white"
+            className="border-border bg-foreground/5 hover:bg-foreground/10 text-foreground"
           >
             {loadingEmail ? <Loader2 className="h-4 w-4 animate-spin" /> : "Salvar"}
           </Button>
@@ -122,31 +122,31 @@ export function AccountSettingsCard({ user }: { user: ProfileUser }) {
       </div>
 
       {/* PASSWORD */}
-      <div className="grid gap-3 pt-2 border-t border-white/10">
+      <div className="grid gap-3 pt-2 border-t border-border">
         <div>
           <Label>Alterar Senha</Label>
-          <p className="text-xs text-white/50 mb-2">Para sua segurança, informe a senha atual.</p>
+          <p className="text-xs text-foreground/50 mb-2">Para sua segurança, informe a senha atual.</p>
         </div>
         <div className="grid gap-3">
           <Input
             type="password"
             value={currentPassword}
             onChange={(e) => setCurrentPassword(e.target.value)}
-            className="bg-white/5 border-white/10 text-white"
+            className="bg-foreground/5 border-border text-foreground"
             placeholder="Senha atual"
           />
           <Input
             type="password"
             value={newPassword}
             onChange={(e) => setNewPassword(e.target.value)}
-            className="bg-white/5 border-white/10 text-white"
+            className="bg-foreground/5 border-border text-foreground"
             placeholder="Nova senha"
           />
           <Button 
             onClick={handleChangePassword} 
             disabled={loadingPassword || !currentPassword || !newPassword}
             variant="outline"
-            className="border-white/10 bg-white/5 hover:bg-white/10 text-white w-full"
+            className="border-border bg-foreground/5 hover:bg-foreground/10 text-foreground w-full"
           >
             {loadingPassword ? <Loader2 className="h-4 w-4 animate-spin" /> : "Atualizar Senha"}
           </Button>

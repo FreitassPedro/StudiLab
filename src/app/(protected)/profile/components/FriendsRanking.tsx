@@ -34,7 +34,7 @@ export function FriendsRanking({ ranking }: FriendsRankingProps) {
           return (
             <div
               key={friend.id}
-              className="relative flex items-center gap-3 px-3 py-2.5 rounded-xl overflow-hidden transition-colors hover:bg-white/[0.03]"
+              className="relative flex items-center gap-3 px-3 py-2.5 rounded-xl overflow-hidden transition-colors hover:bg-foreground/3"
             >
               {/* Progress fill */}
               <div
@@ -54,13 +54,13 @@ export function FriendsRanking({ ranking }: FriendsRankingProps) {
                 ) : index === 2 ? (
                   <Medal className="h-4 w-4 text-amber-700" />
                 ) : (
-                  <span className="text-[11px] font-bold text-white/30">{index + 1}º</span>
+                  <span className="text-[11px] font-bold text-foreground/30">{index + 1}º</span>
                 )}
               </div>
 
               {/* Avatar */}
               <div
-                className="relative z-10 h-8 w-8 shrink-0 rounded-full flex items-center justify-center text-xs font-bold text-white"
+                className="relative z-10 h-8 w-8 shrink-0 rounded-full flex items-center justify-center text-xs font-bold text-foreground"
                 style={{
                   background: isFirst
                     ? `linear-gradient(135deg, ${accent.accent}, ${accent.accent2})`
@@ -77,13 +77,13 @@ export function FriendsRanking({ ranking }: FriendsRankingProps) {
 
               {/* Name */}
               <div className="relative z-10 flex-1 min-w-0">
-                <p className="text-sm font-semibold text-white/90 truncate">{friend.name}</p>
-                <p className="text-[10px] text-white/35">@{friend.username}</p>
+                <p className="text-sm font-semibold text-foreground/90 truncate">{friend.name}</p>
+                <p className="text-[10px] text-foreground/35">@{friend.username}</p>
               </div>
 
               {/* Time */}
               <div className="relative z-10 flex items-center gap-1 shrink-0">
-                <Clock className="w-3.5 h-3.5 text-white/30" />
+                <Clock className="w-3.5 h-3.5 text-foreground/30" />
                 <span
                   className="text-sm font-semibold"
                   style={{ color: isFirst ? accent.accent : "rgba(255,255,255,0.6)" }}

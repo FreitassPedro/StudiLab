@@ -61,13 +61,13 @@ function SessionCard({ session, accent }: SessionCardProps) {
 
       {/* Content */}
       <div className="relative z-10">
-        <div className="mb-1 text-[10px] font-bold uppercase tracking-[0.1em] text-white/35">
+        <div className="mb-1 text-[10px] font-bold uppercase tracking-[0.1em] text-foreground/35">
           {session.subjectName}
         </div>
-        <div className="font-['Space_Grotesk'] text-xl font-black leading-none text-white">
+        <div className="font-['Space_Grotesk'] text-xl font-black leading-none text-foreground">
           {formatDuration(session.duration_minutes)}
         </div>
-        <div className="mt-1.5 text-[10px] text-white/25">
+        <div className="mt-1.5 text-[10px] text-foreground/25">
           às {formatTime(session.start_time)}
         </div>
       </div>
@@ -87,7 +87,7 @@ export function RecentSessions({ sessions }: RecentSessionsProps) {
     return (
       <section className="mb-10">
         <SectionLabel>Sessões Recentes</SectionLabel>
-        <p className="text-sm text-white/30">Nenhuma sessão registrada ainda.</p>
+        <p className="text-sm text-foreground/30">Nenhuma sessão registrada ainda.</p>
       </section>
     );
   }

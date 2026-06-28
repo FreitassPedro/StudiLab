@@ -7,8 +7,8 @@ export function ThemeSwitcher() {
   const { theme, setTheme } = useProfileTheme();
 
   return (
-    <div className="fixed top-5 right-5 z-50 flex items-center gap-2.5 rounded-xl border border-white/10 bg-[#0a0a0f]/85 px-3 py-2 backdrop-blur-xl">
-      <span className="text-[10px] font-semibold uppercase tracking-widest text-white/40">
+    <div className="fixed top-5 right-5 z-50 flex items-center gap-2.5 rounded-xl border border-border bg-background/85 px-3 py-2 backdrop-blur-xl">
+      <span className="text-[10px] font-semibold uppercase tracking-widest text-foreground/40">
         Tema
       </span>
       {THEME_CONFIGS.map((cfg) => (

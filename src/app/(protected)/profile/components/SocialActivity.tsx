@@ -29,22 +29,22 @@ export function SocialActivity() {
         {MOCK_ACTIVITY.map((entry) => (
           <div
             key={entry.id}
-            className="flex items-center gap-3 p-3 rounded-xl bg-white/[0.02] border border-white/[0.05] hover:bg-white/[0.04] transition-colors"
+            className="flex items-center gap-3 p-3 rounded-xl bg-foreground/[0.02] border border-border hover:bg-foreground/[0.04] transition-colors"
           >
             {/* Avatar */}
             <div
-              className="h-9 w-9 shrink-0 rounded-full flex items-center justify-center text-sm font-bold text-white"
+              className="h-9 w-9 shrink-0 rounded-full flex items-center justify-center text-sm font-bold text-foreground"
               style={{ background: `linear-gradient(135deg, ${accent.accent}80, ${accent.accent2}60)` }}
             >
               {entry.userName.charAt(0)}
             </div>
 
             <div className="flex-1 min-w-0">
-              <p className="text-sm text-white/90 leading-snug">
+              <p className="text-sm text-foreground/90 leading-snug">
                 <span className="font-semibold">{entry.userName}</span>{" "}
-                <span className="text-white/55">{entry.action}</span>
+                <span className="text-foreground/55">{entry.action}</span>
               </p>
-              <p className="text-[11px] text-white/30 mt-0.5">{entry.timeAgo}</p>
+              <p className="text-[11px] text-foreground/30 mt-0.5">{entry.timeAgo}</p>
             </div>
 
             {/* Accent dot */}
