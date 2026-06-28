@@ -4,7 +4,6 @@ import { TodaySummary } from "./components/TodaySummary";
 import { TodayTimeline } from "../nova-sessao/components/TodayTimeline";
 import { TodaySummarySkeleton, RecentSessionsSkeleton } from "./components/Skeletons";
 import { BiologicalClock } from "./components/BiologicalClock";
-import { FollowingList } from "./components/FollowingList";
 import { StandaloneFriendsRanking } from "./components/FriendsRankingDashboard";
 import { DashboardWeeklyChart } from "./components/WeeklyChart";
 import { Button } from "@/components/ui/button";
@@ -74,7 +73,9 @@ export default async function DashboardPage() {
                 <div className="lg:col-span-8 space-y-8">
                     {/* Gráfico semanal */}
                     <div>
-                        <DashboardWeeklyChart />
+                        <Suspense fallback={<div className="h-48 bg-muted/40 animate-pulse rounded-2xl" />} >
+                            <DashboardWeeklyChart />
+                        </Suspense>
                     </div>
 
                     {/* Sessões de Hoje */}

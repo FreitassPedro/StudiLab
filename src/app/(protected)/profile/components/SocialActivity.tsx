@@ -29,7 +29,7 @@ export function SocialActivity() {
         {MOCK_ACTIVITY.map((entry) => (
           <div
             key={entry.id}
-            className="flex items-center gap-3 p-3 rounded-xl bg-foreground/[0.02] border border-border hover:bg-foreground/[0.04] transition-colors"
+            className="flex items-center gap-3 p-3 rounded-xl bg-foreground/2 border border-border hover:bg-foreground/4 transition-colors"
           >
             {/* Avatar */}
             <div

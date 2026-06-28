@@ -19,7 +19,7 @@ export function TodaySummary() {
     const streak = 10; // mock — substituir por dado real quando disponível
 
     return (
-        <div className="grid gap-4 md:grid-cols-4 bg-card border-none bg-linear-to-br from-card/50 via-background to-secondary/20 shadow-inner">
+        <div className="grid gap-4 md:grid-cols-4 bg-card border-none bg-linear-to-br from-card/50 via-background to-secondary/20 ">
             {/* Progress circular — ocupa 2 colunas */}
             <DailyProgress totalMinutes={summary.totalMinutes} />
 

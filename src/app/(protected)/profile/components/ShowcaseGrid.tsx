@@ -123,7 +123,7 @@ function BestWeekCard({
   const hours = Math.round(minutes / 60);
   return (
     <div
-      className="flex flex-col gap-2 rounded-2xl border border-border bg-foreground/[0.03] p-5 transition-all duration-300 hover:-translate-y-0.5 hover:border-[var(--accent)] hover:bg-[var(--accent-muted)]"
+      className="flex flex-col gap-2 rounded-2xl border border-border bg-foreground/3 p-5 transition-all duration-300 hover:-translate-y-0.5 hover:border-accent hover:bg-(--accent-muted)"
       style={{
         ["--accent" as string]: accent.accent,
         ["--accent-muted" as string]: `${accent.accent}1a`,
@@ -159,13 +159,13 @@ function WeekGoalCard({
 
   return (
     <div
-      className="flex flex-col gap-3 rounded-2xl border border-border bg-foreground/5 transition-all duration-300 hover:-translate-y-0.5 hover:border-[var(--accent)] hover:bg-[var(--accent-muted)]"
+      className="flex flex-col gap-3 rounded-2xl border border-border bg-foreground/5 transition-all duration-300 hover:-translate-y-0.5 hover:border-accent hover:bg-(--accent-muted)"
       style={{
         ["--accent" as string]: accent.accent,
         ["--accent-muted" as string]: `${accent.accent}1a`,
       }}
     >
-      <div className="text-[11px] font-bold uppercase tracking-[0.1em] text-foreground/30">
+      <div className="text-[11px] font-bold uppercase tracking-widest text-foreground/30">
         🎯 Meta Semanal
       </div>
       <div>

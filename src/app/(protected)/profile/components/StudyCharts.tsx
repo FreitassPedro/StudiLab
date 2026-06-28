@@ -111,7 +111,7 @@ export function StudyCharts({ data }: StudyChartsProps) {
                   axisLine={false}
                   tickFormatter={(val) => `${val}m`}
                 />
-                <Tooltip content={<CustomTooltip />} cursor={{ fill: "var(--muted)" }} />
+                <Tooltip content={<CustomTooltip />} />
                 <Bar dataKey="minutes" fill={accent.accent} radius={[5, 5, 0, 0]} barSize={24} />
               </BarChart>
             ) : (

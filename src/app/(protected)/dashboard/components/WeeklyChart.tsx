@@ -12,18 +12,12 @@ import {
   ResponsiveContainer,
 } from "recharts";
 import { useState } from "react";
+import { useDashboardData } from "@/hooks/useDashboard";
+import { useHistoryAnalysis } from "@/hooks/useActivity";
+import { endOfWeek, startOfWeek, eachDayOfInterval, format } from "date-fns";
+import { ptBR } from "date-fns/locale";
 
-const CHART_DATA = [
-  { name: "Seg", minutes: 120 },
-  { name: "Ter", minutes: 180 },
-  { name: "Qua", minutes: 150 },
-  { name: "Qui", minutes: 210 },
-  { name: "Sex", minutes: 90 },
-  { name: "Sáb", minutes: 240 },
-  { name: "Dom", minutes: 150 },
-];
-
-const ACCENT = "var(--muted)";
+const ACCENT = "var(--foreground)";
 
 const CustomTooltip = ({ active, payload, label }: any) => {
   if (active && payload && payload.length) {
@@ -32,9 +26,9 @@ const CustomTooltip = ({ active, payload, label }: any) => {
     const m = mins % 60;
     const label2 = h > 0 ? `${h}h ${m}m` : `${m}m`;
     return (
-      <div className="bg-card border border-border/40 p-3 rounded-xl shadow-xl text-white">
-        <p className="text-white/50 text-xs mb-1">{label}</p>
-        <p className="text-base" >
+      <div className="bg-card border border-border/40 p-3 rounded-xl shadow-xl">
+        <p className="text-muted-foreground text-xs mb-1">{label}</p>
+        <p className="text-base text-foreground" >
           {label2}
         </p>
       </div>
@@ -47,9 +41,40 @@ type ChartTab = "bar" | "line";
 
 export function DashboardWeeklyChart() {
   const [tab, setTab] = useState<ChartTab>("bar");
-  const totalMins = CHART_DATA.reduce((s, d) => s + d.minutes, 0);
+
+  const today = new Date();
+  const startOfThisWeek = startOfWeek(today, { weekStartsOn: 1 });
+  const endOfThisWeek = endOfWeek(today, { weekStartsOn: 1 });
+  const { data, isLoading } = useHistoryAnalysis(startOfThisWeek, endOfThisWeek);
+
+  if (isLoading || !data?.charts?.areaChart) {
+    return (
+      <div className="rounded-2xl border border-border/40 bg-card/40 p-5 space-y-4 h-[300px] animate-pulse">
+        <div className="h-8 w-1/3 bg-muted rounded"></div>
+        <div className="h-48 w-full bg-muted/50 rounded mt-4"></div>
+      </div>
+    );
+  }
+
+  const days = eachDayOfInterval({ start: startOfThisWeek, end: endOfThisWeek });
+  const chartData = days.map((day) => {
+    const dateKey = format(day, "yyyy-MM-dd");
+    const dayData = data.charts.areaChart[dateKey];
+    
+    // Formata o dia da semana ("seg", "ter") e capitaliza a primeira letra
+    let name = format(day, "EE", { locale: ptBR });
+    name = name.charAt(0).toUpperCase() + name.slice(1);
+    
+    return {
+      name,
+      minutes: dayData ? dayData.totalMinutes : 0
+    };
+  });
+
+  const totalMins = chartData.reduce((s, d) => s + d.minutes, 0);
   const totalH = Math.floor(totalMins / 60);
   const totalM = totalMins % 60;
+
 
   return (
     <div className="rounded-2xl border border-border/40 bg-card/40 p-5 space-y-4">
@@ -58,8 +83,8 @@ export function DashboardWeeklyChart() {
           <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
             Semana Atual
           </p>
-          <p className="text-2xl font-bold text-foreground mt-0.5">
-            {totalH}h {totalM}m estudados
+          <p className="text-2xl font-semibold text-foreground mt-0.5">
+            {totalH}h {totalM}m
           </p>
         </div>
         <div className="flex gap-1 bg-muted/40 p-1 rounded-lg">
@@ -81,7 +106,7 @@ export function DashboardWeeklyChart() {
       <div className="h-[200px] w-full">
         <ResponsiveContainer width="100%" height="100%">
           {tab === "bar" ? (
-            <BarChart data={CHART_DATA} margin={{ top: 4, right: 4, left: -20, bottom: 0 }}>
+            <BarChart data={chartData} margin={{ top: 4, right: 4, left: -20, bottom: 0 }}>
               <CartesianGrid strokeDasharray="3 3" vertical={false} />
               <XAxis
                 dataKey="name"
@@ -97,10 +122,10 @@ export function DashboardWeeklyChart() {
                 tickFormatter={(v) => `${v}m`}
               />
               <Tooltip content={<CustomTooltip />} />
-              <Bar dataKey="minutes" fill={ACCENT} radius={[5, 5, 0, 0]} barSize={26} opacity={0.85} />
+              <Bar dataKey="minutes" fill={"var(--foreground)"} radius={[5, 5, 0, 0]} barSize={26} opacity={0.85} />
             </BarChart>
           ) : (
-            <LineChart data={CHART_DATA} margin={{ top: 4, right: 4, left: -20, bottom: 0 }}>
+            <LineChart data={chartData} margin={{ top: 4, right: 4, left: -20, bottom: 0 }}>
               <CartesianGrid strokeDasharray="3 3" vertical={false} />
               <XAxis
                 dataKey="name"

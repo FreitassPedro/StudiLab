@@ -129,19 +129,19 @@ export function StudyHeatmap({ heatmap }: StudyHeatmapProps) {
     <section className="mb-10">
       <SectionLabel>Diário de Bordo · Últimos 6 meses</SectionLabel>
 
-      <div className="overflow-x-auto rounded-[18px] border border-border bg-foreground/[0.02] p-6">
+      <div className="overflow-x-auto rounded-[18px] border border-border bg-foreground/2 p-6">
         {/* Month labels */}
         <div className="mb-1.5 flex gap-0.5 pl-[22px]">
           {columns.map((col, i) =>
             col.monthLabel ? (
               <span
                 key={i}
-                className="min-w-[28px] flex-shrink-0 text-[9px] font-semibold text-foreground/25"
+                className="min-w-[28px] shrink-0 text-[9px] font-semibold text-foreground/25"
               >
                 {col.monthLabel}
               </span>
             ) : (
-              <span key={i} className="min-w-[15px] flex-shrink-0" />
+              <span key={i} className="min-w-[15px] shrink-0" />
             )
           )}
         </div>

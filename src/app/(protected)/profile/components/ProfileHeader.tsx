@@ -230,11 +230,6 @@ interface ProfileHeaderProps {
   isFollowing: boolean;
 }
 
-function formatHours(minutes: number): string {
-  const h = Math.round(minutes / 60);
-  return `${h.toLocaleString("pt-BR")}h`;
-}
-
 function calcConsistency(studyDays: number, createdAt: Date): string {
   const totalDays = Math.max(
     1,
@@ -277,7 +272,7 @@ export function ProfileHeader({ user, stats, isOwner, isFollowing }: ProfileHead
 
           {/* Streak tier badge */}
           <span
-            className="rounded-full border px-2 py-0.5 text-[10px] font-bold uppercase tracking-[0.1em]"
+            className="rounded-full border px-2 py-0.5 text-[10px] font-bold uppercase tracking-widest"
             style={{
               borderColor: accent.accent,
               color: accent.accent,
