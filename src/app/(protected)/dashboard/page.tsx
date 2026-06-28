@@ -65,7 +65,7 @@ export default async function DashboardPage() {
             </section>
 
             {/* Easter egg especial */}
-            {user?.id?.toLocaleLowerCase() === "laura" && <ComfortSection />}
+            {user?.id === "NmGzrYCU1ZlZRFIqaiVY8qgnjW6SPK18" && <ComfortSection />}
 
             {/* Grid principal */}
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
