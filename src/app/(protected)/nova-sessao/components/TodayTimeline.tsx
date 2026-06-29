@@ -6,7 +6,7 @@ import { useTopicsMap } from "@/hooks/useTopics";
 import useSessionFormStore from "@/store/useSessionFormStore";
 import useCronometerStore from "@/store/useCronometerStore";
 import { Clock } from "lucide-react";
-import { createContext, useContext, useEffect, useMemo, useState } from "react";
+import { createContext, useContext, useEffect, useMemo, useRef, useState } from "react";
 import { getTodayLocal } from "@/lib/utils";
 
 const TimelineCardProps = {
@@ -189,12 +189,16 @@ const RenderCurrentSessionCard = ({
     );
 }
 
-const RenderLogCardItem = ({ log, subject }: { log: TimelineLog; subject?: TimelineSubject }) => {
+interface LogCardItemProps {
+    log: TimelineLog;
+    subject?: TimelineSubject;
+}
+
+const RenderLogCardItem = ({ log, subject }: LogCardItemProps) => {
     return (
         <div
             key={log.id}
-            className="absolute z-10 left-2 right-2 rounded p-2 border-l-4 overflow-hidden cursor-pointer hover:scale-[1.01] hover:z-20 transition-all
-                                    border-blue-500"
+            className="absolute z-10 left-2 right-2 rounded p-1 border-l-4 overflow-hidden cursor-pointer hover:scale-[1.01] hover:z-20 transition-all"
             style={{
                 top: `${calculateTop(log.start_time)}%`,
                 height: `${calculateFinalHeight(log.start_time, log.end_time)}%`,
@@ -204,10 +208,10 @@ const RenderLogCardItem = ({ log, subject }: { log: TimelineLog; subject?: Timel
         >
             <div className="flex justify-between h-full">
                 <div className="pl-4 flex flex-col items-start justify-center space-y-2">
-                    <h4 className="font-semibold text-[16px] text-foreground/80 truncate">{subject?.name}</h4>
-                    <span className="text-[14px] text-foreground/60 truncate">{log.topic.name}</span>
+                    <h4 className="font-semibold text-[14px] text-foreground/80 truncate">{subject?.name}</h4>
+                    <span className="text-[10px] text-foreground/60 truncate">{log.topic.name}</span>
                 </div>
-                <div className="text-sm text-muted-foreground flex items-center gap-1  flex-row justify-between">
+                <div className="text-xs font-semibold text-muted-foreground flex items-center gap-1  flex-row justify-between">
                     <div className='flex flex-row items-center gap-1'>
                         <Clock className="w-3 h-3" />
                         {formatTimeFromTimestamp(log.start_time)}
@@ -233,14 +237,18 @@ const RenderLogsCard = ({
     isLoading: boolean;
 }) => {
 
+
     const renderedLogCards = useMemo(() => {
         if (!logs || logs.length === 0) return null;
 
         return logs.map((log) => (
-            <RenderLogCardItem key={log.id} log={log} subject={subjectsMap?.[log.topic.subjectId]} />
+            <RenderLogCardItem
+                key={log.id}
+                log={log}
+                subject={subjectsMap?.[log.topic.subjectId]}
+            />
         ));
     }, [logs, subjectsMap]);
-
     if (isLoading && (!logs || logs.length === 0)) {
         return (
             <div>
@@ -349,6 +357,14 @@ export function TodayTimeline() {
 
     const currentSubject = formSubjectId ? subjectsMap?.[formSubjectId] : undefined;
     const currentTopic = formTopicId ? topicsMap[formTopicId] : undefined;
+
+    const latestLogRef = useRef<HTMLDivElement>(null);
+
+    useEffect(() => {
+        if (logs && logs.length > 0 && latestLogRef.current) {
+            latestLogRef.current.scrollIntoView({ behavior: "smooth", block: "nearest" });
+        }
+    }, [logs]);
 
     return (
         <div className="h-auto md:h-full md:min-h-0 md:overflow-hidden">

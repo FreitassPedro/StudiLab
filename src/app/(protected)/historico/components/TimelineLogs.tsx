@@ -143,7 +143,7 @@ export function TimelineLogs() {
                                     >
                                         <div className="flex justify-between h-full">
                                             <div>
-                                                <h4 className="font-semibold text-xs text-slate-900 truncate">{dayLog.topic?.name}</h4>
+                                                <h4 className="font-semibold text-xs text-primary truncate">{dayLog.topic?.name}</h4>
                                                 <span className="text-xs text-slate-600 truncate">{subject?.name}</span>
                                             </div>
                                             <div className="text-xs text-slate-600 flex items-center gap-1  flex-row justify-between">
