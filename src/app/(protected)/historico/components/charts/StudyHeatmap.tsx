@@ -128,7 +128,7 @@ const DayView = ({ navDate, startDate, rangeType, setRange, getMinutesForDate }:
 
 const WeekView = ({ navDate, startDate, endDate, rangeType, setRange, getMinutesForPeriod }: ViewProps) => {
   const weeks = getWeeksOfYear(navDate.getFullYear());
-  const targetRef = useRef(null);
+  const targetRef = useRef<HTMLButtonElement>(null);
 
   useEffect(() => {
     if (targetRef.current) {
