@@ -110,10 +110,53 @@ export async function createBulkSubjectsWithTopicsAction(data: {
     subjects: {
         name: string;
         color: string;
+        emoji: string;
         topics: string[];
     }[]
 }) {
-    
-    // TODO
+    const user = await requireAuth();
+    const existingSubjects = await prisma.subject.findMany({
+        where: { userId: user.id },
+        include: {
+            topics: {
+                select: { name: true }
+            }
+        },
+    });
+    const existingSubjectNames = existingSubjects.map(subject => subject.name);
+    const existingTopicNames = existingSubjects.flatMap(subject => subject.topics.map(topic => topic.name));
+
+    const validSubjects = data.subjects.filter(subject => !existingSubjectNames.includes(subject.name));
+
+    try {
+
+        await prisma.subject.createMany({
+            data:
+                validSubjects.map(subject => {
+                    return {
+                        name: subject.name,
+                        color: subject.color,
+                        icon: subject.emoji,
+                        userId: user.id,
+                        isOpen: true,
+                        isArchived: false,
+                        topics: {
+                            create: subject.topics.filter(topic => !existingTopicNames.includes(topic)).map(topic => {
+                                return {
+                                    name: topic,
+                                };
+                            }),
+                        },
+                    }
+                })
+        });
+
+        return { success: true }
+    } catch (error) {
+        if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2002') {
+            throw new Error(`Já existe uma matéria com o nome "${data.subjects.map(subject => subject.name).join(', ')}".`);
+        }
+        throw new Error("Erro desconhecido ao criar matérias");
+    }
 }
 

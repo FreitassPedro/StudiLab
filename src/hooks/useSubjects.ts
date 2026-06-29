@@ -58,7 +58,7 @@ export function useBulkCreateSubjects() {
     const queryClient = useQueryClient();
 
     return useMutation({
-        mutationFn: async (subjects: { name: string; color: string; topics: string[] }[]) => {
+        mutationFn: async (subjects: { name: string; color: string; emoji: string, topics: string[] }[]) => {
             return createBulkSubjectsWithTopicsAction({ subjects });
         },
         onSuccess: () => {

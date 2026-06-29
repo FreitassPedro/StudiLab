@@ -8,8 +8,10 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { useState } from "react";
 import { toast } from "sonner";
 
-const EMOJIS = ['📚', '📐', '🔬', '💻', '🌍', '🎨', '🧠', '⚡', '📝', '💡', '📊', '🏛️'];
-
+const EMOJIS = [
+    "📐", "⚡", "🔬", "🧬", "🏛️", "🌍", "📖", "💭", "👥",
+    "💻", "📰", "📜", "🔢", "🤝", "📚", "🚔", "📑", "💰", "🏠", "👷", "⚖️", "🧰"
+];
 export function EditTopicDialog({
     topicId,
     children,

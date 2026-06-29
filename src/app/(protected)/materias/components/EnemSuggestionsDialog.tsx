@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import {  Sparkles } from "lucide-react";
+import { Sparkles } from "lucide-react";
 import { useBulkCreateSubjects } from "@/hooks/useSubjects";
 import { toast } from "sonner";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -13,6 +13,7 @@ import { cn } from "@/lib/utils";
 export type SubjectSuggestion = {
     name: string;
     color: string;
+    emoji: string;
     topics: string[];
 };
 
@@ -20,67 +21,76 @@ const ENEM_DATA: SubjectSuggestion[] = [
     {
         name: "Matemática",
         color: "#3B82F6",
+        emoji: "📐",
         topics: ["Álgebra", "Geometria Plana", "Geometria Espacial", "Estatística", "Probabilidade", "Trigonometria", "Funções"]
     },
     {
         name: "Física",
         color: "#EF4444",
+        emoji: "⚡",
         topics: ["Mecânica", "Termologia", "Óptica", "Ondulatória", "Eletricidade", "Magnetismo"]
     },
     {
         name: "Química",
         color: "#10B981",
+        emoji: "🔬",
         topics: ["Química Geral", "Físico-Química", "Química Orgânica", "Química Inorgânica", "Meio Ambiente"]
     },
     {
         name: "Biologia",
         color: "#F59E0B",
+        emoji: "🧬",
         topics: ["Citologia", "Genética", "Evolução", "Ecologia", "Fisiologia Humana", "Botânica"]
     },
     {
         name: "História",
         color: "#8B5CF6",
+        emoji: "🏛️",
         topics: ["História do Brasil", "História Geral"]
     },
     {
         name: "Geografia",
         color: "#EC4899",
+        emoji: "🌍",
         topics: ["Geografia Física", "Geografia Humana", "Geografia do Brasil", "Geopolítica"]
     },
     {
         name: "Português",
         color: "#06B6D4",
+        emoji: "📖",
         topics: ["Gramática", "Interpretação de Texto", "Literatura"]
     },
     {
         name: "Filosofia",
         color: "#1E3A8A",
+        emoji: "💭",
         topics: ["Surgimento da Filosofia", "Filosofia Antiga", "Filosofia Medieval", "Filosofia Moderna", "Filosofia Contemporânea", "Ética e Política"]
     },
     {
         name: "Sociologia",
         color: "#1E40AF",
+        emoji: "👥",
         topics: ["Cultura e Identidade", "Trabalho e Produção", "Estado e Democracia", "Movimentos Sociais", "Desigualdades Sociais"]
     }
 ];
 
 const CONCURSO_DATA: SubjectSuggestion[] = [
-    { name: "Informática", color: "#06B6D4", topics: [] },
-    { name: "Língua Portuguesa", color: "#EC4899", topics: [] },
-    { name: "Direito Constitucional", color: "#8B5CF6", topics: [] },
-    { name: "Atualizadas/Conhecimentos Gerais", color: "#06B6D4", topics: [] },
-    { name: "Direito Administrativo", color: "#8B5CF6", topics: [] },
-    { name: "Raciocínio Lógico", color: "#F97316", topics: [] },
-    { name: "Ética e Probidade", color: "#1E3A8A", topics: [] },
-    { name: "Legislação", color: "#1E3A8A", topics: [] },
-    { name: "Regime Jurídico Administrativo", color: "#1E3A8A", topics: [] },
-    { name: "Direito Penal", color: "#EF4444", topics: [] },
-    { name: "Direito Processual Penal", color: "#EF4444", topics: [] },
-    { name: "Direito Tributário", color: "#EF4444", topics: [] },
-    { name: "Direito Civil", color: "#EF4444", topics: [] },
-    { name: "Direito Processual Civil", color: "#EF4444", topics: [] },
-    { name: "Direito do Trabalho", color: "#EF4444", topics: [] },
-    { name: "Direito Processual do Trabalho", color: "#EF4444", topics: [] }
+    { name: "Informática", color: "#06B6D4", emoji: "💻", topics: [] },
+    { name: "Língua Portuguesa", color: "#EC4899", emoji: "📖", topics: [] },
+    { name: "Direito Constitucional", color: "#8B5CF6", emoji: "⚖️", topics: [] },
+    { name: "Atualizadas/Conhecimentos Gerais", color: "#06B6D4", emoji: "📰", topics: [] },
+    { name: "Direito Administrativo", color: "#8B5CF6", emoji: "📜", topics: [] },
+    { name: "Raciocínio Lógico", color: "#F97316", emoji: "🔢", topics: [] },
+    { name: "Ética e Probidade", color: "#1E3A8A", emoji: "🤝", topics: [] },
+    { name: "Legislação", color: "#1E3A8A", emoji: "📚", topics: [] },
+    { name: "Regime Jurídico Administrativo", color: "#1E3A8A", emoji: "🏛️", topics: [] },
+    { name: "Direito Penal", color: "#EF4444", emoji: "🚔", topics: [] },
+    { name: "Direito Processual Penal", color: "#EF4444", emoji: "📑", topics: [] },
+    { name: "Direito Tributário", color: "#EF4444", emoji: "💰", topics: [] },
+    { name: "Direito Civil", color: "#EF4444", emoji: "🏠", topics: [] },
+    { name: "Direito Processual Civil", color: "#EF4444", emoji: "📑", topics: [] },
+    { name: "Direito do Trabalho", color: "#EF4444", emoji: "👷", topics: [] },
+    { name: "Direito Processual do Trabalho", color: "#EF4444", emoji: "📑", topics: [] }
 ];
 
 export function EnemSuggestionsDialog() {
@@ -136,13 +146,14 @@ export function EnemSuggestionsDialog() {
         });
     };
 
-    const handleAddSelected = async () => {
+    const handleSubmit = async () => {
         const allSubjects = [...ENEM_DATA, ...CONCURSO_DATA];
         const toAdd = allSubjects
             .filter(s => selectedSubjects[s.name])
             .map(s => ({
                 name: s.name,
                 color: s.color,
+                emoji: s.emoji,
                 topics: s.topics.filter(t => selectedTopics[s.name]?.[t])
             }))
             .filter(s => s.topics.length > 0 || selectedSubjects[s.name]);
@@ -216,6 +227,9 @@ export function EnemSuggestionsDialog() {
                                         className="flex items-center cursor-pointer transition-colors"
                                         onClick={() => handleToggleSubject(subject.name)}
                                     >
+                                        {subject.emoji && (
+                                            <span className="text-lg mr-2">{subject.emoji}</span>
+                                        )}
                                         <input
                                             type="checkbox"
                                             checked={selectedSubjects[subject.name]}
@@ -258,7 +272,9 @@ export function EnemSuggestionsDialog() {
 
                 <div className="flex justify-end gap-3 mt-6 pt-4 border-t">
                     <Button variant="ghost" onClick={() => setOpen(false)}>Cancelar</Button>
-                    <Button onClick={handleAddSelected} disabled={bulkCreate.isPending}>
+                    <Button
+                        variant="default"
+                        onClick={handleSubmit} disabled={bulkCreate.isPending}>
                         {bulkCreate.isPending ? "Adicionando..." : "Adicionar Selecionados"}
                     </Button>
                 </div>
