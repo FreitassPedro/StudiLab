@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { useActivityAnalysis } from '@/hooks/useActivity';
 import useSearchRangeStore from '@/store/useSearchRangeStore';
 import { formatDateFromDB } from '@/lib/utils';
-import { startOfMonth, endOfMonth, startOfYear, endOfYear, eachDayOfInterval, format, isSameDay } from 'date-fns';
+import { startOfMonth, endOfMonth, startOfYear, endOfYear, eachDayOfInterval, format, isSameDay, getWeekYear } from 'date-fns';
 
 const getHeatmapColor = (minutes: number) => {
   if (minutes === 0) return 'bg-zinc-100 dark:bg-zinc-800';
@@ -34,7 +34,7 @@ const WEEKDAYS = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
 
 export function StudyHeatmap() {
   const { startDate, endDate, setRange, rangeType } = useSearchRangeStore();
-  
+
   // Estado local para navegação do calendário (independente do range selecionado)
   const [navDate, setNavDate] = useState(() => new Date(startDate));
 
@@ -83,7 +83,7 @@ export function StudyHeatmap() {
     const lastDayOfMonth = endOfMonth(navDate);
     const startDayOfWeek = firstDayOfMonth.getDay();
     const days = eachDayOfInterval({ start: firstDayOfMonth, end: lastDayOfMonth });
-    
+
     const calendarDays = [
       ...Array(startDayOfWeek).fill(null),
       ...days
@@ -119,6 +119,93 @@ export function StudyHeatmap() {
     );
   };
 
+  // Retorna as semanas do ano atual (aproximadamente 52 semanas)
+  const getWeeksOfYear = (year: number) => {
+    const weeks: { start: Date; end: Date; weekNumber: number }[] = [];
+
+    const firstDay = new Date(year, 0, 1);
+    const lastDay = new Date(year, 11, 31);
+
+    // Encontra a primeira segunda-feira do ano (ou o primeiro dia se for segunda)
+    const current = new Date(firstDay);
+    const dayOfWeek = current.getDay();
+    // Ajusta para a segunda-feira (1) da primeira semana
+    if (dayOfWeek !== 1) {
+      current.setDate(current.getDate() + ((1 - dayOfWeek + 7) % 7));
+    }
+
+    let weekNumber = 1;
+    while (current <= lastDay) {
+      const weekStart = new Date(current);
+      const weekEnd = new Date(current);
+      weekEnd.setDate(weekEnd.getDate() + 6);
+
+      weeks.push({
+        start: weekStart,
+        end: weekEnd > lastDay ? lastDay : weekEnd,
+        weekNumber,
+      });
+
+      current.setDate(current.getDate() + 7);
+      weekNumber++;
+    }
+
+    return weeks;
+  };
+
+  const isPeriodInRange = (start: Date, end: Date) => {
+    const s = new Date(start);
+    s.setHours(0, 0, 0, 0);
+    const e = new Date(end);
+    e.setHours(23, 59, 59, 999);
+    const rangeStart = new Date(startDate);
+    rangeStart.setHours(0, 0, 0, 0);
+    const rangeEnd = new Date(endDate);
+    rangeEnd.setHours(23, 59, 59, 999);
+
+    return s.getTime() === rangeStart.getTime() && e.getTime() === rangeEnd.getTime();
+  };
+  const renderWeekView = () => {
+    const currentYear = navDate.getFullYear();
+    const weeks = getWeeksOfYear(currentYear);
+
+    return (
+      <>
+        {/* Week grid */}
+        <div className="grid grid-cols-5 gap-1.5 max-h-105 overflow-y-auto px-2 rounded-2xl">
+          {weeks.map((week) => {
+            const minutes = getMinutesForPeriod(week.start, week.end);
+            const inRange = isPeriodInRange(week.start, week.end);
+
+            const startDay = week.start.getDate();
+            const startMonth = week.start.getMonth() + 1;
+
+            const weekLabel = `${startDay}/${startMonth}~`;
+            return (
+              <button
+                key={week.weekNumber}
+                onClick={() => setRange({ startDate: week.start, endDate: week.end, rangeType: 'week' })}
+                className={`
+                  aspect-square rounded-md transition-all text-[10px] font-medium
+                  flex flex-col items-center justify-center relative
+                  ${getHeatmapColor(minutes)}
+                  ${getHeatmapTextColor(minutes)}
+                  ${inRange ? 'ring-2 ring-primary ring-offset-1 ring-offset-background' : ''}
+                  hover:scale-105 cursor-pointer
+                `}
+                title={weekLabel + ` — ${formatTime(minutes)}`}
+              >
+                <p>{weekLabel}</p>
+                {minutes > 0 && (
+                  <p className="text-[8px] text-gray-200">{formatTime(minutes)}</p>
+                )}
+              </button>
+            );
+          })}
+        </div>
+      </>
+    );
+  };
   const renderMonthView = () => {
     const months = Array.from({ length: 12 }, (_, i) => new Date(navDate.getFullYear(), i, 1));
 
@@ -150,7 +237,7 @@ export function StudyHeatmap() {
     );
   };
 
-  const navLabel = rangeType === 'month' || rangeType === 'week' 
+  const navLabel = rangeType === 'month' || rangeType === 'week'
     ? navDate.getFullYear().toString()
     : format(navDate, 'MMMM yyyy');
 
@@ -182,7 +269,7 @@ export function StudyHeatmap() {
               <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
             </div>
           ) : (
-            rangeType === 'month' ? renderMonthView() : renderDayView()
+            rangeType === 'month' ? renderMonthView() : rangeType === 'week' ? renderWeekView() : renderDayView()
           )}
 
           <div className="flex items-center justify-center gap-3 pt-2 border-t">
