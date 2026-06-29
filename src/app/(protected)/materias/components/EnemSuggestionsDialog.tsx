@@ -3,13 +3,12 @@
 import { useState } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { ArrowDown, Sparkles } from "lucide-react";
+import {  Sparkles } from "lucide-react";
 import { useBulkCreateSubjects } from "@/hooks/useSubjects";
 import { toast } from "sonner";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
-import { Subject } from "@/types/types";
 
 export type SubjectSuggestion = {
     name: string;

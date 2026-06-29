@@ -7,8 +7,9 @@ import { ChevronDown, ChevronRight, FileText, Folder, FolderOpen, Plus, Settings
 import { SubjectTree, TopicNode } from "@/types/types";
 import { Fragment, useState } from "react";
 import { toast } from "sonner";
-import { NewTopicDialog } from "./components/NewTopicDialog";
-import { EditSubjectDialog, EditTopicDialog } from "./components/EditSubjectDialog";
+import { NewTopicDialog } from "./NewTopicDialog";
+import { EditSubjectDialog, EditTopicDialog } from "./EditSubjectDialog";
+import { SubjectBook } from "./SubjectBook";
 
 function NodeRow({
     node,
@@ -240,7 +241,7 @@ export default function SubjectList() {
     const { data: tree = [], isLoading } = useSubjectTree();
 
 
-    if (isLoading) {
+    if (isLoading || !tree) {
         return <SubjectsSkeleton />;
     }
 
@@ -248,59 +249,16 @@ export default function SubjectList() {
     const archivedTree = tree.filter(t => t.subject.isArchived);
 
     return (
-        <div className="mt-10 rounded-2xl border border-border bg-card p-2 overflow-hidden">
-            <table className="w-full text-sm border-separate border-spacing-y-2">
-                <thead>
-                    <tr className="border-b border-border bg-muted/40">
-                        <th className="w-8" />
-                        <th className="text-left py-3 px-4 text-xs font-semibold text-muted-foreground uppercase tracking-wider">
-
-                        </th>
-                        <th className="text-center py-3 px-4 text-xs font-semibold text-muted-foreground uppercase tracking-wider w-24">
-                            {/* Pendências */}
-                        </th>
-                        <th className="text-center py-3 px-4 text-xs font-semibold text-muted-foreground uppercase tracking-wider w-24">
-                            {/* logs */}
-                        </th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {activeTree.map((subjectTree) => (
-                        <SubjectItem
-                            key={subjectTree.subject.id}
-                            subjectTree={subjectTree}
-                        />
-                    ))}
-
-                    {archivedTree.length > 0 && (
-                        <>
-                            <tr>
-                                <td colSpan={5} className="py-6">
-                                    <div className="flex items-center gap-4">
-                                        <div className="h-px bg-border flex-1" />
-                                        <span className="text-xs font-medium text-muted-foreground uppercase tracking-wider flex items-center gap-2">
-                                            <Archive className="h-4 w-4" />
-                                            Matérias Arquivadas
-                                        </span>
-                                        <div className="h-px bg-border flex-1" />
-                                    </div>
-                                    <span className="text-xs text-muted-foreground block text-center">Matérias Arquivada não aparecerão disponíveis para seleção de estudos. Desarquive para voltar a usar. </span>
-                                </td>
-                            </tr>
-                            {archivedTree.map((subjectTree) => (
-                                <SubjectItem
-                                    key={subjectTree.subject.id}
-                                    subjectTree={subjectTree}
-                                />
-                            ))}
-                        </>
-                    )}
-                </tbody>
-            </table>
+        <div className="mt-10">
+            <div className="flex flex-row items-center gap-2 mb-6">
+                <h2 className="text-2xl font-bold text-foreground shrink-0">Meus Notebooks</h2>
+                <div className="h-1 w-full bg-secondary rounded-full mt-3" />
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-8">
+                {activeTree.map((treeNode) => (
+                    <SubjectBook key={treeNode.subject.id} subjectTree={treeNode} />
+                ))}
+            </div>
         </div>
-
-
-
-
     );
 }

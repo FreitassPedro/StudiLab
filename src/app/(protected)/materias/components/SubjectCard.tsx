@@ -265,17 +265,17 @@ const EditSubjectDialog = ({ open, onOpenChange, subject, topics }: { open: bool
                 </DialogContent>
             </Dialog>
 
-            <EditTopicDialog 
-                topic={editingTopic} 
-                open={isEditTopicDialogOpen} 
-                onOpenChange={setIsEditTopicDialogOpen} 
+            <EditTopicDialog
+                topic={editingTopic}
+                open={isEditTopicDialogOpen}
+                onOpenChange={setIsEditTopicDialogOpen}
                 onSave={(newName) => {
                     if (editingTopic) {
-                        setLocalTopics(localTopics.map(t => 
+                        setLocalTopics(localTopics.map(t =>
                             t.id === editingTopic.id ? { ...t, name: newName } : t
                         ));
                     }
-                }} 
+                }}
             />
 
         </>
@@ -306,7 +306,7 @@ export function SubjectCard({ subject }: SubjectCardProps) {
 
     return (
         <>
-            <Card className="">
+            <Card>
                 <CardContent className="flex items-center justify-between">
                     <div className="flex items-center gap-3">
                         <div
@@ -354,7 +354,12 @@ export function SubjectCard({ subject }: SubjectCardProps) {
                 )}
             </Card>
 
-            <EditSubjectDialog subject={subject} topics={subject.topics} open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen} />
+            <EditSubjectDialog
+                subject={subject}
+                topics={subject.topics}
+                open={isEditDialogOpen}
+                onOpenChange={setIsEditDialogOpen}
+            />
         </>
     );
 }

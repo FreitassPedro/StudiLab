@@ -27,6 +27,10 @@
 
 */
 
+.custom {
+  --color-paper: "#f2f1ed";
+}
+
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);

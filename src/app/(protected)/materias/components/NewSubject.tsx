@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
-import { PaletteIcon, PenTool, Plus, SparkleIcon } from 'lucide-react';
+import { PaletteIcon, Plus, SparkleIcon } from 'lucide-react';
 import React, { useState } from 'react';
 import { toast } from 'sonner';
 import { useCreateSubject } from '@/hooks/useSubjects';
@@ -61,14 +61,7 @@ export function NewSubject() {
         }
     };
 
-    const previewSubject = {
-        id: '1',
-        name: "Teste",
-        color: "#3B82F6",
-        user_id: '1',
-        created_at: "2026-06-28T22:30:42-03:00",
-        updated_at: "2026-06-28T22:30:42-03:00",
-    }
+
     return (
         <div className='grid grid-cols-1 md:grid-cols-6 gap-6'>
             <Card className='md:col-span-5 border-border/60 shadow-sm'>
@@ -185,7 +178,7 @@ export function NewSubject() {
                                 {icon}
                             </div>
                         </div>
-                        <h4 className='font-semibold text-foreground text-base leading-tight'>{newName || previewSubject.name}</h4>
+                        <h4 className='font-semibold text-foreground text-base leading-tight'>{newName}</h4>
                         {/* lines decorations */}
                         <div className='mt-auto space-y-1'>
                             {[100, 75, 50].map((percent) => (
