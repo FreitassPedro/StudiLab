@@ -12,7 +12,6 @@ import {
   ResponsiveContainer,
 } from "recharts";
 import { useState } from "react";
-import { useDashboardData } from "@/hooks/useDashboard";
 import { useHistoryAnalysis } from "@/hooks/useActivity";
 import { endOfWeek, startOfWeek, eachDayOfInterval, format } from "date-fns";
 import { ptBR } from "date-fns/locale";

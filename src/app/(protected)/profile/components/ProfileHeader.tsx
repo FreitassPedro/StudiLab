@@ -18,6 +18,8 @@ import { toast } from "sonner";
 import { UserSearchModal } from "./UserSearchModal";
 
 function ThemeSwitcherProfile({ theme, setTheme }: { theme: Theme; setTheme: (t: Theme) => void }) {
+  const { setTheme: themePreview } = useProfileTheme();
+
   return (
     <div className="flex items-center gap-2.5 rounded-xl border border-border bg-background/85 px-3 py-2 backdrop-blur-xl">
       <span className="text-[10px] font-semibold uppercase tracking-widest text-foreground/40">
@@ -27,7 +29,10 @@ function ThemeSwitcherProfile({ theme, setTheme }: { theme: Theme; setTheme: (t:
         <button
           key={cfg.key}
           title={cfg.tooltip}
-          onClick={() => setTheme(cfg.key as Theme)}
+          onClick={() => {
+            setTheme(cfg.key as Theme);
+            themePreview(cfg.key as Theme)
+          }}
           className={`relative h-[18px] w-[18px] rounded-full bg-linear-to-br ${cfg.gradient} transition-all duration-200 hover:scale-125 ${theme === cfg.key
             ? "ring-2 ring-ring ring-offset-1 ring-offset-background"
             : ""
@@ -38,6 +43,7 @@ function ThemeSwitcherProfile({ theme, setTheme }: { theme: Theme; setTheme: (t:
     </div>
   )
 }
+
 function EditDialog({ children, user, isOwner }: { children: React.ReactNode; user: ProfileUser; isOwner: boolean }) {
   const [open, setOpen] = useState(false);
   const [name, setName] = useState(user.name);
@@ -46,6 +52,7 @@ function EditDialog({ children, user, isOwner }: { children: React.ReactNode; us
   const [image, setImage] = useState(user.image || "");
   const [loading, setLoading] = useState(false);
   const [theme, setTheme] = useState(user.theme || "midnight");
+  const { setTheme: updateTheme } = useProfileTheme();
   const router = useRouter();
 
   async function handleSave() {
@@ -139,7 +146,10 @@ function EditDialog({ children, user, isOwner }: { children: React.ReactNode; us
               />
             </div>
             <div className="flex justify-end gap-2 mt-4">
-              <Button variant="ghost" onClick={() => setOpen(false)} className="hover:bg-foreground/5 hover:text-foreground">
+              <Button
+                variant="ghost"
+                onClick={() => setOpen(false)}
+                className="hover:bg-foreground/5 hover:text-foreground">
                 Cancelar
               </Button>
               <Button
@@ -197,9 +207,6 @@ function AvatarFrame({
   return (
     <div
       className="h-[180px] w-[180px] shrink-0 z-10 rounded-full p-[3px]"
-      style={{
-        background: `linear-gradient(135deg, ${accent.accent}, ${accent.accent2})`,
-      }}
     >
       <div className="flex h-full w-full items-center justify-center overflow-hidden rounded-full border-[3px] border-background bg-card">
         {image ? (
@@ -230,14 +237,6 @@ interface ProfileHeaderProps {
   isFollowing: boolean;
 }
 
-function calcConsistency(studyDays: number, createdAt: Date): string {
-  const totalDays = Math.max(
-    1,
-    Math.floor((Date.now() - createdAt.getTime()) / (1000 * 60 * 60 * 24))
-  );
-  const pct = Math.min(100, Math.round((studyDays / totalDays) * 100));
-  return `${pct}%`;
-}
 
 export function ProfileHeader({ user, stats, isOwner, isFollowing }: ProfileHeaderProps) {
   const { accent } = useProfileTheme();
@@ -249,7 +248,7 @@ export function ProfileHeader({ user, stats, isOwner, isFollowing }: ProfileHead
       <div className="min-w-[200px] flex-1 pb-1">
         {/* Name */}
         <div className="mb-1 flex flex-wrap items-center gap-2.5">
-          <h1 className="font-['Space_Grotesk'] text-[26px] font-black leading-none tracking-[-0.5px] text-foreground">
+          <h1 className="font-['Space_Grotesk'] text-3xl font-black leading-none tracking-[-0.5px] text-foreground">
             {user.name}
           </h1>
           {/* Streak badge */}
@@ -290,7 +289,7 @@ export function ProfileHeader({ user, stats, isOwner, isFollowing }: ProfileHead
         </div>
 
         {/* Username / Email */}
-        <div className="mb-2.5 text-[13px] text-foreground/40">
+        <div className="mb-2.5 text-[16px] text-foreground/40">
           @{user.username || user.email.split("@")[0]}
         </div>
 

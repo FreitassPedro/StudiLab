@@ -8,23 +8,22 @@ import { HistoryCharts } from "./components/HistoryCharts";
 import { StudyHeatmap } from "./components/charts/StudyHeatmap";
 import { Suspense } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { BarChart3, List, History as HistoryIcon, LayoutGrid, Calendar } from "lucide-react";
+import { BarChart3, List, Calendar } from "lucide-react";
 
 export function HistoryContent() {
     return (
         <div className="container mx-auto px-4 py-8 space-y-8 animate-in fade-in duration-700">
 
             {/* Navegação de Data e Resumo Rápido */}
-            <section className="space-y-6">
-                <HistoryDateNav />
+            <section className="space-y-6 grid grid-cols-6 gap-4">
+                <div className="col-span-2">
+                    <StudyHeatmap />
+                </div>
 
-                <div className="grid gap-6 grid-cols-1 lg:grid-cols-12">
-                    <div className="lg:col-span-4">
-                        <StudyHeatmap />
-                    </div>
-                    <div className="lg:col-span-8">
-                        <SummaryCards />
-                    </div>
+                <div className="space-y-6 col-span-4 flex flex-col ">
+                    <HistoryDateNav />
+
+                    <SummaryCards />
                 </div>
             </section>
 

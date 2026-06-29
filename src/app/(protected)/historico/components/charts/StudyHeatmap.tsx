@@ -1,13 +1,25 @@
 "use client";
-import { useState, useMemo } from 'react';
+
+import { useState, useMemo, useRef, useEffect } from 'react';
 import { CalendarDays, ChevronLeft, ChevronRight, Loader2 } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { useActivityAnalysis } from '@/hooks/useActivity';
-import useSearchRangeStore from '@/store/useSearchRangeStore';
+import useSearchRangeStore, { RangeType } from '@/store/useSearchRangeStore';
 import { formatDateFromDB } from '@/lib/utils';
-import { startOfMonth, endOfMonth, startOfYear, endOfYear, eachDayOfInterval, format, isSameDay, getWeekYear } from 'date-fns';
+import { startOfMonth, endOfMonth, startOfYear, endOfYear, eachDayOfInterval, format, isSameDay } from 'date-fns';
 
+// --- Constants & Helpers ---
+const WEEKDAYS = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
+interface ViewProps {
+  navDate: Date,
+  startDate: Date,
+  endDate: Date,
+  rangeType: RangeType,
+  setRange: (range: { startDate: Date, endDate: Date, rangeType: RangeType }) => void,
+  getMinutesForDate: (date: Date) => number,
+  getMinutesForPeriod: (start: Date, end: Date) => number;
+};
 const getHeatmapColor = (minutes: number) => {
   if (minutes === 0) return 'bg-zinc-100 dark:bg-zinc-800';
   if (minutes < 60) return 'bg-emerald-200 dark:bg-emerald-900';
@@ -30,15 +42,168 @@ const formatTime = (minutes: number) => {
   return `${h}h${m}m`;
 };
 
-const WEEKDAYS = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
+const getWeeksOfYear = (year: number) => {
+  const weeks: { start: Date; end: Date; weekNumber: number }[] = [];
+  const firstDay = new Date(year, 0, 1);
+  const lastDay = new Date(year, 11, 31);
 
+  const current = new Date(firstDay);
+  const dayOfWeek = current.getDay();
+  // Ajusta para a primeira segunda-feira (1)
+  if (dayOfWeek !== 1) {
+    current.setDate(current.getDate() + ((1 - dayOfWeek + 7) % 7));
+  }
+
+  let weekNumber = 1;
+  while (current <= lastDay) {
+    const weekStart = new Date(current);
+    const weekEnd = new Date(current);
+    weekEnd.setDate(weekEnd.getDate() + 6);
+
+    weeks.push({
+      start: weekStart,
+      end: weekEnd > lastDay ? lastDay : weekEnd,
+      weekNumber,
+    });
+
+    current.setDate(current.getDate() + 7);
+    weekNumber++;
+  }
+  return weeks;
+};
+
+const isPeriodInRange = (start: Date, end: Date, rangeStart: Date, rangeEnd: Date) => {
+  return isSameDay(start, rangeStart) && isSameDay(end, rangeEnd);
+};
+
+// --- View Types & Components ---
+
+interface ViewProps {
+  navDate: Date;
+  startDate: Date;
+  endDate: Date;
+  rangeType: RangeType;
+  setRange: (range: { startDate: Date; endDate: Date; rangeType: RangeType }) => void;
+  getMinutesForDate: (date: Date) => number;
+  getMinutesForPeriod: (start: Date, end: Date) => number;
+}
+
+const DayView = ({ navDate, startDate, rangeType, setRange, getMinutesForDate }: ViewProps) => {
+  const firstDay = startOfMonth(navDate);
+  const lastDay = endOfMonth(navDate);
+  const startDayOfWeek = firstDay.getDay();
+  const days = eachDayOfInterval({ start: firstDay, end: lastDay });
+
+  const calendarDays = [...Array(startDayOfWeek).fill(null), ...days];
+
+  return (
+    <div className="grid grid-cols-7 gap-1.5">
+      {WEEKDAYS.map(day => (
+        <div key={day} className="text-center text-[10px] font-medium text-muted-foreground pb-1">{day}</div>
+      ))}
+      {calendarDays.map((date, i) => {
+        if (!date) return <div key={`empty-${i}`} className="aspect-square" />;
+        const minutes = getMinutesForDate(date);
+        const isSelected = isSameDay(date, startDate) && rangeType === 'day';
+
+        return (
+          <button
+            key={date.toString()}
+            onClick={() => setRange({ startDate: date, endDate: date, rangeType: 'day' })}
+            className={`
+                aspect-square rounded-md transition-all text-[11px] font-medium flex items-center justify-center
+                ${getHeatmapColor(minutes)} ${getHeatmapTextColor(minutes)}
+                ${isSelected ? 'ring-2 ring-primary ring-offset-1' : ''}
+                hover:scale-110 cursor-pointer
+              `}
+            title={`${format(date, 'dd/MM')} — ${formatTime(minutes)}`}
+          >
+            {date.getDate()}
+          </button>
+        );
+      })}
+    </div>
+  );
+};
+
+const WeekView = ({ navDate, startDate, endDate, rangeType, setRange, getMinutesForPeriod }: ViewProps) => {
+  const weeks = getWeeksOfYear(navDate.getFullYear());
+  const targetRef = useRef(null);
+
+  useEffect(() => {
+    if (targetRef.current) {
+      targetRef.current.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+  }, [navDate]);
+
+  return (
+    <div className="grid grid-cols-5 gap-1.5 max-h-[325px] overflow-y-auto px-1 [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-thumb]:bg-muted-foreground/20 [&::-webkit-scrollbar-thumb]:rounded-full pr-1.5">
+      {weeks.map((week) => {
+        const minutes = getMinutesForPeriod(week.start, week.end);
+        const isInRange = rangeType === 'week' && isPeriodInRange(week.start, week.end, startDate, endDate);
+        const weekLabel = `${week.start.getDate()}/${week.start.getMonth() + 1}~`;
+
+        return (
+          <button
+            key={week.weekNumber}
+            ref={isInRange ? targetRef : null}
+            onClick={() => setRange({ startDate: week.start, endDate: week.end, rangeType: 'week' })}
+            className={`
+                aspect-square rounded-md transition-all text-[10px] font-medium
+                flex flex-col items-center justify-center relative
+                ${getHeatmapColor(minutes)} ${getHeatmapTextColor(minutes)}
+                ${isInRange ? 'ring-2 ring-primary ring-offset-1 ring-offset-background' : ''}
+                hover:scale-105 cursor-pointer
+              `}
+            title={weekLabel + ` — ${formatTime(minutes)}`}
+          >
+            <p>{weekLabel}</p>
+            {minutes > 0 && (
+              <p className="text-[8px] opacity-80">{formatTime(minutes)}</p>
+            )}
+          </button>
+        );
+      })}
+    </div>
+  );
+};
+
+const MonthView = ({ navDate, startDate, rangeType, setRange, getMinutesForPeriod }: ViewProps) => {
+  const months = Array.from({ length: 12 }, (_, i) => new Date(navDate.getFullYear(), i, 1));
+
+  return (
+    <div className="grid grid-cols-4 gap-2">
+      {months.map((month) => {
+        const start = startOfMonth(month);
+        const end = endOfMonth(month);
+        const minutes = getMinutesForPeriod(start, end);
+        const isSelected = isSameDay(start, startDate) && rangeType === 'month';
+
+        return (
+          <button
+            key={month.toString()}
+            onClick={() => setRange({ startDate: start, endDate: end, rangeType: 'month' })}
+            className={`
+                aspect-square rounded-md transition-all text-xs font-medium flex flex-col items-center justify-center p-2
+                ${getHeatmapColor(minutes)} ${getHeatmapTextColor(minutes)}
+                ${isSelected ? 'ring-2 ring-primary ring-offset-1' : ''}
+                hover:scale-105 cursor-pointer
+              `}
+          >
+            <span className="capitalize">{format(month, 'MMM')}</span>
+            <span className="text-[10px] mt-1 opacity-80">{formatTime(minutes)}</span>
+          </button>
+        );
+      })}
+    </div>
+  );
+};
+
+// --- Main Component ---
 export function StudyHeatmap() {
   const { startDate, endDate, setRange, rangeType } = useSearchRangeStore();
-
-  // Estado local para navegação do calendário (independente do range selecionado)
   const [navDate, setNavDate] = useState(() => new Date(startDate));
 
-  // Determinar o intervalo de busca com base na navegação e no tipo de range
   const searchInterval = useMemo(() => {
     if (rangeType === 'month' || rangeType === 'week') {
       return { start: startOfYear(navDate), end: endOfYear(navDate) };
@@ -78,168 +243,20 @@ export function StudyHeatmap() {
     });
   };
 
-  const renderDayView = () => {
-    const firstDayOfMonth = startOfMonth(navDate);
-    const lastDayOfMonth = endOfMonth(navDate);
-    const startDayOfWeek = firstDayOfMonth.getDay();
-    const days = eachDayOfInterval({ start: firstDayOfMonth, end: lastDayOfMonth });
-
-    const calendarDays = [
-      ...Array(startDayOfWeek).fill(null),
-      ...days
-    ];
-
-    return (
-      <div className="grid grid-cols-7 gap-1.5">
-        {WEEKDAYS.map(day => (
-          <div key={day} className="text-center text-[10px] font-medium text-muted-foreground pb-1">{day}</div>
-        ))}
-        {calendarDays.map((date, i) => {
-          if (!date) return <div key={`empty-${i}`} className="aspect-square" />;
-          const minutes = getMinutesForDate(date);
-          const isSelected = isSameDay(date, startDate) && rangeType === 'day';
-
-          return (
-            <button
-              key={date.toString()}
-              onClick={() => setRange({ startDate: date, endDate: date, rangeType: 'day' })}
-              className={`
-                aspect-square rounded-md transition-all text-[11px] font-medium flex items-center justify-center
-                ${getHeatmapColor(minutes)} ${getHeatmapTextColor(minutes)}
-                ${isSelected ? 'ring-2 ring-primary ring-offset-1' : ''}
-                hover:scale-110 cursor-pointer
-              `}
-              title={`${format(date, 'dd/MM')} — ${formatTime(minutes)}`}
-            >
-              {date.getDate()}
-            </button>
-          );
-        })}
-      </div>
-    );
-  };
-
-  // Retorna as semanas do ano atual (aproximadamente 52 semanas)
-  const getWeeksOfYear = (year: number) => {
-    const weeks: { start: Date; end: Date; weekNumber: number }[] = [];
-
-    const firstDay = new Date(year, 0, 1);
-    const lastDay = new Date(year, 11, 31);
-
-    // Encontra a primeira segunda-feira do ano (ou o primeiro dia se for segunda)
-    const current = new Date(firstDay);
-    const dayOfWeek = current.getDay();
-    // Ajusta para a segunda-feira (1) da primeira semana
-    if (dayOfWeek !== 1) {
-      current.setDate(current.getDate() + ((1 - dayOfWeek + 7) % 7));
-    }
-
-    let weekNumber = 1;
-    while (current <= lastDay) {
-      const weekStart = new Date(current);
-      const weekEnd = new Date(current);
-      weekEnd.setDate(weekEnd.getDate() + 6);
-
-      weeks.push({
-        start: weekStart,
-        end: weekEnd > lastDay ? lastDay : weekEnd,
-        weekNumber,
-      });
-
-      current.setDate(current.getDate() + 7);
-      weekNumber++;
-    }
-
-    return weeks;
-  };
-
-  const isPeriodInRange = (start: Date, end: Date) => {
-    const s = new Date(start);
-    s.setHours(0, 0, 0, 0);
-    const e = new Date(end);
-    e.setHours(23, 59, 59, 999);
-    const rangeStart = new Date(startDate);
-    rangeStart.setHours(0, 0, 0, 0);
-    const rangeEnd = new Date(endDate);
-    rangeEnd.setHours(23, 59, 59, 999);
-
-    return s.getTime() === rangeStart.getTime() && e.getTime() === rangeEnd.getTime();
-  };
-  const renderWeekView = () => {
-    const currentYear = navDate.getFullYear();
-    const weeks = getWeeksOfYear(currentYear);
-
-    return (
-      <>
-        {/* Week grid */}
-        <div className="grid grid-cols-5 gap-1.5 max-h-105 overflow-y-auto px-2 rounded-2xl">
-          {weeks.map((week) => {
-            const minutes = getMinutesForPeriod(week.start, week.end);
-            const inRange = isPeriodInRange(week.start, week.end);
-
-            const startDay = week.start.getDate();
-            const startMonth = week.start.getMonth() + 1;
-
-            const weekLabel = `${startDay}/${startMonth}~`;
-            return (
-              <button
-                key={week.weekNumber}
-                onClick={() => setRange({ startDate: week.start, endDate: week.end, rangeType: 'week' })}
-                className={`
-                  aspect-square rounded-md transition-all text-[10px] font-medium
-                  flex flex-col items-center justify-center relative
-                  ${getHeatmapColor(minutes)}
-                  ${getHeatmapTextColor(minutes)}
-                  ${inRange ? 'ring-2 ring-primary ring-offset-1 ring-offset-background' : ''}
-                  hover:scale-105 cursor-pointer
-                `}
-                title={weekLabel + ` — ${formatTime(minutes)}`}
-              >
-                <p>{weekLabel}</p>
-                {minutes > 0 && (
-                  <p className="text-[8px] text-gray-200">{formatTime(minutes)}</p>
-                )}
-              </button>
-            );
-          })}
-        </div>
-      </>
-    );
-  };
-  const renderMonthView = () => {
-    const months = Array.from({ length: 12 }, (_, i) => new Date(navDate.getFullYear(), i, 1));
-
-    return (
-      <div className="grid grid-cols-4 gap-2">
-        {months.map((month) => {
-          const start = startOfMonth(month);
-          const end = endOfMonth(month);
-          const minutes = getMinutesForPeriod(start, end);
-          const isSelected = isSameDay(start, startDate) && rangeType === 'month';
-
-          return (
-            <button
-              key={month.toString()}
-              onClick={() => setRange({ startDate: start, endDate: end, rangeType: 'month' })}
-              className={`
-                aspect-square rounded-md transition-all text-xs font-medium flex flex-col items-center justify-center p-2
-                ${getHeatmapColor(minutes)} ${getHeatmapTextColor(minutes)}
-                ${isSelected ? 'ring-2 ring-primary ring-offset-1' : ''}
-                hover:scale-105 cursor-pointer
-              `}
-            >
-              <span className="capitalize">{format(month, 'MMM')}</span>
-              <span className="text-[10px] mt-1">{formatTime(minutes)}</span>
-            </button>
-          );
-        })}
-      </div>
-    );
-  };
-
   const navLabel = rangeType === 'month' || rangeType === 'week'
     ? navDate.getFullYear().toString()
     : format(navDate, 'MMMM yyyy');
+
+  const viewProps: ViewProps = {
+    navDate,
+    startDate,
+    endDate,
+    rangeType: rangeType as RangeType,
+    setRange: setRange as any,
+    getMinutesForDate,
+    getMinutesForPeriod,
+  };
+
 
   return (
     <Card>
@@ -269,7 +286,12 @@ export function StudyHeatmap() {
               <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
             </div>
           ) : (
-            rangeType === 'month' ? renderMonthView() : rangeType === 'week' ? renderWeekView() : renderDayView()
+            <>
+              {rangeType === 'month' && <MonthView {...viewProps} />}
+              {rangeType === 'week' && <WeekView {...viewProps} />}
+              {rangeType === 'day' && <DayView {...viewProps} />}
+              {rangeType === 'custom' && <DayView {...viewProps} />}
+            </>
           )}
 
           <div className="flex items-center justify-center gap-3 pt-2 border-t">

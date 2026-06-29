@@ -203,7 +203,7 @@ export function HistoryDateNav() {
 
 
     return (
-        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 p-4 bg-card border rounded-lg">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 p-4 bg-card border-2 border-border rounded-lg">
             {/* Mobile: Select Dropdown */}
             <div className="w-full">
                 <div className="flex sm:hidden w-full gap-2 relative items-center ">
