@@ -155,7 +155,7 @@ export function useUpdateSubject() {
     const queryClient = useQueryClient();
 
     return useMutation({
-        mutationFn: async (updatedSubject: { id: string; name: string; color: string }) => {
+        mutationFn: async (updatedSubject: { id: string; name: string; color: string; icon?: string | null }) => {
             return updateSubjectAction(updatedSubject);
         },
         onSuccess: () => {

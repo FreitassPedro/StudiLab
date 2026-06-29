@@ -18,6 +18,7 @@ export async function createSubjectAction(data: { name: string; color: string })
                 userId: user.id,
                 isOpen: true,
                 isArchived: false,
+                icon: "📚",
                 topics: {
                     create: {
                         name: "Sem nome",
@@ -59,7 +60,7 @@ export async function updateSubjectStatus(subjectId: string, isOpen: boolean, is
         throw new Error("Erro desconhecido ao atualizar status da matéria");
     }
 }
-export async function updateSubjectAction(data: { id: string; name: string; color: string, isOpen?: boolean, isArchived?: boolean }) {
+export async function updateSubjectAction(data: { id: string; name: string; color: string, icon?: string | null, isOpen?: boolean, isArchived?: boolean }) {
     await requireAuth();
     try {
         return await prisma.subject.update({
@@ -67,6 +68,7 @@ export async function updateSubjectAction(data: { id: string; name: string; colo
             data: {
                 name: data.name,
                 color: data.color,
+                icon: data.icon,
             },
         });
     } catch (error) {
@@ -96,10 +98,12 @@ import { cache } from "react";
 
 export const getSubjectsAction = cache(async (): Promise<Subject[]> => {
     const user = await requireAuth();
+
     return await prisma.subject.findMany({
         where: { userId: user.id },
         orderBy: { name: 'asc' }
     });
+
 });
 
 export async function createBulkSubjectsWithTopicsAction(data: {
@@ -109,65 +113,7 @@ export async function createBulkSubjectsWithTopicsAction(data: {
         topics: string[];
     }[]
 }) {
-    const user = await requireAuth();
-    try {
-        const results = [];
-        for (const subjectData of data.subjects) {
-            // Check if subject already exists for this user
-            const existingSubject = await prisma.subject.findFirst({
-                where: {
-                    name: subjectData.name,
-                    userId: user.id
-                }
-            });
-
-            if (existingSubject) {
-                // If subject exists, add topics that don't exist yet
-                const existingTopics = await prisma.topic.findMany({
-                    where: {
-                        subjectId: existingSubject.id,
-                        parentId: null
-                    }
-                });
-
-                const existingTopicNames = new Set(existingTopics.map(t => t.name));
-                const topicsToCreate = subjectData.topics.filter(tName => !existingTopicNames.has(tName));
-
-                if (topicsToCreate.length > 0) {
-                    await prisma.topic.createMany({
-                        data: topicsToCreate.map(name => ({
-                            name,
-                            subjectId: existingSubject.id,
-                        }))
-                    });
-                }
-                results.push(existingSubject);
-            } else {
-                // Create new subject with topics
-                const subject = await prisma.subject.create({
-                    data: {
-                        name: subjectData.name,
-                        color: subjectData.color,
-                        userId: user.id,
-                        isOpen: true,
-                        isArchived: false,
-                        topics: {
-                            create: subjectData.topics.map(topicName => ({
-                                name: topicName,
-                            }))
-                        }
-                    },
-                    include: {
-                        topics: true
-                    }
-                });
-                results.push(subject);
-            }
-        }
-        return results;
-    } catch (error) {
-        console.error("Bulk creation error:", error);
-        throw new Error("Erro ao criar matérias em lote");
-    }
+    
+    // TODO
 }
 

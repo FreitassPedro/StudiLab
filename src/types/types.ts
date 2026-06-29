@@ -4,6 +4,7 @@ export interface Subject {
     color: string;
     isOpen: boolean;
     isArchived: boolean;
+    icon?: string | null;
 }
 export type PieChartData = {
     name: string;

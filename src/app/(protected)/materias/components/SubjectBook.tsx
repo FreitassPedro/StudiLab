@@ -167,10 +167,14 @@ export function SubjectBook({ subjectTree }: { subjectTree: SubjectTree }) {
                                 className="w-9 h-9 rounded-xl shadow-sm flex items-center justify-center"
                                 style={{ backgroundColor: subject.color + "22" }}
                             >
-                                <BookOpen
-                                    size={18}
-                                    className="transition-transform group-hover/btn:scale-110"
-                                />
+                                {subject.icon ? (
+                                    <span className="text-base transition-transform group-hover/btn:scale-110">{subject.icon}</span>
+                                ) : (
+                                    <BookOpen
+                                        size={18}
+                                        className="transition-transform group-hover/btn:scale-110"
+                                    />
+                                )}
                             </div>
                         </div>
 
