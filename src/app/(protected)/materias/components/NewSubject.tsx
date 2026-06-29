@@ -4,12 +4,15 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { PaletteIcon, PenTool, Plus, SparkleIcon } from 'lucide-react';
 import React, { useState } from 'react';
 import { toast } from 'sonner';
 import { useCreateSubject } from '@/hooks/useSubjects';
 import { useRouter } from 'next/navigation';
 import { EnemSuggestionsDialog } from './EnemSuggestionsDialog';
+
+const EMOJIS = ['📚', '📐', '🔬', '💻', '🌍', '🎨', '🧠', '⚡', '📝', '💡', '📊', '🏛️'];
 
 const PRESET_COLORS = [
     '#3B82F6', '#EF4444', '#10B981', '#F59E0B', '#8B5CF6',
@@ -21,8 +24,10 @@ export function NewSubject() {
     const createSubject = useCreateSubject();
     const [newName, setNewName] = useState('');
     const [newColor, setNewColor] = useState(PRESET_COLORS[0]);
+    const [icon, setIcon] = useState(EMOJIS[0]);
 
     const [rgbColor, setRgbColor] = React.useState('#f1f1f1');
+
 
     const colorInputRef = React.useRef<HTMLInputElement>(null);
 
@@ -78,12 +83,28 @@ export function NewSubject() {
                         <div className="space-y-2">
                             <Label htmlFor="subjectName">Nome</Label>
                             <div className="flex items-center gap-2">
-                                <div
-                                    className={`rounded-md border-2 flex items-center justify-center p-2`}
-                                    style={{ backgroundColor: rgbColor }}
-                                >
-                                    <SparkleIcon className="h-6 w-6 text-foreground" />
-                                </div>
+                                <DropdownMenu>
+                                    <DropdownMenuTrigger asChild>
+                                        <button
+                                            type="button"
+                                            className={`rounded-md border-2 flex items-center justify-center w-10 h-10 cursor-pointer hover:opacity-80 transition-opacity`}
+                                            style={{ backgroundColor: newColor }}
+                                        >
+                                            <span className="text-xl">{icon}</span>
+                                        </button>
+                                    </DropdownMenuTrigger>
+                                    <DropdownMenuContent align="start" className="w-48 grid grid-cols-4 gap-2 p-2">
+                                        {EMOJIS.map((emoji) => (
+                                            <DropdownMenuItem
+                                                key={emoji}
+                                                onClick={() => setIcon(emoji)}
+                                                className="flex items-center justify-center text-xl p-2 cursor-pointer rounded-md hover:bg-muted shadow-sm"
+                                            >
+                                                {emoji}
+                                            </DropdownMenuItem>
+                                        ))}
+                                    </DropdownMenuContent>
+                                </DropdownMenu>
                                 <Input
                                     id="subjectName"
                                     placeholder="Ex: Matemática, Biologia, Inglês..."
@@ -155,22 +176,22 @@ export function NewSubject() {
                     Pre visalização
                 </div>
                 <div className='bg-card relative rounded-2xl flex-1 overflow-hidden border border-border/60 shadow-lg min-h-[200px]'>
-                    <div className='w-3 absolute left-0 inset-y-0' style={{ backgroundColor: previewSubject.color }} />
+                    <div className='w-3 absolute left-0 inset-y-0' style={{ backgroundColor: newColor }} />
                     <div className='flex flex-col pl-6 py-4 pr-5 gap-3 h-full flex-1'>
                         {/* Icon */}
                         <div className='w-12 h-12 rounded-lg flex items-center justify-center shadow-sm'
-                            style={{ backgroundColor: previewSubject.color }}>
-                            <div className='font-bold text-sm'>
-                                {previewSubject.name.charAt(0)}
+                            style={{ backgroundColor: newColor }}>
+                            <div className='font-bold text-xl'>
+                                {icon}
                             </div>
                         </div>
-                        <h4 className='font-semibold text-foreground text-base leading-tight'>{previewSubject.name}</h4>
+                        <h4 className='font-semibold text-foreground text-base leading-tight'>{newName || previewSubject.name}</h4>
                         {/* lines decorations */}
                         <div className='mt-auto space-y-1'>
                             {[100, 75, 50].map((percent) => (
                                 <div key={percent}
                                     className='h-[2px] rounded-full'
-                                    style={{ width: `${percent}%`, backgroundColor: previewSubject.color }}
+                                    style={{ width: `${percent}%`, backgroundColor: newColor }}
                                 />
                             ))}
                         </div>
