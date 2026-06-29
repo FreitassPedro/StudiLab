@@ -39,12 +39,16 @@ export function useSubjects() {
     );
 }
 
-
+export interface SubjectCreate {
+    name: string;
+    color: string;
+    icon?: string | null;
+}
 export function useCreateSubject() {
     const queryClient = useQueryClient();
 
     return useMutation({
-        mutationFn: async (newSubject: { name: string; color: string }) => {
+        mutationFn: async (newSubject: { name: string; color: string; icon: string }) => {
             return createSubjectAction(newSubject);
         },
         onSuccess: () => {

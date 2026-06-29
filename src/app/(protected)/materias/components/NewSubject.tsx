@@ -6,11 +6,12 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { PaletteIcon, Plus, SparkleIcon } from 'lucide-react';
-import React, { useState } from 'react';
+import React from 'react';
 import { toast } from 'sonner';
-import { useCreateSubject } from '@/hooks/useSubjects';
+import { useCreateSubject, SubjectCreate } from '@/hooks/useSubjects';
 import { useRouter } from 'next/navigation';
 import { EnemSuggestionsDialog } from './EnemSuggestionsDialog';
+import { useForm, useWatch } from 'react-hook-form';
 
 const EMOJIS = ['📚', '📐', '🔬', '💻', '🌍', '🎨', '🧠', '⚡', '📝', '💡', '📊', '🏛️'];
 
@@ -22,37 +23,48 @@ const PRESET_COLORS = [
 export function NewSubject() {
     const router = useRouter();
     const createSubject = useCreateSubject();
-    const [newName, setNewName] = useState('');
-    const [newColor, setNewColor] = useState(PRESET_COLORS[0]);
-    const [icon, setIcon] = useState(EMOJIS[0]);
 
     const [rgbColor, setRgbColor] = React.useState('#f1f1f1');
 
+    const { control, register, handleSubmit, setValue, reset } = useForm<{
+        name: string;
+        color: string;
+        icon: string;
+    }>({
+        defaultValues: {
+            name: '',
+            color: '',
+            icon: EMOJIS[0],
+        },
+    });
+
+    const [name, color, icon] = useWatch({
+        control,
+        name: ['name', 'color', 'icon']
+    });
 
     const colorInputRef = React.useRef<HTMLInputElement>(null);
 
     const handleRgbColorChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const color = e.target.value;
         setRgbColor(color);
-        setNewColor(color);
+        setValue('color', color);
     };
 
-    const handleCreate = async (e: React.FormEvent) => {
-        e.preventDefault();
-
-        if (!newName.trim()) {
+    const handleCreate = async (data: SubjectCreate) => {
+        if (!data.name.trim()) {
             toast.error('Digite o nome da matéria');
             return;
         }
 
         try {
             await createSubject.mutateAsync({
-                name: newName.trim(),
-                color: newColor,
+                name: data.name.trim(),
+                color: data.color,
+                icon: data.icon || "",
             });
             router.refresh();
-            setNewName('');
-            setNewColor(PRESET_COLORS[Math.floor(Math.random() * PRESET_COLORS.length)]);
+            reset();
             toast.success('Matéria criada!');
         } catch (error) {
             const errorMessage = error instanceof Error ? error.message : 'Erro ao criar matéria';
@@ -64,14 +76,13 @@ export function NewSubject() {
 
     return (
         <div className='grid grid-cols-1 md:grid-cols-6 gap-6'>
-            <Card className='md:col-span-5 border-border/60 shadow-sm'>
+            <Card className='md:col-span-5 col-span-full border-border/60 shadow-sm'>
                 <CardHeader className="flex items-center justify-between">
                     <CardTitle>Nova Matéria</CardTitle>
                     <EnemSuggestionsDialog />
-
                 </CardHeader>
                 <CardContent>
-                    <form onSubmit={handleCreate} className="space-y-4">
+                    <form onSubmit={handleSubmit(handleCreate)} className="space-y-4">
 
                         <div className="space-y-2">
                             <Label htmlFor="subjectName">Nome</Label>
@@ -81,7 +92,7 @@ export function NewSubject() {
                                         <button
                                             type="button"
                                             className={`rounded-md border-2 flex items-center justify-center w-10 h-10 cursor-pointer hover:opacity-80 transition-opacity`}
-                                            style={{ backgroundColor: newColor }}
+                                            style={{ backgroundColor: color }}
                                         >
                                             <span className="text-xl">{icon}</span>
                                         </button>
@@ -90,7 +101,7 @@ export function NewSubject() {
                                         {EMOJIS.map((emoji) => (
                                             <DropdownMenuItem
                                                 key={emoji}
-                                                onClick={() => setIcon(emoji)}
+                                                onClick={() => setValue('icon', emoji)}
                                                 className="flex items-center justify-center text-xl p-2 cursor-pointer rounded-md hover:bg-muted shadow-sm"
                                             >
                                                 {emoji}
@@ -101,8 +112,7 @@ export function NewSubject() {
                                 <Input
                                     id="subjectName"
                                     placeholder="Ex: Matemática, Biologia, Inglês..."
-                                    value={newName}
-                                    onChange={(e) => setNewName(e.target.value)}
+                                    {...register('name')}
                                     maxLength={50}
                                 />
                             </div>
@@ -112,7 +122,7 @@ export function NewSubject() {
                         <div className="space-y-2">
                             <Label>Cor</Label>
                             <div className='flex flex-row space-x-2 items-center'>
-                                <div className={`relative bg-card ${newColor === rgbColor
+                                <div className={`relative bg-card ${color === rgbColor
                                     ? 'border-foreground '
                                     : 'border-border/60'
                                     } border rounded-xl p-2 flex flex-row items-center justify-center gap-2`}>
@@ -122,7 +132,7 @@ export function NewSubject() {
                                         type='button'
                                         onClick={() => colorInputRef.current?.click()}
                                         className={`w-6 h-6 rounded-full border-2 transition-transform 
-                                            ${newColor === rgbColor
+                                            ${color === rgbColor
                                                 ? 'border-foreground scale-110'
                                                 : 'border-transparent'
                                             } flex items-center justify-center text-[10px] font-bold text-white`}
@@ -144,8 +154,8 @@ export function NewSubject() {
                                         <button
                                             key={color}
                                             type="button"
-                                            onClick={() => setNewColor(color)}
-                                            className={`w-6 h-6 rounded-full border-2 transition-transform ${newColor === color
+                                            onClick={() => setValue('color', color)}
+                                            className={`w-6 h-6 rounded-full border-2 transition-transform ${color === color
                                                 ? 'border-foreground scale-110'
                                                 : 'border-transparent'
                                                 }`}
@@ -163,34 +173,36 @@ export function NewSubject() {
                     </form>
                 </CardContent>
             </Card>
-            <div className='md:col-span-1 flex flex-col'>
-                <div className="text-xs text-muted-foreground uppercase tracking-wide flex items-center gap-2">
-                    <SparkleIcon size={10} />
-                    Pre visalização
-                </div>
-                <div className='bg-card relative rounded-2xl flex-1 overflow-hidden border border-border/60 shadow-lg min-h-[200px]'>
-                    <div className='w-3 absolute left-0 inset-y-0' style={{ backgroundColor: newColor }} />
-                    <div className='flex flex-col pl-6 py-4 pr-5 gap-3 h-full flex-1'>
-                        {/* Icon */}
-                        <div className='w-12 h-12 rounded-lg flex items-center justify-center shadow-sm'
-                            style={{ backgroundColor: newColor }}>
-                            <div className='font-bold text-xl'>
-                                {icon}
+            {name?.length > 0 && (
+                <div className='md:col-span-1 flex flex-col'>
+                    <div className="text-xs text-muted-foreground uppercase tracking-wide flex items-center gap-2">
+                        <SparkleIcon size={10} />
+                        Pre visalização
+                    </div>
+                    <div className='bg-card relative rounded-2xl flex-1 overflow-hidden border border-border/60 shadow-lg min-h-[200px]'>
+                        <div className='w-3 absolute left-0 inset-y-0' style={{ backgroundColor: color }} />
+                        <div className='flex flex-col pl-6 py-4 pr-5 gap-3 h-full flex-1'>
+                            {/* Icon */}
+                            <div className='w-12 h-12 rounded-lg flex items-center justify-center shadow-sm'
+                                style={{ backgroundColor: color }}>
+                                <div className='font-bold text-xl'>
+                                    {icon}
+                                </div>
                             </div>
-                        </div>
-                        <h4 className='font-semibold text-foreground text-base leading-tight'>{newName}</h4>
-                        {/* lines decorations */}
-                        <div className='mt-auto space-y-1'>
-                            {[100, 75, 50].map((percent) => (
-                                <div key={percent}
-                                    className='h-[2px] rounded-full'
-                                    style={{ width: `${percent}%`, backgroundColor: newColor }}
-                                />
-                            ))}
+                            <h4 className='font-semibold text-foreground text-base leading-tight'>{name}</h4>
+                            {/* lines decorations */}
+                            <div className='mt-auto space-y-1'>
+                                {[100, 75, 50].map((percent) => (
+                                    <div key={percent}
+                                        className='h-[2px] rounded-full'
+                                        style={{ width: `${percent}%`, backgroundColor: color }}
+                                    />
+                                ))}
+                            </div>
                         </div>
                     </div>
                 </div>
-            </div>
+            )}
         </div >
     );
 }
