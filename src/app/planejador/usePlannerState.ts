@@ -48,6 +48,22 @@ export function usePlannerState() {
                 const parsed = JSON.parse(stored) as StudyBlock[];
                 // eslint-disable-next-line react-hooks/set-state-in-effect
                 setBlocks(parsed);
+
+                // Deriva matérias a partir dos blocos salvos (enriquece o estado inicial)
+                setSubjects(prev => {
+                    const newSubjectsMap = new Map(prev.map(s => [s.id, s]));
+                    parsed.forEach(b => {
+                        if (!newSubjectsMap.has(b.subjectId)) {
+                            newSubjectsMap.set(b.subjectId, {
+                                id: b.subjectId,
+                                name: b.subjectId,
+                                color: b.color,
+                                isVisible: true
+                            });
+                        }
+                    });
+                    return Array.from(newSubjectsMap.values());
+                });
             } catch {
                 console.error("Failed to parse stored blocks");
             }
@@ -114,7 +130,6 @@ export function usePlannerState() {
     }, []);
 
     const openEditBlock = useCallback((block: StudyBlock) => {
-        setEditingBlock(block);
         const subject = subjects.find(s => s.id === block.subjectId);
         setNewBlockForm({
             subjectId: subject?.name ?? block.subjectId,
@@ -125,6 +140,7 @@ export function usePlannerState() {
             color: block.color,
             dayIndex: block.dayIndex,
         });
+        setEditingBlock(block);
         setModalOpen(true);
     }, [subjects]);
 
@@ -134,15 +150,18 @@ export function usePlannerState() {
     }, []);
 
     const removeBlock = useCallback((blockId: string) => {
-        setBlocks((prev) => prev.filter((b) => b.id !== blockId));
-        // Se for ultimo bloco da matéria, remova-la também
-        const block = blocks.find(b => b.id === blockId);
-        if (block) {
-            const hasOther = blocks.some(b => b.subjectId === block.subjectId && b.id !== blockId);
-            if (!hasOther) {
-                setSubjects((prev) => prev.filter(s => s.id !== block.subjectId));
+        setBlocks((prev) => {
+            const newBlocks = prev.filter((b) => b.id !== blockId);
+            const block = prev.find(b => b.id === blockId);
+            if (block) {
+                // Se for o último bloco da matéria, remova a matéria se ela foi gerada dinamicamente
+                const hasOther = newBlocks.some(b => b.subjectId === block.subjectId);
+                if (!hasOther) {
+                    setSubjects(prevSubjs => prevSubjs.filter(s => s.id !== block.subjectId));
+                }
             }
-        }
+            return newBlocks;
+        });
     }, []);
 
     const duplicateBlock = useCallback((blockId: string) => {
@@ -159,56 +178,59 @@ export function usePlannerState() {
     }, [blocks]);
 
 
-    const saveBlock = useCallback(() => {
-        console.log("Saving block with form data", newBlockForm);
-        if (!newBlockForm.subjectId.trim()) {
+    const saveBlock = useCallback((newBlockForm: Partial<StudyBlock>) => {
+        const payloadSubjectId = newBlockForm.subjectId?.trim();
+        if (!payloadSubjectId) {
             alert("O campo 'Matéria' é obrigatório.");
             return;
         }
 
-        const subject = subjects.find(s => normalizeSubjectName(s.name) === normalizeSubjectName(newBlockForm.subjectId)) || {
-            id: normalizeSubjectName(newBlockForm.subjectId),
-            name: newBlockForm.subjectId,
-            color: newBlockForm.color,
-            isVisible: true,
+        // Tenta encontrar a matéria pelo ID ou nome normalizado
+        let subject = subjects.find(s => s.id === payloadSubjectId || normalizeSubjectName(s.name) === normalizeSubjectName(payloadSubjectId));
+        let subjectWasCreated = false;
+
+        if (!subject) {
+            subject = {
+                id: payloadSubjectId, // O próprio nome é o ID para preservar e não precisar persistir separadamente
+                name: payloadSubjectId,
+                color: newBlockForm.color || "blue",
+                isVisible: true,
+            };
+            subjectWasCreated = true;
+        }
+
+        const blockData: Omit<StudyBlock, "id" | "status"> = {
+            subjectId: subject.id,
+            topic: newBlockForm.topic || "",
+            startTime: newBlockForm.startTime || "09:00",
+            endTime: newBlockForm.endTime || "10:00",
+            color: subject.color, // A cor do bloco deriva da matéria
+            dayIndex: newBlockForm.dayIndex ?? 0,
+            type: newBlockForm.type || "exercise",
         };
 
-        const blockData: Partial<StudyBlock> = {
-            subjectId: subject.id,
-            topic: newBlockForm.topic,
-            startTime: newBlockForm.startTime,
-            endTime: newBlockForm.endTime,
-            color: subject.color,
-            dayIndex: newBlockForm.dayIndex,
-            type: newBlockForm.type,
-        };
+        if (subjectWasCreated) {
+            setSubjects((prev) => [...prev, subject!]);
+        }
 
         if (editingBlock) {
             setBlocks((prev) => prev.map((b) => b.id === editingBlock.id ? { ...b, ...blockData } : b));
-        }
-        else {
+        } else {
             const newBlock: StudyBlock = {
                 id: generateId(),
-                subjectId: subject.id,
-                topic: newBlockForm.topic,
-                startTime: newBlockForm.startTime,
-                endTime: newBlockForm.endTime,
-                color: subject.color,
-                dayIndex: newBlockForm.dayIndex,
-                type: newBlockForm.type,
                 status: "todo",
+                ...blockData
             };
-
-            console.log("Saving new block", newBlock);
             setBlocks((prev) => [...prev, newBlock]);
         }
+
         closeModal();
-    }, [newBlockForm, closeModal, editingBlock, subjects]);
+    }, [editingBlock, subjects, closeModal]);
 
     const deleteBlock = useCallback((blockId: string) => {
-        setBlocks((prev) => prev.filter((b) => b.id !== blockId));
+        removeBlock(blockId);
         closeModal();
-    }, [closeModal]);
+    }, [removeBlock, closeModal]);
 
     const toggleBlockStatus = useCallback((blockId: string) => {
         setBlocks((prev) =>

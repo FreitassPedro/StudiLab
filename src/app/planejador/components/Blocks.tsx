@@ -1,6 +1,6 @@
-import { useCallback, useMemo, useState } from "react";
-import { BlockType, StudyBlock, ColorName, Subject } from "./mockData";
-import { COLOR_MAP, formatDuration, getBlockTimelineMetrics, normalizeSubjectName, parseTimeToMinutes } from "../utils";
+import { useCallback, useMemo } from "react";
+import { BlockType, StudyBlock, ColorName } from "./mockData";
+import { COLOR_MAP, formatDuration, getBlockTimelineMetrics, parseTimeToMinutes } from "../utils";
 import { CheckCircle2, Circle, Clock, GripVertical, MoreHorizontal, Pencil, Trash2, Trash2Icon } from "lucide-react";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
@@ -12,6 +12,7 @@ import { Button } from "@/components/ui/button";
 import { usePlannerActions } from "./PlannerActionsContext";
 import { Combobox, ComboboxContent, ComboboxInput, ComboboxItem, ComboboxList } from "@/components/ui/combobox";
 import { usePlannerState } from "../usePlannerState";
+import { Controller, useForm, useWatch } from "react-hook-form";
 
 
 interface BlockCardProps {
@@ -158,7 +159,8 @@ export function BlockCard({
                     <DropdownMenuGroup>
                         {/* Edit button */}
                         <DropdownMenuItem
-                            onSelect={() => {
+                            onClick={(e) => {
+                                e.stopPropagation();
                                 openEditBlock(block);
                             }}
                         >
@@ -166,12 +168,18 @@ export function BlockCard({
                             Editar
                         </DropdownMenuItem>
                         <DropdownMenuItem
-                            onClick={() => duplicateBlock(block.id)}
+                            onClick={(e) => {
+                                e.stopPropagation();
+                                duplicateBlock(block.id);
+                            }}
                         >
                             Duplicar
                         </DropdownMenuItem>
                         <DropdownMenuItem variant="destructive"
-                            onClick={() => removeBlock(block.id)}
+                            onClick={(e) => {
+                                e.stopPropagation();
+                                removeBlock(block.id);
+                            }}
                         >
                             <Trash2Icon />
                             Trash
@@ -251,230 +259,253 @@ function ColorPicker({
     );
 }
 
-
+interface FormValues {
+    subjectName: string;
+    topicName: string | null;
+    study_type: string;
+    dayIndex: number;
+    startTime: string;
+    endTime: string;
+    color: ColorName;
+}
 // ── Block Form Modal ─────────────────────────────────────────────────────────
 export function NewBlockFormModal({
     open,
-    form,
+    initialData,
     onCloseModal,
     onSave,
     onDelete,
-    onFormChange,
     isEditing,
 }: {
     open: boolean;
-    form: Partial<StudyBlock>;
+    initialData: Partial<StudyBlock>;
     onCloseModal: () => void;
-    onSave: () => void;
+    onSave: (payload: Partial<StudyBlock>) => void;
     onDelete?: () => void;
-    onFormChange: (patch: Partial<StudyBlock>) => void;
     isEditing?: boolean;
 }) {
 
-    const {
-        subjects
-    } = usePlannerState();
+    const { subjects } = usePlannerState();
+    console.log("Initial Data", initialData);
 
-    const [subjectNameInput, setSubjectNameInput] = useState(subjects.find(s => s.id === form.subjectId)?.name ?? "");
+    const initialSubject = subjects.find(s => s.id === initialData.subjectId)?.name ?? "";
 
-    const subject = subjects.find(s => s.id === form.subjectId);
+    const { register, handleSubmit, reset, setValue, control } = useForm<FormValues>({
+        defaultValues: {
+            subjectName: initialSubject,
+            topicName: initialData.topic,
+            study_type: initialData.type,
+            dayIndex: initialData.dayIndex,
+            startTime: initialData.startTime,
+            endTime: initialData.endTime,
+            color: initialData.color,
+        },
+    });
 
-    const normalizedFormSubject = subjectNameInput.trim().toLowerCase();
+    const [subjectName, topicName, study_type, dayIndex, startTime, endTime, color] = useWatch({
+        control,
+        name: ["subjectName", "topicName", "study_type", "dayIndex", "startTime", "endTime", "color"],
+    })
+
+    const subject = subjects.find(s => s.id === initialData.subjectId);
+
 
     const filteredOptions = useMemo(() => {
-        const query = normalizedFormSubject.toLowerCase();
+        const query = (subjectName || "").toLowerCase().trim();
 
         return subjects.filter((subj) => !query || subj.name.toLowerCase().includes(query))
 
-    }, [normalizedFormSubject, subjects]);
+    }, [subjectName, subjects]);
 
-    const handleSubjectChange = useCallback((selectedValue: string, isSelection: boolean = false) => {
-        console.log("handleSubjectChange called with", selectedValue, "isSelection:", isSelection);
+    const handleSubmitForm = (values: FormValues) => {
+        const normalizedInput = values.subjectName.trim().toLowerCase();
+        const matchedSubject = subjects.find(
+            s => s.name.toLowerCase() === normalizedInput
+        );
 
-        if (!selectedValue) {
-            onFormChange({ subjectId: "" });
-            return;
-        }
+        const payload: Partial<StudyBlock> = {
+            subjectId: matchedSubject ? matchedSubject.id : values.subjectName.trim(),
+            topic: values.topicName || undefined,
+            dayIndex: values.dayIndex,
+            startTime: values.startTime,
+            endTime: values.endTime,
+            type: values.study_type as BlockType,
+            color: values.color as ColorName,
+        };
 
-        const matchedSubject = subjects.find(s => s.id === selectedValue || s.name.toLowerCase() === selectedValue.toLowerCase());
-
-        const subjectId = matchedSubject ? matchedSubject.id : normalizeSubjectName(selectedValue);
-        console.log("handleSubjectChange Select", { selectedValue, subjectId, matchedSubject });
-
-        if (isSelection && matchedSubject) {
-            setSubjectNameInput(matchedSubject.name);
-        }
-
-        onFormChange({
-            subjectId: subjectId,
-            color: matchedSubject?.color ?? "blue",
-        });
-    }, [subjects, onFormChange]);
+        onSave(payload);
+        reset();
+    };
 
 
     return (
-        <Dialog open={open} onOpenChange={(v) => !v && onCloseModal()}>
+        <Dialog open={open} onOpenChange={(v) => !v && onCloseModal()} >
             <DialogContent className="max-w-sm">
-                <DialogHeader>
-                    <DialogTitle>
-                        {isEditing ? "Editar bloco" : "Novo bloco de estudo"}
-                    </DialogTitle>
-                    <DialogDescription></DialogDescription>
-                </DialogHeader>
+                <form className="flex flex-col gap-3" onSubmit={handleSubmit(handleSubmitForm)}>
 
-                <div className="flex flex-col gap-3">
-                    <div className="flex flex-col gap-1">
-                        <Label className="text-xs text-muted-foreground mb-1">Matéria</Label>
-                        <Combobox
-                            items={filteredOptions}
-                            value={subjectNameInput}
-                            inputValue={subjectNameInput}
+                    <DialogHeader>
+                        <DialogTitle>
+                            {isEditing ? "Editar bloco" : "Novo bloco de estudo"}
+                        </DialogTitle>
+                        <DialogDescription></DialogDescription>
+                    </DialogHeader>
 
-                            // Acionado ao digitar
-                            onInputValueChange={(value) => {
-                                setSubjectNameInput(value ?? "");
-                                handleSubjectChange(value ?? "", false);
-                            }}
-                            // Acionado ao selecionar
-                            onValueChange={(value) => {
-                                handleSubjectChange(value ?? "", true);
-                            }}
-                        >
-                            <ComboboxInput
-                                placeholder="Ex: Cálculo"
+                    <div className="flex flex-col gap-3 py-4">
+                        <div className="flex flex-col gap-1">
+                            <Label className="text-xs text-muted-foreground mb-1">Matéria</Label>
+                            <Controller
+                                control={control}
+                                name="subjectName"
+                                render={({ field }) => (
+                                    <Combobox
+                                        items={filteredOptions}
+                                        value={field.value}
+                                        inputValue={field.value}
+                                        onInputValueChange={field.onChange}
+                                        onValueChange={(selectedId) => {
+                                            const subj = subjects.find(s => s.id === selectedId);
+                                            if (subj) {
+                                                field.onChange(subj.name);
+                                                setValue("color", subj.color);
+                                            }
+                                        }}
+                                    >
+                                        <ComboboxInput placeholder="Ex: Cálculo" />
+                                        <ComboboxContent>
+                                            <ComboboxList>
+                                                {filteredOptions.map((sbj) => (
+                                                    <ComboboxItem key={sbj.id} value={sbj.id}>
+                                                        <div>
+                                                            <div className={cn("w-2.5 h-2.5 rounded-full bg-current opacity-70 mr-2 inline-block", COLOR_MAP[sbj.color]?.badge ?? COLOR_MAP.blue.badge)} />
+                                                            {sbj.name}
+                                                        </div>
+                                                    </ComboboxItem>
+                                                ))}
+                                            </ComboboxList>
+                                        </ComboboxContent>
+                                    </Combobox>
+                                )}
                             />
-                            <ComboboxContent>
-                                <ComboboxList>
-                                    {(sbj: Subject) => (
-                                        <ComboboxItem key={sbj.id} value={sbj.id}>
-                                            <div>
-                                                <div className={cn("w-2.5 h-2.5 rounded-full bg-current opacity-70 mr-2 inline-block", COLOR_MAP[sbj.color]?.badge ?? COLOR_MAP.blue.badge)}
-                                                />
-                                                {sbj.name}
-                                            </div>
-                                        </ComboboxItem>
-                                    )}
-                                </ComboboxList>
-                            </ComboboxContent>
-                        </Combobox>
-                    </div>
-
-                    <div>
-                        <Label className="text-xs text-muted-foreground mb-1 block">Tópico</Label>
-                        <Input
-                            placeholder="Ex: Cálculo — Derivadas"
-                            value={form.topic ?? ""}
-                            onChange={(e) => onFormChange({ topic: e.target.value })}
-                        />
-                    </div>
-
-                    <div>
-                        <Label className="text-xs text-muted-foreground mb-1 block">Tipo</Label>
-                        <div className="flex gap-2 flex-wrap">
-                            {["leiture", "revision", "exercise", "resume", "exam"].map((t) => (
-                                <button
-                                    key={t}
-                                    type="button"
-                                    onClick={() => onFormChange({ type: t as BlockType })}
-                                    className={cn(
-                                        "px-3 py-1 rounded-full text-xs border transition-all",
-                                        form.type === t
-                                            ? "bg-primary text-primary-foreground border-primary"
-                                            : "border-border text-muted-foreground hover:border-primary/50"
-                                    )}
-                                >
-                                    {t}
-                                </button>
-                            ))}
                         </div>
-                    </div>
-                    <div>
-                        <Label className="text-xs text-muted-foreground mb-1 block">Dia</Label>
-                        <div className="flex gap-1 flex-wrap">
-                            {["Segunda", "Terça", "Quarta", "Quinta", "Sexta", "Sábado", "Domingo"].map((d, i) => (
-                                <button
-                                    key={d}
-                                    type="button"
-                                    onClick={() => onFormChange({ dayIndex: i })}
-                                    className={cn(
-                                        "px-3 py-1 rounded-full text-xs border transition-all",
-                                        form.dayIndex === i
-                                            ? "bg-primary text-primary-foreground border-primary"
-                                            : "border-border text-muted-foreground hover:border-primary/50"
-                                    )}
-                                >
-                                    {d}
-                                </button>
-                            ))}
-                        </div>
-                    </div>
 
-                    <div className="grid grid-cols-2 gap-3">
                         <div>
-                            <Label className="text-xs text-muted-foreground mb-1 block">Início</Label>
+                            <Label className="text-xs text-muted-foreground mb-1 block">Tópico</Label>
                             <Input
-                                type="time"
-                                value={form.startTime ?? "09:00"}
-                                onChange={(e) => onFormChange({ startTime: e.target.value })}
+                                placeholder="Ex: Cálculo — Derivadas"
+                                {...register("topicName")}
                             />
+                        </div>
+
+                        <div>
+                            <Label className="text-xs text-muted-foreground mb-1 block">Tipo</Label>
+                            <div className="flex gap-2 flex-wrap">
+                                {["leiture", "revision", "exercise", "resume", "exam"].map((t) => (
+                                    <button
+                                        key={t}
+                                        type="button"
+                                        onClick={() => setValue("study_type", t, { shouldDirty: true })}
+                                        className={cn(
+                                            "px-3 py-1 rounded-full text-xs border transition-all",
+                                            study_type === t
+                                                ? "bg-primary text-primary-foreground border-primary"
+                                                : "border-border text-muted-foreground hover:border-primary/50"
+                                        )}
+                                    >
+                                        {t}
+                                    </button>
+                                ))}
+                            </div>
                         </div>
                         <div>
-                            <Label className="text-xs text-muted-foreground mb-1 block">Fim</Label>
-                            <Input
-                                type="time"
-                                value={form.endTime ?? "10:00"}
-                                onChange={(e) => onFormChange({ endTime: e.target.value })}
-                            />
+                            <Label className="text-xs text-muted-foreground mb-1 block">Dia</Label>
+                            <div className="flex gap-1 flex-wrap">
+                                {["Segunda", "Terça", "Quarta", "Quinta", "Sexta", "Sábado", "Domingo"].map((d, i) => (
+                                    <button
+                                        key={d}
+                                        type="button"
+                                        onClick={() => setValue("dayIndex", i, { shouldDirty: true })}
+                                        className={cn(
+                                            "px-3 py-1 rounded-full text-xs border transition-all",
+                                            dayIndex === i
+                                                ? "bg-primary text-primary-foreground border-primary"
+                                                : "border-border text-muted-foreground hover:border-primary/50"
+                                        )}
+                                    >
+                                        {d}
+                                    </button>
+                                ))}
+                            </div>
+                        </div>
+
+                        <div className="grid grid-cols-2 gap-3">
+                            <div>
+                                <Label className="text-xs text-muted-foreground mb-1 block">Início</Label>
+                                <Input
+                                    type="time"
+                                    value={startTime}
+                                    {...register("startTime")}
+                                />
+                            </div>
+                            <div>
+                                <Label className="text-xs text-muted-foreground mb-1 block">Fim</Label>
+                                <Input
+                                    type="time"
+                                    value={endTime}
+                                    {...register("endTime")}
+                                />
+                            </div>
+                        </div>
+
+                        <div>
+                            <Label className="text-xs text-muted-foreground mb-1 block">Cor</Label>
+                            <div className="flex justify-between items-center gap-2">
+                                <ColorPicker
+                                    value={color as ColorName}
+                                    onChange={(color) => {
+                                        setValue("color", color);
+                                    }}
+                                    disabled={subjects.some(s => s.id === subject?.id)}
+                                />
+                                {subject && (
+                                    <Button
+                                        variant="outline"
+                                        type="button"
+                                    >
+                                        <div className={cn("w-2.5 h-2.5 rounded-full inline-block",
+                                            COLOR_MAP[color as ColorName]?.badge)}
+                                        />
+                                        {subject.name ?? "Sem matéria"}
+                                    </Button>
+                                )}
+                            </div>
                         </div>
                     </div>
 
-                    <div>
-                        <Label className="text-xs text-muted-foreground mb-1 block">Cor</Label>
-                        <div className="flex justify-between items-center gap-2">
-                            <ColorPicker
-                                value={form.color as ColorName}
-                                onChange={(c) => onFormChange({ color: c })}
-                                disabled={subjects.some(s => s.id === form.subjectId)}
-                            />
-                            {subject && (
+
+                    <DialogFooter className="flex items-center justify-between mt-1">
+                        <div>
+                            {isEditing && onDelete && (
                                 <Button
-                                    variant="outline"
-                                    type="button"
+                                    variant="ghost"
+                                    size="sm"
+                                    className="text-destructive hover:text-destructive hover:bg-destructive/10"
+                                    onClick={onDelete}
                                 >
-                                    <div className={cn("w-2.5 h-2.5 rounded-full inline-block",
-                                        COLOR_MAP[form.color as ColorName]?.badge)}
-                                    />
-                                    {subject.name ?? "Sem matéria"}
+                                    <Trash2 className="w-3.5 h-3.5 mr-1" />
+                                    Excluir
                                 </Button>
                             )}
                         </div>
-                    </div>
-                </div>
-
-
-                <DialogFooter className="flex items-center justify-between mt-1">
-                    <div>
-                        {isEditing && onDelete && (
-                            <Button
-                                variant="ghost"
-                                size="sm"
-                                className="text-destructive hover:text-destructive hover:bg-destructive/10"
-                                onClick={onDelete}
-                            >
-                                <Trash2 className="w-3.5 h-3.5 mr-1" />
-                                Excluir
+                        <div className="flex gap-2">
+                            <Button variant="outline" size="sm" onClick={onCloseModal}>
+                                Cancelar
                             </Button>
-                        )}
-                    </div>
-                    <div className="flex gap-2">
-                        <Button variant="outline" size="sm" onClick={onCloseModal}>
-                            Cancelar
-                        </Button>
-                        <Button size="sm" onClick={onSave}>
-                            Salvar
-                        </Button>
-                    </div>
-                </DialogFooter>
+                            <Button size="sm" onClick={handleSubmit(handleSubmitForm)}>
+                                Salvar
+                            </Button>
+                        </div>
+                    </DialogFooter>
+                </form>
             </DialogContent>
         </Dialog >
     );

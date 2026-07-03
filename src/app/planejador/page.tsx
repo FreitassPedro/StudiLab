@@ -295,16 +295,16 @@ export default function Page() {
 
                     <SidebarTools />
                 </div>
-
-                <NewBlockFormModal
-                    open={modalOpen}
-                    form={form}
-                    isEditing={!!editingBlock}
-                    onFormChange={(updatedFields) => setForm((f) => ({ ...f, ...updatedFields }))}
-                    onSave={saveBlock}
-                    onDelete={editingBlock ? () => deleteBlock(editingBlock.id) : undefined}
-                    onCloseModal={closeModal}
-                />
+                {modalOpen && (
+                    <NewBlockFormModal
+                        open={modalOpen}
+                        initialData={form}
+                        isEditing={!!editingBlock}
+                        onSave={saveBlock}
+                        onDelete={editingBlock ? () => deleteBlock(editingBlock.id) : undefined}
+                        onCloseModal={closeModal}
+                    />
+                )}
             </div>
         </PlannerActionsProvider>
     );
