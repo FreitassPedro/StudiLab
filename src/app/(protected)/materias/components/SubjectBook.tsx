@@ -15,6 +15,7 @@ import {
     ArchiveRestore,
     BookOpen,
     Hash,
+    ExternalLink,
 } from "lucide-react";
 import { SubjectTree, TopicNode } from "@/types/types";
 import { Fragment } from "react";
@@ -23,6 +24,7 @@ import { useDeleteSubject, useSubjectOpen, useToggleArchiveSubject } from "@/hoo
 import { EditSubjectDialog, EditTopicDialog } from "./EditSubjectDialog";
 import { NewTopicDialog } from "./NewTopicDialog";
 import { cn } from "@/lib/utils";
+import Link from "next/link";
 
 // ─── Topic Row ────────────────────────────────────────────────────────────────
 
@@ -204,37 +206,43 @@ export function SubjectBook({ subjectTree }: { subjectTree: SubjectTree }) {
                 </div>
 
                 {/* action row — only visible on hover */}
-                <div className={cn("flex items-center gap-1 mt-3 transition-all duration-300 ease-in-out",
-                    isOpen ? "opacity-100 translate-y-0" : "opacity-0 translate-y-2")}>
-                    <NewTopicDialog subjectId={subject.id}>
-                        <ActionBtn icon={<Plus size={13} />} label="Tópico" />
-                    </NewTopicDialog>
+                {isOpen && (
+                    <div className={cn("flex items-center gap-1 mt-3 transition-all duration-300 ease-in-out",
+                        isOpen ? "opacity-100 translate-y-0" : "opacity-0 translate-y-2")}>
+                        <NewTopicDialog subjectId={subject.id}>
+                            <ActionBtn icon={<Plus size={13} />} label="Tópico" />
+                        </NewTopicDialog>
 
-                    <EditSubjectDialog subjectId={subject.id}>
-                        <ActionBtn icon={<Settings size={13} />} label="Editar" />
-                    </EditSubjectDialog>
+                        <EditSubjectDialog subjectId={subject.id}>
+                            <ActionBtn icon={<Settings size={13} />} label="Editar" />
+                        </EditSubjectDialog>
 
-                    <div className="flex-1" />
+                        <Link href={`/materias/${subject.id}`}>
+                            <ActionBtn icon={<ExternalLink size={13} />} label="Painel" />
+                        </Link>
 
-                    <ActionBtn
-                        icon={
-                            isArchived ? (
-                                <ArchiveRestore size={13} />
-                            ) : (
-                                <Archive size={13} />
-                            )
-                        }
-                        label={isArchived ? "Reativar" : "Arquivar"}
-                        onClick={handleToggleArchive}
-                        muted
-                    />
-                    <ActionBtn
-                        icon={<Trash2 size={13} />}
-                        label="Excluir"
-                        onClick={handleDelete}
-                        destructive
-                    />
-                </div>
+                        <div className="flex-1" />
+
+                        <ActionBtn
+                            icon={
+                                isArchived ? (
+                                    <ArchiveRestore size={13} />
+                                ) : (
+                                    <Archive size={13} />
+                                )
+                            }
+                            label={isArchived ? "Reativar" : "Arquivar"}
+                            onClick={handleToggleArchive}
+                            muted
+                        />
+                        <ActionBtn
+                            icon={<Trash2 size={13} />}
+                            label="Excluir"
+                            onClick={handleDelete}
+                            destructive
+                        />
+                    </div>
+                )}
             </div >
 
             {/* ── Pages (topic tree) ── */}

@@ -1,5 +1,6 @@
 "use client";
 
+import { useQuery } from "@tanstack/react-query";
 import { Trophy, Clock } from "lucide-react";
 
 export interface FriendRankingItem {
@@ -10,17 +11,17 @@ export interface FriendRankingItem {
   minutes: number;
 }
 
-interface StandaloneFriendsRankingProps {
-  ranking: FriendRankingItem[];
-  accentColor?: string;
-}
 
-export function StandaloneFriendsRanking({
-  ranking,
-  accentColor = "#8b5cf6",
-}: StandaloneFriendsRankingProps) {
-  if (!ranking || ranking.length === 0) return null;
 
+export function StandaloneFriendsRanking() {
+
+  const {data: ranking} = useQuery({
+    queryKey: ["friendsRanking"],
+    queryFn: getFriendsRanking,
+  })
+
+  if(ranking?.isError) return <div>Error...</div>
+  if(ranking?.isLoading) return <div>Loading...</div>
 
   const formatHours = (mins: number) => {
     const h = Math.floor(mins / 60);

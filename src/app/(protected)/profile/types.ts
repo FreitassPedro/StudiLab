@@ -83,7 +83,6 @@ export interface ProfileStats {
 }
 
 export interface FriendRanking {
-  id: string;
   name: string;
   username: string;
   image?: string;

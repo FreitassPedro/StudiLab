@@ -17,7 +17,9 @@ import { NewTopicDialog } from "../../materias/components/NewTopicDialog";
 import { Label } from "@/components/ui/label";
 import { useRouter } from "next/navigation";
 
-const GOALS = [0, 25, 45, 60, 90];
+const GOALS = [0, 25, 45, 60, 90] as const;
+type Goal = typeof GOALS[number];
+
 const hexToRgba = (hex: string, a: number) => {
     const h = hex.replace("#", "");
     const r = parseInt(h.slice(0, 2), 16);
@@ -53,7 +55,7 @@ export function MainSection({
     const stopTicking = useCronometerStore((state) => state.stopTicking);
 
     // Local UI state
-    const [selectedGoal, setSelectedGoal] = useState(50);
+    const [selectedGoal, setSelectedGoal] = useState<Goal>(60);
     const [timerSize, setTimerSize] = useState(320);
     const [newTopicDialogOpen, setNewTopicDialogOpen] = useState(false);
 
@@ -66,8 +68,10 @@ export function MainSection({
         return () => window.removeEventListener("resize", handleResize);
     }, []);
 
+
+
     const { data: subjects = [], isLoading: loadingSubjects } = useSubjects();
-    const activeSubjects = useMemo(() => subjects.filter((s: any) => !s.isArchived), [subjects]);
+    const activeSubjects = useMemo(() => subjects.filter((s) => !s.isArchived).sort((a, b) => a.name.localeCompare(b.name)), [subjects]);
     const { data: topics = [], isLoading: loadingTopics } = useTopicBySubject(subjectId);
 
     const activeSubject = useMemo(() => subjects.find((s: any) => s.id === subjectId), [subjects, subjectId]);
@@ -205,7 +209,7 @@ export function MainSection({
 
                     {/* Current Topic Indicator */}
                     {subjectId && (
-                        < div className="flex-1 space-y-1 w-full transition-opacity duration-300" style={{ opacity: subjectId ? 1 : 0.5, pointerEvents: subjectId ? 'auto' : 'none' }}>
+                        <div className="flex-1 space-y-1 w-full transition-opacity duration-300" style={{ opacity: subjectId ? 1 : 0.5, pointerEvents: subjectId ? 'auto' : 'none' }}>
                             <Label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider ml-1">Tópico</Label>
                             <div className="flex items-center">
                                 <Select

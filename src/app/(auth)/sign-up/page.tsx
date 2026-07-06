@@ -51,6 +51,7 @@ export default function SignUpPage() {
             });
 
             if (error) {
+                console.error(error);
                 toast.error(error.message || "Falha ao criar conta");
                 return;
             }

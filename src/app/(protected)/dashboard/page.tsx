@@ -111,7 +111,9 @@ export default async function DashboardPage() {
                 {/* Coluna lateral */}
                 <aside className="lg:col-span-4 space-y-6">
                     {/* Ranking diário de amigos */}
-                    <StandaloneFriendsRanking ranking={ranking} />
+                    <StandaloneFriendsRanking
+                        ranking={ranking}
+                    />
 
                     {/* Ritmo circadiano */}
                     <Suspense fallback={<div className="h-48 bg-muted/40 animate-pulse rounded-2xl" />}>
