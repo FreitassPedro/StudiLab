@@ -17,7 +17,7 @@ function StreakCard({
 
   return (
     <div
-      className="flex flex-col gap-2 bg-accent rounded-2xl border border-border p-4 transition-all duration-300 hover:-translate-y-0.5"
+      className="flex flex-col gap-2 bg-orange-400 rounded-2xl border border-border p-4 transition-all duration-300 hover:-translate-y-0.5"
       style={
         isOnFire
           ? {
@@ -39,7 +39,7 @@ function StreakCard({
         </span>
       </div>
       <div className="flex items-baseline gap-1.5">
-        <FlameIcon className="h-12 w-12 text-red-600" />
+        <FlameIcon className={`h-12 w-12  ${isOnFire ? "text-red-600 animate-pulse" : "text-yellow-500"}`} />
         <span
           className="font-['Space_Grotesk'] text-[56px] font-black leading-none tracking-[-3px]"
           style={{ color: accent.accent }}
