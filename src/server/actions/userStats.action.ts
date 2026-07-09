@@ -118,16 +118,35 @@ export async function recomputeUserStats(userId: string): Promise<void> {
  * Custo: O(1) — lookup por chave primária (userId).
  * Usado pelo Dashboard, Perfil e qualquer componente que precise de métricas.
  */
-export async function getUserStatsAction(): Promise<UserStatsData | null> {
+export async function getUserStatsAction(): Promise<UserStatsData> {
     const user = await requireAuth();
 
     return unstable_cache(
         async () => {
-            const stats = await prisma.userStats.findUnique({
+            let stats = await prisma.userStats.findUnique({
                 where: { userId: user.id },
             });
 
-            if (!stats) return null;
+            // Lazy Initialization: Se for um usuário antigo sem UserStats, calculamos na hora
+            if (!stats) {
+                await recomputeUserStats(user.id);
+                stats = await prisma.userStats.findUnique({
+                    where: { userId: user.id },
+                });
+                
+                // Fallback de segurança se o usuário literalmente não tiver logs
+                if (!stats) {
+                    return {
+                        currentStreak: 0,
+                        longestStreak: 0,
+                        lastStudyDate: null,
+                        totalMinutes: 0,
+                        totalSessions: 0,
+                        weeklyMinutes: 0,
+                        studyDays: 0,
+                    };
+                }
+            }
 
             return {
                 currentStreak: stats.currentStreak,

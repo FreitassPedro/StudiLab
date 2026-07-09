@@ -36,7 +36,6 @@ export default function SignInPage() {
         try {
             const inputValue = data.name.trim();
             let email = inputValue;
-            console.log(email, inputValue);
 
             if (!inputValue.includes("@")) {
                 const foundEmail = await getEmailByUsernameAction(inputValue);
