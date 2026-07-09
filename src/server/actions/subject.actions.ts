@@ -115,48 +115,85 @@ export async function createBulkSubjectsWithTopicsAction(data: {
     }[]
 }) {
     const user = await requireAuth();
-    const existingSubjects = await prisma.subject.findMany({
-        where: { userId: user.id },
-        include: {
-            topics: {
-                select: { name: true }
-            }
-        },
-    });
-    const existingSubjectNames = existingSubjects.map(subject => subject.name);
-    const existingTopicNames = existingSubjects.flatMap(subject => subject.topics.map(topic => topic.name));
-
-    const validSubjects = data.subjects.filter(subject => !existingSubjectNames.includes(subject.name));
 
     try {
+        await prisma.$transaction(async (tx) => {
+            // 1. Busca todas as matérias que o usuário já tem de uma só vez (1 query)
+            const existingSubjects = await tx.subject.findMany({
+                where: { userId: user.id },
+                include: { topics: { select: { name: true } } },
+            });
 
-        await prisma.subject.createMany({
-            data:
-                validSubjects.map(subject => {
-                    return {
-                        name: subject.name,
-                        color: subject.color,
-                        icon: subject.emoji,
+            const existingMap = new Map(existingSubjects.map((s) => [s.name, s]));
+
+            const subjectsToCreate = [];
+            const topicsToCreate: { name: string; subjectId: string }[] = [];
+
+            // 2. Separa matérias novas vs existentes
+            for (const subjectData of data.subjects) {
+                const existing = existingMap.get(subjectData.name);
+                if (existing) {
+                    // Já existe: filtra apenas os tópicos que faltam
+                    const existingTopicNames = new Set(existing.topics.map((t) => t.name));
+                    const newTopics = subjectData.topics.filter((t) => !existingTopicNames.has(t));
+                    
+                    for (const t of newTopics) {
+                        topicsToCreate.push({ name: t, subjectId: existing.id });
+                    }
+                } else {
+                    // Não existe: vai para a fila de criação em lote
+                    subjectsToCreate.push(subjectData);
+                }
+            }
+
+            // 3. Cria matérias novas em lote (1 query)
+            if (subjectsToCreate.length > 0) {
+                await tx.subject.createMany({
+                    data: subjectsToCreate.map((s) => ({
+                        name: s.name,
+                        color: s.color,
+                        icon: s.emoji,
                         userId: user.id,
                         isOpen: true,
                         isArchived: false,
-                        topics: {
-                            create: subject.topics.filter(topic => !existingTopicNames.includes(topic)).map(topic => {
-                                return {
-                                    name: topic,
-                                };
-                            }),
-                        },
+                    })),
+                });
+
+                // Recupera os IDs das matérias recém-criadas para atrelar os tópicos (1 query)
+                const newSubjectNames = subjectsToCreate.map((s) => s.name);
+                const newlyCreatedSubjects = await tx.subject.findMany({
+                    where: { userId: user.id, name: { in: newSubjectNames } },
+                    select: { id: true, name: true },
+                });
+
+                const newlyCreatedMap = new Map(newlyCreatedSubjects.map((s) => [s.name, s.id]));
+
+                // Adiciona os tópicos dessas matérias novas na fila de criação
+                for (const subjectData of subjectsToCreate) {
+                    const subjectId = newlyCreatedMap.get(subjectData.name);
+                    if (subjectId) {
+                        for (const t of subjectData.topics) {
+                            topicsToCreate.push({ name: t, subjectId });
+                        }
                     }
-                })
+                }
+            }
+
+            // 4. Cria todos os tópicos (novos e de matérias existentes) de uma só vez (1 query)
+            if (topicsToCreate.length > 0) {
+                await tx.topic.createMany({
+                    data: topicsToCreate,
+                });
+            }
         });
 
-        return { success: true }
+        return { success: true };
     } catch (error) {
+        console.error("Erro no createBulkSubjectsWithTopicsAction:", error);
         if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2002') {
-            throw new Error(`Já existe uma matéria com o nome "${data.subjects.map(subject => subject.name).join(', ')}".`);
+            throw new Error(`Conflito ao criar uma matéria ou tópico. Tente novamente.`);
         }
-        throw new Error("Erro desconhecido ao criar matérias");
+        throw new Error("Erro desconhecido ao criar matérias e tópicos em lote");
     }
 }
 
