@@ -12,6 +12,7 @@ import { ProfileData, Theme } from "../types";
 
 import { StudyCharts } from "../components/StudyCharts";
 import { FriendsRanking } from "../components/FriendsRanking";
+import { Friends } from "@/app/(protected)/dashboard/components/Friends";
 
 async function MainPage({ data }: { data: ProfileData }) {
   return (
@@ -43,6 +44,8 @@ async function MainPage({ data }: { data: ProfileData }) {
           <div className="flex flex-col gap-6">
             {/* <ObjectiveCard objective={data.objective} /> */}
             <FriendsRanking ranking={data.friendsRanking} />
+
+            {data.isOwner && <Friends />}
 
             {/* <SocialActivity /> */}
             <AchievementBadges badges={data.badges} />

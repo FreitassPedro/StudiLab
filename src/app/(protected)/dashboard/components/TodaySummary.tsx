@@ -28,10 +28,10 @@ export function TodaySummary() {
             <DailyProgress totalMinutes={summary.totalMinutes} />
 
             {/* Streak / Ofensiva */}
-            <Card className="bg-orange-400/80 border-none">
+            <Card className="bg-orange-500/80 border-none">
                 <CardContent className="p-5 h-full flex flex-row items-center justify-center">
-                    <div className="p-2 w-fit rounded-xl bg-orange-500/10 mb-3">
-                        <Flame className="h-12 w-12 text-orange-500" />
+                    <div className="p-2 w-fit rounded-xl bg-orange-500 mb-3">
+                        <Flame className="h-14 w-14 text-orange-300" />
                     </div>
                     <div className="ml-2">
                         <p className="text-3xl font-extrabold leading-none">

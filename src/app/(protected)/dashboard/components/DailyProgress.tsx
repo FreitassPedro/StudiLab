@@ -113,6 +113,11 @@ export function DailyProgress({
     const circumference = 2 * Math.PI * radius;
     const offset = circumference - (progress / 100) * circumference;
 
+    const minutosRestante = Math.max(0, dailyGoalMinutes - totalMinutes);
+    const horasRestante = Math.floor(minutosRestante / 60);
+    const minutosRestanteFinal = minutosRestante % 60;
+
+
     return (
         <Card className="md:col-span-2 overflow-hidden border-none bg-linear-to-br from-card/50 via-background to-secondary/5 shadow-inner">
             <CardContent className="p-6">
@@ -132,10 +137,7 @@ export function DailyProgress({
                             {hours}h {minutes}m
                         </h3>
                         <p className="text-sm text-muted-foreground">
-                            {progress >= 100 ? "Meta batida! Parabéns! 🎉" : `Faltam ${Math.max(0, dailyGoalMinutes - totalMinutes)} 
-                            ${type == 'hours' ? (hours > 1 ? "h" : "min") : 'min'}
-                            
-                            para a meta`}
+                            {progress >= 100 ? "Meta batida! Parabéns! 🎉" : `Faltam ${horasRestante}h ${minutosRestanteFinal}m para a meta`}
                         </p>
                     </div>
 

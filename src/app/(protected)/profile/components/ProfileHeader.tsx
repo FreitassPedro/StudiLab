@@ -300,60 +300,60 @@ export function ProfileHeader({ user, stats, isOwner, isFollowing }: ProfileHead
           </div>
         )}
 
-        {isOwner && (
-          <EditDialog user={user} isOwner={isOwner}>
-            <Button
-              variant="outline"
-              size="sm"
-              className=" "
-            >
-              <Pencil />
-              Editar Perfil
-            </Button>
-          </EditDialog>
-        )}
-        <Button
-          variant="outline" size="sm"
-          onClick={async () => {
-            await navigator.clipboard.writeText(`https://studilab.vercel.app/profile/${user.username}`);
-            toast.success("Link copiado para a área de transferência!");
-          }}
-          className="  ">
-          <Share className="w-4 h-4" />
-          Compartilhar
-        </Button>
-        {!isOwner && (
-          <FollowButton targetUserId={user.id} initialIsFollowing={isFollowing} />
-        )}
-        {isOwner && (
-          <UserSearchModal>
-            <Button variant="outline" size="sm" className="bg-foreground/5 hover:bg-foreground/10 ml-2 border-border text-foreground">
-              <Search className="mr-2 h-4 w-4" />
-              Buscar Amigos
-            </Button>
-          </UserSearchModal>
-        )}
-
-        <div className="flex flex-wrap items-center gap-2 mt-4">
+        {/* Followers / Following Stats */}
+        <div className="flex flex-wrap items-center gap-3 mt-4 mb-3">
           {user.followersCount !== undefined && (
             <StatPill value={String(user.followersCount)} label="Seguidores" />
           )}
           {user.followingCount !== undefined && (
             <StatPill value={String(user.followingCount)} label="Seguindo" />
           )}
+        </div>
 
-          {/*
-          <StatPill value={totalHoursLabel} label="estudadas" />
-          <StatPill value={consistency} label="consistência" />
-          <StatPill value={String(stats.studyDays)} label="dias registrados" />
+        {/* Action Buttons */}
+        <div className="flex flex-wrap items-center gap-2">
+          {isOwner && (
+            <EditDialog user={user} isOwner={isOwner}>
+              <Button
+                variant="default"
+                size="sm"
+                className="rounded-xl shadow-sm transition-all hover:-translate-y-0.5 font-medium"
+              >
+                <Pencil className="w-4 h-4 mr-2" />
+                Editar Perfil
+              </Button>
+            </EditDialog>
+          )}
 
-          <div className="inline-flex items-center gap-1.5 rounded-full border border-border bg-foreground/[0.03] px-3 py-[5px] text-xs">
-            <span>🔥</span>
-            <span className="font-semibold text-foreground/70">
-              {stats.currentStreak} dias de ofensiva
-            </span>
-          </div>
-          */}
+          {isOwner && (
+            <UserSearchModal>
+              <Button 
+                variant="secondary" 
+                size="sm" 
+                className="rounded-xl shadow-sm transition-all hover:-translate-y-0.5 border border-border/40 font-medium"
+              >
+                <Search className="w-4 h-4 mr-2" />
+                Buscar Amigos
+              </Button>
+            </UserSearchModal>
+          )}
+
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={async () => {
+              await navigator.clipboard.writeText(`https://studilab.vercel.app/profile/${user.username}`);
+              toast.success("Link copiado para a área de transferência!");
+            }}
+            className="rounded-xl shadow-sm transition-all hover:-translate-y-0.5 border-border/60 hover:bg-muted/50 font-medium"
+          >
+            <Share className="w-4 h-4 mr-2" />
+            Compartilhar
+          </Button>
+
+          {!isOwner && (
+            <FollowButton targetUserId={user.id} initialIsFollowing={isFollowing} />
+          )}
         </div>
       </div>
     </div>
