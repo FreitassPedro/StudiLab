@@ -99,17 +99,17 @@ function HeatCell({
     4: accent.accent,
   };
 
-  return (
-    <div
-      className="group relative h-[13px] w-[13px] cursor-default rounded-[3px] transition-transform duration-150 hover:z-10 hover:scale-150"
-      style={{ background: intensityMap[level] }}
-      title={label}
-    >
-      <div className="pointer-events-none absolute bottom-full left-1/2 z-50 mb-1.5 -translate-x-1/2 whitespace-nowrap rounded-md border border-border bg-card px-2 py-1 text-[11px] text-foreground opacity-0 transition-opacity group-hover:opacity-100">
-        {label}
+    return (
+      <div
+        className="group relative h-[13px] w-[13px] cursor-default rounded-[3px] transition-transform duration-150 hover:z-10 hover:scale-150"
+        style={{ background: intensityMap[level] }}
+        title={label}
+      >
+        <div className="pointer-events-none absolute bottom-full left-1/2 z-50 mb-1.5 -translate-x-1/2 whitespace-nowrap rounded-md border border-border bg-card px-2 py-1 text-[11px] text-foreground opacity-0 transition-opacity group-hover:opacity-100">
+          {label}
+        </div>
       </div>
-    </div>
-  );
+    );
 }
 
 const DAY_LABELS = ["Seg", "", "Qua", "", "Sex", "", "Dom"];
@@ -124,6 +124,9 @@ export function StudyHeatmap({ heatmap }: StudyHeatmapProps) {
   const WEEKS = 26;
 
   const columns = useMemo(() => buildColumns(heatmap, WEEKS), [heatmap]);
+
+  const today = new Date();
+  const todayKey = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, "0")}-${String(today.getDate()).padStart(2, "0")}`;
 
   return (
     <section className="mb-10">
@@ -163,14 +166,20 @@ export function StudyHeatmap({ heatmap }: StudyHeatmapProps) {
           <div className="flex flex-nowrap gap-0.5">
             {columns.map((col, w) => (
               <div key={w} className="flex flex-col gap-0.5">
-                {col.cells.map((cell, d) => (
-                  <HeatCell
-                    key={d}
-                    level={cell.level}
-                    label={cell.label}
-                    accent={accent}
-                  />
-                ))}
+                {col.cells.map((cell, d) => {
+
+                  // Se a celula for depois de hoje, não renderizar
+                  if(cell.dateKey > todayKey) return null; 
+                  
+                  return (
+                    <HeatCell
+                      key={d}
+                      level={cell.level}
+                      label={cell.label}
+                      accent={accent}
+                    />
+                  )
+                })}
               </div>
             ))}
           </div>

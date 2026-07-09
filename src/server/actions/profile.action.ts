@@ -96,6 +96,8 @@ const getCachedProfileStats = async (targetUserId: string) => {
       const currentDateObj = new Date();
       currentDateObj.setHours(0, 0, 0, 0);
 
+      const todayMinutes = heatmap[currentDateObj.toISOString().split("T")[0]] || 0;
+
       for (let i = 0; i < 365; i++) {
         const d = new Date(currentDateObj.getTime() - i * msInDay);
         const dStr = d.toISOString().split("T")[0];
@@ -120,7 +122,7 @@ const getCachedProfileStats = async (targetUserId: string) => {
         bestWeekLabel: "Última Semana",
         weeklyMinutes: 0,
         avgMinutesPerDay: uniqueStudyDays.size > 0 ? Math.round(totalMinutes / uniqueStudyDays.size) : 0,
-        todayMinutes: 0,
+        todayMinutes,
       };
 
       return { heatmap, topSubjects, recentSessions, stats };

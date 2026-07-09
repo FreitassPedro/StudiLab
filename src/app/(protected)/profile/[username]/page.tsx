@@ -63,27 +63,8 @@ interface PageProps {
 export default async function UsernameProfilePage({ params }: PageProps) {
   const { username } = await params;
   const data = await getProfileDataAction(username);
-  data.stats.todayMinutes = 150;
-  data.friendsRanking = [
-    { id: "1", name: "Ana Silva", username: "anasilva", minutes: 320 },
-    { id: "2", name: "Carlos Edu", username: "carlosedu", minutes: 210 },
-    { id: "3", name: "Você", username: data.user.username || "voce", minutes: 150, image: data.user.image || undefined },
-    { id: "4", name: "Maria Clara", username: "mariac", minutes: 45 },
-  ];
-  data.chartData = [
-    { name: "Seg", minutes: 120 },
-    { name: "Ter", minutes: 180 },
-    { name: "Qua", minutes: 150 },
-    { name: "Qui", minutes: 210 },
-    { name: "Sex", minutes: 90 },
-    { name: "Sáb", minutes: 240 },
-    { name: "Dom", minutes: 150 },
-  ];
-  data.objective = {
-    name: "ENEM 2026",
-    date: "03 Nov 2026",
-    daysLeft: 129,
-  };
+
+  
   return (
     <ProfileThemeProvider initialTheme={data.user.theme as Theme}>
       {/* Page background */}
