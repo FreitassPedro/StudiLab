@@ -9,12 +9,9 @@ import type {
   ProfileSubject,
   ProfileSession,
   ProfileUser,
-  FriendRanking,
 } from "@/app/(protected)/profile/types";
 import { notFound } from "next/navigation";
 import { revalidateTag, unstable_cache } from "next/cache";
-import { getCurrentUser } from "./getCurrentUser";
-import { startOfDay } from "date-fns";
 
 // 1. Cache Global Invariável
 const getCachedBadges = unstable_cache(
@@ -344,32 +341,29 @@ export async function updateProfile(data: {
 }
 
 
-export const getFriendsRanking = async () => {
+export const getFriends = async () => {
   const user = await requireAuth();
-  const today = new Date();
+  const data = await prisma.user.findMany({
+    select: {
+      id: true,
+      name: true,
+      email: true,
+      image: true,
+      profile: {
+        select: {
+          username: true
+        }
+      }
+    },
+    where: {
+      followers: {
+        some: {
+          followerId: user.id,
+        },
+      },
+    },
+  });
 
-  const ranking = await prisma.$queryRaw<FriendRanking[]>`
-    SELECT 
-      u.id,
-      u.name,
-      u.image,
-      p.username,
-      -- Garante que se o usuário não tiver logs hoje, o valor retornado seja 0 e não NULL
-      COALESCE(SUM(l.minutes)::INT, 0) as minutes
-    FROM "User" u
-    -- 1. Junta com a tabela de Profile para pegar o username
-    LEFT JOIN "Profile" p ON p."userId" = u.id
-    -- 2. Filtra para trazer apenas os usuários que você segue
-    JOIN "Follow" f ON f."followingId" = u.id
-    -- 3. Sequência de LEFT JOINs para chegar até os logs de estudo do usuário
-    LEFT JOIN "Subject" s ON s."userId" = u.id
-    LEFT JOIN "Topic" t ON t."subjectId" = s.id
-    -- Filtra os logs para somar apenas os que aconteceram a partir de hoje (00:00)
-    LEFT JOIN "StudyLogs" l ON l."topicId" = t.id AND l.study_date >= ${today}
-    WHERE f."followerId" = ${user.id}
-    GROUP BY u.id, p.username
-    ORDER BY minutes DESC;
-  `;
-
-  return ranking;
+  console.log(data);
+  return data;
 }

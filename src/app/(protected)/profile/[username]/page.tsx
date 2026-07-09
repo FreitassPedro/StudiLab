@@ -1,6 +1,5 @@
 import { getProfileDataAction } from "@/server/actions/profile.action";
 import { ProfileThemeProvider } from "../components/ThemeContext";
-import { ThemeSwitcher } from "../components/ThemeSwitcher";
 import { ProfileBanner } from "../components/ProfileBanner";
 import { ProfileHeader } from "../components/ProfileHeader";
 import { ShowcaseGrid } from "../components/ShowcaseGrid";
@@ -10,8 +9,7 @@ import { RecentSessions } from "../components/RecentSessions";
 import { AchievementBadges } from "../components/AchievementBadges";
 import { Suspense } from "react";
 import { ProfileData, Theme } from "../types";
-import { requireAuth } from "@/server/actions/requireAuth";
-import { checkIsFollowing } from "@/server/actions/follow.action";
+
 import { StudyCharts } from "../components/StudyCharts";
 import { FriendsRanking } from "../components/FriendsRanking";
 

@@ -4,7 +4,7 @@ import { TodaySummary } from "./components/TodaySummary";
 import { TodayTimeline } from "../nova-sessao/components/TodayTimeline";
 import { TodaySummarySkeleton, RecentSessionsSkeleton } from "./components/Skeletons";
 import { BiologicalClock } from "./components/BiologicalClock";
-import { StandaloneFriendsRanking } from "./components/FriendsRankingDashboard";
+import { Friends } from "./components/Friends";
 import { DashboardWeeklyChart } from "./components/WeeklyChart";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
@@ -15,13 +15,6 @@ import { ComfortSection } from "./components/Comfort";
 export default async function DashboardPage() {
     const user = await getCurrentUser();
     const firstName = user?.name?.split(" ")[0] || "Estudante";
-
-    const ranking = [
-        { id: "1", name: "Ana Silva", username: "anasilva", minutes: 320 },
-        { id: "2", name: "Carlos Edu", username: "carlosedu", minutes: 210 },
-        { id: "3", name: "Você", username: "voce", minutes: 150 },
-        { id: "4", name: "Maria Clara", username: "mariac", minutes: 45 },
-    ];
 
     return (
         <div className="container mx-auto p-4 md:p-8 space-y-8 animate-in fade-in duration-700">
@@ -111,9 +104,7 @@ export default async function DashboardPage() {
                 {/* Coluna lateral */}
                 <aside className="lg:col-span-4 space-y-6">
                     {/* Ranking diário de amigos */}
-                    <StandaloneFriendsRanking
-                        ranking={ranking}
-                    />
+                    <Friends />
 
                     {/* Ritmo circadiano */}
                     <Suspense fallback={<div className="h-48 bg-muted/40 animate-pulse rounded-2xl" />}>
