@@ -106,14 +106,10 @@ function TaskItem({
     );
 }
 
-// ─── Main Export ──────────────────────────────────────────────────────────────
+function TaskAdd({ subjectId }: { subjectId: string }) {
 
-export function TasksSection({ subjectId }: { subjectId: string }) {
-    const { pending, completed, addTask, toggleTask, deleteTask, editTask, clearCompleted } =
-        useSubjectTasks(subjectId);
-
+    const { addTask } = useSubjectTasks(subjectId);
     const [newTaskText, setNewTaskText] = useState("");
-    const [showCompleted, setShowCompleted] = useState(false);
     const inputRef = useRef<HTMLInputElement>(null);
 
     const handleAdd = () => {
@@ -126,30 +122,40 @@ export function TasksSection({ subjectId }: { subjectId: string }) {
     const handleKeyDown = (e: KeyboardEvent<HTMLInputElement>) => {
         if (e.key === "Enter") handleAdd();
     };
+    return (
+        <div className="flex items-center gap-2 p-1 rounded-xl border border-dashed border-border hover:border-primary/40 focus-within:border-primary/40 transition-colors bg-card/50">
+            <div className="pl-2">
+                <Plus size={16} className="text-muted-foreground" />
+            </div>
+            <Input
+                ref={inputRef}
+                placeholder="Adicionar tarefa..."
+                value={newTaskText}
+                onChange={(e) => setNewTaskText(e.target.value)}
+                onKeyDown={handleKeyDown}
+                className="border-0 bg-transparent shadow-none focus-visible:ring-0 text-sm h-9 "
+            />
+            {newTaskText.trim() && (
+                <Button size="sm" className="h-7 rounded-lg shrink-0 mr-1" onClick={handleAdd}>
+                    Adicionar
+                </Button>
+            )}
+        </div>
+    );
+}
+// ─── Main Export ──────────────────────────────────────────────────────────────
+
+export function TasksSection({ subjectId }: { subjectId: string }) {
+    const { pending, completed, toggleTask, deleteTask, editTask, clearCompleted } =
+        useSubjectTasks(subjectId);
+
+    const [showCompleted, setShowCompleted] = useState(false);
 
     const totalTasks = pending.length + completed.length;
 
     return (
         <div className="space-y-4">
-            {/* Add task input */}
-            <div className="flex items-center gap-2 p-1 rounded-xl border border-dashed border-border hover:border-primary/40 focus-within:border-primary/40 transition-colors bg-card/50">
-                <div className="pl-2">
-                    <Plus size={16} className="text-muted-foreground" />
-                </div>
-                <Input
-                    ref={inputRef}
-                    placeholder="Adicionar tarefa..."
-                    value={newTaskText}
-                    onChange={(e) => setNewTaskText(e.target.value)}
-                    onKeyDown={handleKeyDown}
-                    className="border-0 bg-transparent shadow-none focus-visible:ring-0 text-sm h-9 px-0"
-                />
-                {newTaskText.trim() && (
-                    <Button size="sm" className="h-7 rounded-lg shrink-0 mr-1" onClick={handleAdd}>
-                        Adicionar
-                    </Button>
-                )}
-            </div>
+            <TaskAdd subjectId={subjectId} />
 
             {/* Empty state */}
             {totalTasks === 0 && (

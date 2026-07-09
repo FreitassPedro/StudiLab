@@ -9,6 +9,7 @@ export interface SubjectTask {
     text: string;
     completed: boolean;
     createdAt: string;
+    dueDate: string | null;
     completedAt: string | null;
 }
 
@@ -38,7 +39,9 @@ function saveToStorage(subjectId: string, tasks: SubjectTask[]) {
 // ─── Hook ────────────────────────────────────────────────────────────────────
 
 export function useSubjectTasks(subjectId: string) {
-    const [tasks, setTasks] = useState<SubjectTask[]>([]);
+    const [tasks, setTasks] = useState<SubjectTask[]>(() => {
+        return loadFromStorage(subjectId);
+    });
 
     // Load on mount / subjectId change
     useEffect(() => {
@@ -62,6 +65,7 @@ export function useSubjectTasks(subjectId: string) {
                 text: text.trim(),
                 completed: false,
                 createdAt: new Date().toISOString(),
+                dueDate: null,
                 completedAt: null,
             };
             persist([task, ...tasks]);

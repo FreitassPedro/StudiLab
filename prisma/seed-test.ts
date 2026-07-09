@@ -107,17 +107,40 @@ async function main() {
     await prisma.verification.deleteMany();
 
     console.log('👤 Creating test user...');
-    const { user } = await auth.api.signUpEmail({
+    const { user: user1 } = await auth.api.signUpEmail({
         body: {
             email: "test-user@example.com",
             password: "test-password",
-            name: "Test User",
+            name: "Test User 1",
         }
     });
 
-    if (!user) {
+    const { user: user2 } = await auth.api.signUpEmail({
+        body: {
+            email: "test2@email.com",
+            password: "test-password2",
+            name: "Test User 2",
+        }
+    });
+
+
+    if (!user1 || !user2) {
         throw new Error("Failed to create test user");
     }
+
+    await prisma.follows.create({
+        data: {
+            followerId: user1.id,
+            followingId: user2.id,
+        },
+    });
+
+    await prisma.follows.create({
+        data: {
+            followerId: user2.id,
+            followingId: user1.id,
+        },
+    });
 
     const subjectsByName = new Map<string, { id: string }>();
     console.log('📚 Creating subjects...');
@@ -126,7 +149,7 @@ async function main() {
             data: {
                 name: subject.name,
                 color: subject.color,
-                userId: user.id,
+                userId: user1.id,
                 isOpen: subject.isOpen,
                 isArchived: subject.isArchived,
             },

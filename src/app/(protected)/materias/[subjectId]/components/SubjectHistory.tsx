@@ -46,7 +46,7 @@ export function SubjectHistory({ subjectId, subjectColor }: Props) {
     const subjectLogs = useMemo(() => {
         if (!analysis?.logs) return [];
         return analysis.logs
-            .filter((log) => log.topic?.subject?.id === subjectId)
+            .filter((log) => log.topic?.subjectId === subjectId)
             .sort(
                 (a, b) =>
                     new Date(b.start_time).getTime() - new Date(a.start_time).getTime()

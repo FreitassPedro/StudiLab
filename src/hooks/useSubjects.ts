@@ -38,7 +38,14 @@ export function useSubjects() {
         useSubjectsOptions()
     );
 }
-
+export function useSubjectById(subjectId: string) {
+    return useQuery(
+        {
+            ...useSubjectsOptions(),
+            select: (subjects) => subjects.find((s) => s.id === subjectId),
+        }
+    );
+}
 export interface SubjectCreate {
     name: string;
     color: string;
