@@ -353,7 +353,7 @@ function SubjectCard({
           <Button variant="outline" size="sm" className="w-full h-7 text-[11px] gap-1"
             onClick={(e) => { e.stopPropagation(); onAddBlock(); }}>
             <Plus className="w-3 h-3" />
-            Novo bloco · {s.subject.split(" ")[0]}
+            Novo bloco · {s.subject}
           </Button>
         </div>
       )}
@@ -510,9 +510,9 @@ export function SidebarTools() {
             Matérias · {summaries.length}
           </p>
           <div className="flex flex-col gap-2">
-            {summaries.map((s) => (
+            {summaries.map((s, index) => (
               <SubjectCard
-                key={s.subject}
+                key={index}
                 s={s}
                 blocks={allBlocks}
                 onAddBlock={() => openAddModal(0)}

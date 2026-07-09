@@ -132,7 +132,7 @@ export function usePlannerState() {
     const openEditBlock = useCallback((block: StudyBlock) => {
         const subject = subjects.find(s => s.id === block.subjectId);
         setNewBlockForm({
-            subjectId: subject?.name ?? block.subjectId,
+            subjectId: block.subjectId,
             topic: block.topic ?? "",
             startTime: block.startTime,
             endTime: block.endTime,
@@ -256,6 +256,37 @@ export function usePlannerState() {
             return newSet;
         });
     }, []);
+
+    const moveToBacklog = useCallback((blockId: string) => {
+        setBlocks((prev) => prev.map(b => b.id === blockId ? { ...b, dayIndex: -1 } : b));
+    }, []);
+
+    const addQuickBlock = useCallback((template: { subject: string, type: BlockType, color: ColorName }) => {
+        setSubjects(prevSubjects => {
+            let subject = prevSubjects.find(s => s.name === template.subject);
+            let newSubjects = prevSubjects;
+            if (!subject) {
+                subject = { id: template.subject, name: template.subject, color: template.color, isVisible: true };
+                newSubjects = [...prevSubjects, subject];
+            }
+            
+            const newBlock: StudyBlock = {
+                id: generateId(),
+                subjectId: subject.id,
+                topic: "",
+                startTime: "09:00",
+                endTime: "10:00",
+                color: subject.color,
+                dayIndex: -1,
+                type: template.type,
+                status: "todo",
+            };
+            
+            setBlocks(prev => [...prev, newBlock]);
+            return newSubjects;
+        });
+    }, []);
+
     /**
      * Move a block to a new day + pixel offset within the timeline.
      * pixelTop: distance from top of timeline container (px).
@@ -341,6 +372,8 @@ export function usePlannerState() {
         saveBlock,
         deleteBlock,
         toggleBlockStatus,
+        moveToBacklog,
+        addQuickBlock,
     };
 }
 

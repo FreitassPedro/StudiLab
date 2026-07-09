@@ -1,5 +1,6 @@
 "use client";
 
+import { getFriendsRanking } from "@/server/actions/profile.action";
 import { useQuery } from "@tanstack/react-query";
 import { Trophy, Clock } from "lucide-react";
 

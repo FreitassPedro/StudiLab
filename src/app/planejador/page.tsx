@@ -3,15 +3,19 @@
 import { Suspense, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { DayColumn } from "./components/DayColumn";
 import { getMondayOfCurrentWeek, getWeekDates } from "../teste/4/components/planner-utils";
-import { Clock, ChevronLeft, ChevronRight } from "lucide-react";
+import { CalendarDays, ChevronLeft, ChevronRight, Clock } from "lucide-react";
 import { usePlannerState } from "./usePlannerState";
 import { SidebarTools } from "./components/SidebarTools";
+import { WeekStatsBar } from "./components/WeekStatsBar";
 import { buildHourHeights, formatDuration, parseTimeToMinutes } from "./utils";
-
-import { addWeeks } from "date-fns";
+import { addWeeks, format } from "date-fns";
+import { ptBR } from "date-fns/locale";
 import { PlannerActionsProvider } from "./components/PlannerActionsContext";
 import { NewBlockFormModal } from "./components/Blocks";
 import { Button } from "@/components/ui/button";
+import { Separator } from "@/components/ui/separator";
+import { TooltipProvider } from "@/components/ui/tooltip";
+import { cn } from "@/lib/utils";
 
 function formatHourLabel(hour: number) {
     return `${String(hour).padStart(2, "0")}:00`;
@@ -44,6 +48,8 @@ export default function Page() {
         saveBlock,
         deleteBlock,
         toggleBlockStatus,
+        moveToBacklog,
+        addQuickBlock,
     } = usePlannerState();
 
     // ── Week navigation ──────────────────────────────────────────────────────
@@ -76,38 +82,30 @@ export default function Page() {
         dragMovedRef.current = false;
     }, [setDraggedId, dragMovedRef]);
 
-    // Global mousemove: track which day column the cursor is over
     useEffect(() => {
         if (!draggedId && !resizingId) return;
 
         const handleMouseMove = (e: MouseEvent) => {
             dragMovedRef.current = true;
-
             if (resizingId) {
-                // Find column for the resizing block
                 const block = blocks.find((b) => b.id === resizingId);
                 if (!block) return;
                 const timelineEl = timelineRefs.current[block.dayIndex];
                 if (!timelineEl) return;
                 const rect = timelineEl.getBoundingClientRect();
-                const relY = e.clientY - rect.top;
-                resizeBlockByPixel(resizingId, relY, hourHeights);
+                resizeBlockByPixel(resizingId, e.clientY - rect.top, hourHeights);
             }
         };
 
         const handleMouseUp = (e: MouseEvent) => {
             if (draggedId && dragMovedRef.current) {
-                // Find which column the cursor is over
                 let targetDay = -1;
                 let relY = 0;
                 for (let i = 0; i < 7; i++) {
                     const timelineEl = timelineRefs.current[i];
                     if (!timelineEl) continue;
                     const rect = timelineEl.getBoundingClientRect();
-                    if (
-                        e.clientX >= rect.left &&
-                        e.clientX <= rect.right
-                    ) {
+                    if (e.clientX >= rect.left && e.clientX <= rect.right) {
                         targetDay = i;
                         relY = e.clientY - rect.top;
                         break;
@@ -115,9 +113,21 @@ export default function Page() {
                 }
                 if (targetDay >= 0) {
                     moveBlockByPixel(draggedId, targetDay, relY - dragOffsetY, hourHeights);
+                } else {
+                    const sidebarEl = document.getElementById("planner-sidebar");
+                    if (sidebarEl) {
+                        const sRect = sidebarEl.getBoundingClientRect();
+                        if (
+                            e.clientX >= sRect.left &&
+                            e.clientX <= sRect.right &&
+                            e.clientY >= sRect.top &&
+                            e.clientY <= sRect.bottom
+                        ) {
+                            moveToBacklog(draggedId);
+                        }
+                    }
                 }
             }
-
             setDraggedId(null);
             setResizingId(null);
         };
@@ -138,7 +148,7 @@ export default function Page() {
         [setResizingId]
     );
 
-    // ── Memoized Context & Data ──
+    // ── Memoized Context & Data ──────────────────────────────────────────────
     const actionsValue = useMemo(() => ({
         allBlocks: blocks,
         subjects,
@@ -155,157 +165,184 @@ export default function Page() {
         handleResizeStart,
         toggleBlockStatus,
         toggleViewSubject,
+        moveToBacklog,
+        addQuickBlock,
     }), [
         blocks, subjects, hiddenSubjects, subjectsSummary, draggedId, resizingId,
         dragOffsetY, openAddModal, openEditBlock, removeBlock, duplicateBlock,
-        handleDragStart, handleResizeStart, toggleBlockStatus, toggleViewSubject
+        handleDragStart, handleResizeStart, toggleBlockStatus, toggleViewSubject,
+        moveToBacklog, addQuickBlock,
     ]);
 
     const blocksByDay = useMemo(() => {
         const result = Array.from({ length: 7 }, () => [] as typeof blocks);
         blocks.forEach(b => {
-            if (b.dayIndex >= 0 && b.dayIndex < 7) {
-                result[b.dayIndex].push(b);
-            }
+            if (b.dayIndex >= 0 && b.dayIndex < 7) result[b.dayIndex].push(b);
         });
         return result;
     }, [blocks]);
 
-    // ── Stats ────────────────────────────────────────────────────────────────
     const totalMinutes = useMemo(
-        () =>
-            blocks.reduce((total, block) => {
-                const s = parseTimeToMinutes(block.startTime);
-                const e = parseTimeToMinutes(block.endTime);
-                return total + (e - s);
-            }, 0),
+        () => blocks.reduce((total, b) => {
+            return total + (parseTimeToMinutes(b.endTime) - parseTimeToMinutes(b.startTime));
+        }, 0),
         [blocks]
     );
 
+    // Week label e.g. "30 jun – 6 jul"
     const weekLabel = useMemo(() => {
-        const start = weekDates[0];
-        const end = weekDates[6];
-        const opts: Intl.DateTimeFormatOptions = { day: "numeric", month: "short" };
-        return `${start.toLocaleDateString("pt-BR", opts)} – ${end.toLocaleDateString("pt-BR", opts)}`;
+        const fmt = (d: Date) => format(d, "d MMM", { locale: ptBR });
+        return `${fmt(weekDates[0])} – ${fmt(weekDates[6])}`;
     }, [weekDates]);
+
+    const isCurrentWeek = weekOffset === 0;
 
     if (!isLoaded) {
         return (
             <div className="flex items-center justify-center h-screen">
-                <div className="text-sm text-muted-foreground">Carregando...</div>
+                <div className="text-sm text-muted-foreground animate-pulse">Carregando planejador...</div>
             </div>
         );
     }
 
     return (
-        <PlannerActionsProvider value={actionsValue}>
-            <div
-                className="flex flex-col h-screen"
-                style={{ cursor: draggedId ? "grabbing" : resizingId ? "ns-resize" : undefined }}
-            >
-                {/* ── Header ── */}
-                <div className="border-b bg-background/95 backdrop-blur-sm flex items-center justify-between px-6 py-3 shrink-0">
-                    <div className="flex items-center gap-6">
-                        <div>
-                            <h1 className="text-sm font-semibold tracking-tight">Planejador Semanal</h1>
-                            <p className="text-xs text-muted-foreground">{weekLabel}</p>
-                        </div>
-
-                        <div className="flex items-center gap-1">
-                            <Button
-                                variant="ghost"
-                                size="icon"
-                                className="h-7 w-7"
-                                onClick={() => setWeekOffset((w) => w - 1)}
-                            >
-                                <ChevronLeft className="w-4 h-4" />
-                            </Button>
-                            <Button
-                                variant="ghost"
-                                size="sm"
-                                className="h-7 text-xs"
-                                onClick={() => setWeekOffset(0)}
-                            >
-                                Hoje
-                            </Button>
-                            <Button
-                                variant="ghost"
-                                size="icon"
-                                className="h-7 w-7"
-                                onClick={() => setWeekOffset((w) => w + 1)}
-                            >
-                                <ChevronRight className="w-4 h-4" />
-                            </Button>
-                        </div>
-                    </div>
-
-                    <div className="flex items-center gap-2 text-muted-foreground">
-                        <Clock size={14} />
-                        <span className="text-xs">
-                            Total: <strong className="text-foreground">{formatDuration(totalMinutes)}</strong>
-                        </span>
-                    </div>
-                </div>
-
-                <div className="flex  overflow-hidden relative">
-                    {/* ── Main planner ── */}
-                    <div className="flex flex-1 min-w-0 bg-background m-4 mr-0 rounded-2xl flex-col">
-                        <div className="flex-1 overflow-auto">
-                            <div
-                                ref={gridRef}
-                                className="grid gap-2 h-full px-2 min-w-200"
-                                style={{ gridTemplateColumns: "56px repeat(7, minmax(0, 1fr))" }}
-                            >
-                                {/* Hour labels */}
-                                <div className="flex flex-col min-w-0 pt-18">
-                                    <div
-                                        className="relative text-xs text-muted-foreground"
-                                        style={{ height: `${timelineHeightPx}px` }}
-                                    >
-                                        {hourOffsets.map((top, hour) => (
-                                            <div
-                                                key={hour}
-                                                className="absolute right-2 flex items-center"
-                                                style={{ top: `${top}px` }}
-                                            >
-                                                <span className={hour % 6 === 0 ? "text-foreground/60" : "text-muted-foreground/40"}>
-                                                    {formatHourLabel(hour)}
-                                                </span>
-                                            </div>
-                                        ))}
-                                    </div>
+        <TooltipProvider delayDuration={200}>
+            <PlannerActionsProvider value={actionsValue}>
+                <div
+                    className="flex flex-col h-screen bg-background text-foreground overflow-hidden"
+                    style={{ cursor: draggedId ? "grabbing" : resizingId ? "ns-resize" : undefined }}
+                >
+                    {/* ── Header ──────────────────────────────────────────── */}
+                    <header className="flex items-center justify-between px-6 py-3 border-b shrink-0 bg-background/95 backdrop-blur-md z-20">
+                        <div className="flex items-center gap-4">
+                            {/* Brand */}
+                            <div className="flex items-center gap-3">
+                                <div className="bg-primary/10 p-2 rounded-xl">
+                                    <CalendarDays className="w-4 h-4 text-primary" />
                                 </div>
-                                <Suspense fallback={<div>Loading...</div>}>
-                                    {weekDates.map((date, dayIndex) => (
-                                        <div key={dayIndex}>
-                                            <DayColumn
-                                                blocks={blocksByDay[dayIndex]}
-                                                date={date}
-                                                dayIndex={dayIndex}
-                                                hourHeights={hourHeights}
-                                                timelineHeightPx={timelineHeightPx}
-                                                timelineRef={(el) => { timelineRefs.current[dayIndex] = el; }}
-                                            />
-                                        </div>
-                                    ))}
-                                </Suspense>
+                                <div>
+                                    <h1 className="text-sm font-bold tracking-tight leading-none">Planejador</h1>
+                                    <p className="text-[10px] text-muted-foreground font-medium uppercase tracking-widest mt-0.5">
+                                        Semanal
+                                    </p>
+                                </div>
+                            </div>
+
+                            <Separator orientation="vertical" className="h-8" />
+
+                            {/* Week navigator pill */}
+                            <div className="flex items-center bg-muted/50 rounded-lg p-0.5 border">
+                                <Button
+                                    variant="ghost" size="icon"
+                                    className="h-7 w-7 hover:bg-background"
+                                    onClick={() => setWeekOffset((w) => w - 1)}
+                                >
+                                    <ChevronLeft className="w-4 h-4" />
+                                </Button>
+                                <button
+                                    className="px-3 py-1 flex flex-col items-center min-w-[130px]"
+                                    onClick={() => setWeekOffset(0)}
+                                >
+                                    <span className="text-[11px] font-bold tabular-nums">{weekLabel}</span>
+                                    <span className="text-[9px] text-muted-foreground font-medium">
+                                        {isCurrentWeek ? "Esta semana" : weekOffset > 0 ? `+${weekOffset} sem.` : `${weekOffset} sem.`}
+                                    </span>
+                                </button>
+                                <Button
+                                    variant="ghost" size="icon"
+                                    className="h-7 w-7 hover:bg-background"
+                                    onClick={() => setWeekOffset((w) => w + 1)}
+                                >
+                                    <ChevronRight className="w-4 h-4" />
+                                </Button>
                             </div>
                         </div>
+
+                        {/* Right: total */}
+                        <div className="flex items-center gap-2 text-muted-foreground">
+                            <Clock size={13} />
+                            <span className="text-xs">
+                                <strong className="text-foreground">{formatDuration(totalMinutes)}</strong>
+                                {" "}planejados
+                            </span>
+                        </div>
+                    </header>
+
+                    {/* ── Stats bar ───────────────────────────────────────── */}
+                    <WeekStatsBar blocks={blocks} subjects={subjects} />
+
+                    {/* ── Body ────────────────────────────────────────────── */}
+                    <div className="flex flex-1 overflow-hidden min-h-0">
+                        {/* Grid */}
+                        <div className="flex-1 flex flex-col min-w-0 bg-muted/5">
+                            <div className="flex-1 overflow-auto">
+                                <div
+                                    ref={gridRef}
+                                    className="grid gap-px px-2 py-2 min-w-[760px]"
+                                    style={{ gridTemplateColumns: "52px repeat(7, minmax(0, 1fr))" }}
+                                >
+                                    {/* Hour labels — every 1h */}
+                                    <div className="flex flex-col min-w-0 pt-10">
+                                        <div
+                                            className="relative"
+                                            style={{ height: `${timelineHeightPx}px` }}
+                                        >
+                                            {hourOffsets.map((top, hour) =>
+                                                hour % 1 === 0 ? (
+                                                    <div
+                                                        key={hour}
+                                                        className="absolute right-2 flex items-center"
+                                                        style={{ top: `${top}px` }}
+                                                    >
+                                                        <span className={cn(
+                                                            "tabular-nums",
+                                                            hour % 6 === 0
+                                                                ? "text-foreground/50 text-[11px] font-semibold"
+                                                                : "text-muted-foreground/30 text-[10px]"
+                                                        )}>
+                                                            {formatHourLabel(hour)}
+                                                        </span>
+                                                    </div>
+                                                ) : null
+                                            )}
+                                        </div>
+                                    </div>
+
+                                    {/* Day columns */}
+                                    <Suspense fallback={<div />}>
+                                        {weekDates.map((date, dayIndex) => (
+                                            <div key={dayIndex}>
+                                                <DayColumn
+                                                    blocks={blocksByDay[dayIndex]}
+                                                    date={date}
+                                                    dayIndex={dayIndex}
+                                                    hourHeights={hourHeights}
+                                                    timelineHeightPx={timelineHeightPx}
+                                                    timelineRef={(el) => { timelineRefs.current[dayIndex] = el; }}
+                                                />
+                                            </div>
+                                        ))}
+                                    </Suspense>
+                                </div>
+                            </div>
+                        </div>
+
+                        <SidebarTools />
                     </div>
 
-                    <SidebarTools />
+                    {/* ── Modal ───────────────────────────────────────────── */}
+                    {modalOpen && (
+                        <NewBlockFormModal
+                            open={modalOpen}
+                            initialData={form}
+                            isEditing={!!editingBlock}
+                            onSave={saveBlock}
+                            onDelete={editingBlock ? () => deleteBlock(editingBlock.id) : undefined}
+                            onCloseModal={closeModal}
+                        />
+                    )}
                 </div>
-                {modalOpen && (
-                    <NewBlockFormModal
-                        open={modalOpen}
-                        initialData={form}
-                        isEditing={!!editingBlock}
-                        onSave={saveBlock}
-                        onDelete={editingBlock ? () => deleteBlock(editingBlock.id) : undefined}
-                        onCloseModal={closeModal}
-                    />
-                )}
-            </div>
-        </PlannerActionsProvider>
+            </PlannerActionsProvider>
+        </TooltipProvider>
     );
 }

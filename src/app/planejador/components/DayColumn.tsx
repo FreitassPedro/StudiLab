@@ -1,13 +1,11 @@
 "use client";
 
 import { cn } from "@/lib/utils";
-import { Separator } from "@/components/ui/separator";
 import { Calendar, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useCallback, useMemo, useRef, useState, memo } from "react";
 import { StudyBlock } from "./mockData";
 import { formatDuration } from "../utils";
-import { Badge } from "@/components/ui/badge";
 
 import { getDayName } from "../utils";
 
@@ -41,7 +39,7 @@ export function DayColumn({
     const [isDragOver, setIsDragOver] = useState(false);
     const [ghostTop, setGhostTop] = useState<number | null>(null);
 
-    console.log(`Renderizando ${getDayName(date)} - ${blocks.length} blocos`);
+
 
     const dayMinutes = useMemo(() => {
         return blocks.reduce((total, block) => {
@@ -139,23 +137,48 @@ export function DayColumn({
         );
     }, [date]);
 
+    // Abbreviated day name: "Seg", "Ter", etc.
+    const shortDay = getDayName(date).slice(0, 3);
+    const dayNum = date.getDate();
+
     return (
         <div className="flex flex-col min-w-0 relative">
             {/* Header */}
-            <div className={cn("sticky top-0 z-50 bg-background/95 backdrop-blur-sm px-2 py-2 rounded-t-lg  ", isToday && "bg-primary/5")}>
-                <h3 className={cn("text-sm font-semibold", isToday ? "text-primary" : "text-foreground")}>
-                    {getDayName(date)}
-                </h3>
-                {isToday && (
-                    <span className="ml-1.5 text-xs font-normal text-primary/70">Hoje</span>
+            <div
+                className={cn(
+                    "sticky top-0 z-50 bg-background/95 backdrop-blur-sm px-2 pt-2 pb-2.5 border-b",
+                    isToday && "border-primary/30"
                 )}
-                <p className="text-xs text-muted-foreground">{date.toLocaleDateString("pt-BR")}</p>
-                <Badge variant={dayMinutes > 0 ? "secondary" : "outline"} className="mt-1">
-                    {dayMinutes > 0 ? formatDuration(dayMinutes) : "—"}
-                </Badge>
+            >
+                <div className="flex items-center justify-between gap-1">
+                    <div className="flex items-center gap-1.5">
+                        {isToday && (
+                            <span className="w-1.5 h-1.5 rounded-full bg-primary shrink-0" />
+                        )}
+                        <span
+                            className={cn(
+                                "text-[11px] font-bold uppercase tracking-wider",
+                                isToday ? "text-primary" : "text-muted-foreground"
+                            )}
+                        >
+                            {shortDay}
+                        </span>
+                        <span
+                            className={cn(
+                                "text-sm font-bold tabular-nums",
+                                isToday ? "text-primary" : "text-foreground"
+                            )}
+                        >
+                            {dayNum}
+                        </span>
+                    </div>
+                    {dayMinutes > 0 && (
+                        <span className="text-[10px] font-mono text-muted-foreground/60 tabular-nums">
+                            {formatDuration(dayMinutes)}
+                        </span>
+                    )}
+                </div>
             </div>
-
-            <Separator className="my-1" />
 
             {/* Timeline */}
             <div
@@ -175,19 +198,18 @@ export function DayColumn({
                 onMouseLeave={handleMouseLeave}
                 onDoubleClick={handleColumnDoubleClick}
             >
-                {/* Hour lines */}
-                {hourOffsets.map((top, hour) => (
-                    <div
-                        key={hour}
-                        className={cn(
-                            "absolute left-0 right-0 border-t pointer-events-none",
-                            hour % 6 === 0
-                                ? "border-border/40"
-                                : "border-muted/30"
-                        )}
-                        style={{ top: `${top}px` }}
-                    />
-                ))}
+                {/* 1h dividers */}
+                <div className="absolute inset-0 pointer-events-none">
+                    {hourHeights.map((h, i) =>
+                        i % 1 === 0 ? (
+                            <div
+                                key={i}
+                                className="absolute left-0 w-full border-b border-border/40"
+                                style={{ top: hourOffsets[i] }}
+                            />
+                        ) : null
+                    )}
+                </div>
 
                 {/* Current time indicator */}
                 {isToday && <CurrentTimeIndicator hourHeights={hourHeights} />}

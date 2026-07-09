@@ -205,10 +205,7 @@ export const getBlockTimelineMetrics = (
 };
 
 export function normalizeSubjectName(subject: string): string {
-    return subject
-        .normalize("NFD")
-        .replace(/[\u0300-\u036f]/g, "")
-        .trim()
+    return subject?.trim()
         .toLowerCase()
         .replace(/\s+/g, " ");
 }

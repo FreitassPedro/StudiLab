@@ -1,9 +1,7 @@
 "use client";
 
 import { createContext, useContext } from "react";
-import { StudyBlock } from "./mockData";
-
-import { Subject } from "./mockData";
+import { StudyBlock, Subject, BlockType, ColorName } from "./mockData";
 
 interface PlannerActionsContextValue {
     allBlocks: StudyBlock[];
@@ -21,6 +19,8 @@ interface PlannerActionsContextValue {
     handleResizeStart: (id: string, e: React.MouseEvent) => void;
     toggleBlockStatus: (blockId: string) => void;
     toggleViewSubject: (subjectId: string) => void;
+    moveToBacklog: (blockId: string) => void;
+    addQuickBlock: (template: { subject: string; type: BlockType; color: ColorName }) => void;
 }
 
 const PlannerActionsContext = createContext<PlannerActionsContextValue | null>(null);
