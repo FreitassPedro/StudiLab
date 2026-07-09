@@ -33,7 +33,7 @@ export function FriendsRanking({ ranking }: FriendsRankingProps) {
 
           return (
             <div
-              key={friend.id}
+              key={friend.username}
               className="relative flex items-center gap-3 px-3 py-2.5 rounded-xl overflow-hidden transition-colors hover:bg-foreground/3"
             >
               {/* Progress fill */}

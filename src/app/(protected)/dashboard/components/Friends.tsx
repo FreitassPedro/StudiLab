@@ -2,7 +2,7 @@
 
 import { getFriends } from "@/server/actions/profile.action";
 import { useQuery } from "@tanstack/react-query";
-import { Trophy, Clock } from "lucide-react";
+import { Trophy } from "lucide-react";
 import { useRouter } from "next/navigation"; // Correct import for App Router
 
 export interface FriendRankingItem {
