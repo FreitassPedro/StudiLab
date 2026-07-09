@@ -3,7 +3,7 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useDeleteSubject, useSubjectOpen, useSubjectTree, useToggleArchiveSubject } from "@/hooks/useSubjects";
 import { Button } from "@/components/ui/button";
-import { ChevronDown, ChevronRight, FileText, Folder, FolderOpen, Plus, Settings, Trash2, Archive, ArchiveRestore } from "lucide-react";
+import { ChevronDown, ChevronRight, FileText, Folder, FolderOpen, Plus, Settings, Trash2, Archive, ArchiveRestore, ExternalLinkIcon } from "lucide-react";
 import { SubjectTree, TopicNode } from "@/types/types";
 import { Fragment, useState } from "react";
 import { toast } from "sonner";
@@ -11,6 +11,7 @@ import { NewTopicDialog } from "./NewTopicDialog";
 import { EditSubjectDialog, EditTopicDialog } from "./EditSubjectDialog";
 import { SubjectBook } from "./SubjectBook";
 import { NewSubject } from "./NewSubject";
+import { useRouter } from "next/navigation";
 
 function NodeRow({
     node,
@@ -240,6 +241,7 @@ function SubjectItem({ subjectTree }: {
 
 export default function SubjectList() {
     const { data: tree = [], isLoading } = useSubjectTree();
+    const router = useRouter();
 
 
     if (isLoading || !tree) {
@@ -247,13 +249,18 @@ export default function SubjectList() {
     }
 
     const activeTree = tree.filter(t => !t.subject.isArchived);
-        const archivedTree = tree.filter(t => t.subject.isArchived);
+    const archivedTree = tree.filter(t => t.subject.isArchived);
+
 
     return (
         <div className="mt-10">
             <div className="flex flex-row items-center gap-2 mb-6">
                 <h2 className="text-2xl font-bold text-foreground shrink-0">Meus Notebooks</h2>
                 <div className="h-1 w-full bg-secondary rounded-full mt-3" />
+                <Button className="outline" onClick={() => router.push(`/materias/${activeTree.at(0)?.subject.id}`)}>
+                    <ExternalLinkIcon className="h-4 w-4" />
+                    Ir para o painel
+                </Button>
             </div>
             <NewSubject />
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-8">

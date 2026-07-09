@@ -45,7 +45,7 @@ async function MainPage({ data }: { data: ProfileData }) {
             {/* <ObjectiveCard objective={data.objective} /> */}
             <FriendsRanking ranking={data.friendsRanking} />
 
-            {data.isOwner && <Friends />}
+            <Friends />
 
             {/* <SocialActivity /> */}
             <AchievementBadges badges={data.badges} />
@@ -65,7 +65,7 @@ export default async function UsernameProfilePage({ params }: PageProps) {
   const { username } = await params;
   const data = await getProfileDataAction(username);
 
-  
+
   return (
     <ProfileThemeProvider initialTheme={data.user.theme as Theme}>
       {/* Page background */}
