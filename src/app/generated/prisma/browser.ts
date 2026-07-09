@@ -72,3 +72,9 @@ export type Badge = Prisma.BadgeModel
  * 
  */
 export type UserBadge = Prisma.UserBadgeModel
+/**
+ * Model UserStats
+ * Tabela desnormalizada com métricas pré-calculadas por usuário.
+ * Atualizada incrementalmente em cada mutação de StudyLog — nunca calculada em tempo de request.
+ */
+export type UserStats = Prisma.UserStatsModel

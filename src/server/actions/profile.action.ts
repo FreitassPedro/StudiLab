@@ -25,38 +25,35 @@ const getCachedProfileStats = async (targetUserId: string) => {
   return unstable_cache(
     async () => {
       const today = new Date();
-      const fifteenDaysAgo = new Date();
-      fifteenDaysAgo.setDate(today.getDate() - 14);
+      today.setUTCHours(0, 0, 0, 0);
+      const fifteenDaysAgo = new Date(today.getTime() - 14 * 86400000);
 
-      const studyLogs = await prisma.studyLogs.findMany({
-        where: {
-          topic: {
-            subject: { userId: targetUserId }
-          },
-          study_date: {
-            gte: fifteenDaysAgo,
-            lte: today,
-          },
-        },
-        include: {
-          topic: { include: { subject: true } }
-        },
-        orderBy: { start_time: "desc" }
+      // Ler métricas pré-calculadas de UserStats — O(1), uma linha, sem JOINs
+      const userStats = await prisma.userStats.findUnique({
+        where: { userId: targetUserId },
       });
 
-      // Calculate Heatmap
+      // Buscar apenas os últimos 15 dias com JOINs — necessário para heatmap, topSubjects e sessões recentes
+      // Essa query é aceitável: janela de tempo fixa e pequena (máx. ~15 dias × sessões/dia)
+      const recentLogs = await prisma.studyLogs.findMany({
+        where: {
+          topic: { subject: { userId: targetUserId } },
+          study_date: { gte: fifteenDaysAgo, lte: today },
+        },
+        include: { topic: { include: { subject: true } } },
+        orderBy: { start_time: "desc" },
+      });
+
+      // Heatmap e top subjects derivados apenas dos últimos 15 dias
       const heatmap: Record<string, number> = {};
-      let totalMinutes = 0;
-      const uniqueStudyDays = new Set<string>();
+      const subjectMap = new Map<string, { name: string; color: string; minutes: number; emoji: string }>();
+      let todayMinutes = 0;
+      const todayStr = today.toISOString().split("T")[0];
 
-      // Basic Stats Calculation
-      const subjectMap = new Map<string, { name: string; color: string; minutes: number, emoji: string }>();
-
-      studyLogs.forEach(log => {
-        totalMinutes += log.duration_minutes;
+      recentLogs.forEach((log) => {
         const dateStr = log.study_date.toISOString().split("T")[0];
         heatmap[dateStr] = (heatmap[dateStr] || 0) + log.duration_minutes;
-        uniqueStudyDays.add(dateStr);
+        if (dateStr === todayStr) todayMinutes += log.duration_minutes;
 
         const subjectId = log.topic.subject.id;
         if (!subjectMap.has(subjectId)) {
@@ -70,13 +67,11 @@ const getCachedProfileStats = async (targetUserId: string) => {
         subjectMap.get(subjectId)!.minutes += log.duration_minutes;
       });
 
-      // Top Subjects
       const topSubjects: ProfileSubject[] = Array.from(subjectMap.values())
         .sort((a, b) => b.minutes - a.minutes)
         .slice(0, 5);
 
-      // Recent Sessions
-      const recentSessions: ProfileSession[] = studyLogs.slice(0, 10).map(log => ({
+      const recentSessions: ProfileSession[] = recentLogs.slice(0, 10).map((log) => ({
         id: log.id,
         subjectName: log.topic.subject.name,
         subjectColor: log.topic.subject.color,
@@ -84,48 +79,32 @@ const getCachedProfileStats = async (targetUserId: string) => {
         duration_minutes: log.duration_minutes,
         start_time: log.start_time,
         study_date: log.study_date,
-        notes: log.notes
+        notes: log.notes,
       }));
 
-      // Streaks (simplified application-level calculation)
-      let currentStreakCount = 0;
-      const msInDay = 1000 * 60 * 60 * 24;
-      const currentDateObj = new Date();
-      currentDateObj.setHours(0, 0, 0, 0);
-
-      const todayMinutes = heatmap[currentDateObj.toISOString().split("T")[0]] || 0;
-
-      for (let i = 0; i < 365; i++) {
-        const d = new Date(currentDateObj.getTime() - i * msInDay);
-        const dStr = d.toISOString().split("T")[0];
-        if (uniqueStudyDays.has(dStr)) {
-          currentStreakCount++;
-        } else if (i === 0) {
-          // It's okay if they haven't studied today yet
-        } else {
-          break;
-        }
-      }
-      const currentStreak = currentStreakCount;
-      const longestStreak = currentStreakCount > 10 ? currentStreakCount : 12; // Placeholder for longest streak
-
+      // Montar ProfileStats lendo valores reais de UserStats (nunca hardcoded)
       const stats: ProfileStats = {
-        totalMinutes,
-        totalSessions: studyLogs.length,
-        studyDays: uniqueStudyDays.size,
-        currentStreak,
-        longestStreak,
-        bestWeekMinutes: 0,
-        bestWeekLabel: "Última Semana",
-        weeklyMinutes: 0,
-        avgMinutesPerDay: uniqueStudyDays.size > 0 ? Math.round(totalMinutes / uniqueStudyDays.size) : 0,
+        totalMinutes: userStats?.totalMinutes ?? 0,
+        totalSessions: userStats?.totalSessions ?? 0,
+        studyDays: userStats?.studyDays ?? 0,
+        currentStreak: userStats?.currentStreak ?? 0,
+        longestStreak: userStats?.longestStreak ?? 0,
+        weeklyMinutes: userStats?.weeklyMinutes ?? 0,
+        // bestWeekMinutes: futuramente persistir em UserStats via recompute
+        // Por ora, usa o total semanal atual como proxy se disponível
+        bestWeekMinutes: userStats?.weeklyMinutes ?? 0,
+        bestWeekLabel: "Semana Atual",
+        avgMinutesPerDay:
+          (userStats?.studyDays ?? 0) > 0
+            ? Math.round((userStats?.totalMinutes ?? 0) / (userStats?.studyDays ?? 1))
+            : 0,
         todayMinutes,
       };
 
       return { heatmap, topSubjects, recentSessions, stats };
     },
     [`profile-stats-${targetUserId}`],
-    { tags: [`profile-stats-${targetUserId}`] }
+    { tags: [`profile-stats-${targetUserId}`, `user-stats-${targetUserId}`] }
   )();
 };
 

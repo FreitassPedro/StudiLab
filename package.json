@@ -17,7 +17,9 @@
     "test:studio": "dotenv -e .env.test -- prisma studio",
     "test:seed": "dotenv -e .env.test -- tsx prisma/seed-test.ts",
     "test:seed:auto": "npm run test:db:up && npm run test:push && npm run test:seed",
-    "test:reset:seed": "npm run test:db:reset && npm run test:push && npm run test:seed"
+    "test:reset:seed": "npm run test:db:reset && npm run test:push && npm run test:seed",
+    "seed:stats": "tsx prisma/seed-user-stats.ts",
+    "test:seed:stats": "dotenv -e .env.test -- tsx prisma/seed-user-stats.ts"
   },
   "dependencies": {
     "@base-ui/react": "^1.6.0",

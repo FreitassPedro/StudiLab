@@ -141,10 +141,14 @@ Passo a passo do zero
 
 2. Aplicar estado atual do projeto no banco de teste
 - npm run test:migrate
-Se der conflito por histórico local, reset completo:
-- npm run test:db:reset
-- npm run test:push
-- npm run test:seed
+
+⚠️ **Resolução de Conflitos (Drift) e Erros (`ltree` does not exist)**
+Se houver divergência entre o seu banco e as migrations (Drift detected), ou se você tentou rodar `test:push` e encontrou erro de extensão faltante (`type "ltree" does not exist`):
+- O `test:push` falha porque ele ignora as migrations que criam extensões no PostgreSQL (como o `ltree`).
+- A solução correta é limpar o banco de testes e aplicar as migrations do zero:
+  1. `npm run test:db:reset` (Limpa e reinicia o banco Docker)
+  2. `npm run test:migrate` (Aplica as migrations corretamente. Se houver mudanças no schema, ele pedirá para criar uma nova migration)
+  3. `npm run test:seed` (Opcional, para popular dados de teste)
 
 3. Alterar o schema
 - editar schema.prisma
@@ -208,6 +212,7 @@ Guia rápido dos comandos Prisma (sem confusão)
 
 3. prisma db push
 - Uso: protótipo local rápido, sem histórico
+- ⚠️ **Cuidado**: Evite usar se o projeto depender de extensões (como `ltree`) criadas em migrations, pois o `push` não executa essas extensões e falhará.
 - Não usar em produção com migrations
 
 4. prisma generate
@@ -221,15 +226,32 @@ Guia rápido dos comandos Prisma (sem confusão)
 - Uso: recuperar estado quando migration falhou em produção
 - Só usar conscientemente (caso avançado)
 
-Sobre seu caso de erro P3018 anterior
+## 🚑 Playbook: Como Recuperar Erro de Migration (P3018)
 
-Quando produção já tem parte da mudança (drift), o padrão é:
-1. corrigir manualmente o objeto faltante no banco
-2. marcar migration como applied com migrate resolve
-3. rodar migrate deploy novamente
+Quando você tenta rodar `npx prisma migrate deploy` no banco de **produção** e se depara com um erro do tipo:
+`A migration failed to apply... Database error: ERROR: column "X" of relation "Y" already exists` (Erro P3018)
 
-Se você quiser, eu te entrego agora um playbook pronto de 10 linhas para colar no README com:
-1. Fluxo feature
-2. Fluxo main
-3. Fluxo produção
-4. Fluxo de recuperação de erro de migration
+Isso significa que o banco de produção já possui a coluna/tabela que a migration está tentando criar (geralmente porque ela foi criada manualmente antes). O Prisma então entra num estado de falha para proteger o banco de conflitos.
+
+**Passo a passo para resolver:**
+
+1. **Identifique a Migration com Erro**
+   No log do erro, você verá o nome da pasta da migration, algo como:
+   `Migration name: 20260625161837`
+
+2. **Verifique o Estado do Banco**
+   Se o erro indica "already exists" e você sabe que os dados estão corretos, o banco já está no estado que deveria ficar. Caso contrário, acesse o banco via pgAdmin e faça a alteração manual para que o schema fique igual ao esperado pela migration.
+
+3. **Marque a Migration como Resolvida (`applied`)**
+   Para avisar ao Prisma que o conteúdo daquela migration já existe no banco e ele pode marcá-la como concluída (parando de tentar rodá-la e travar o processo), use o comando **`resolve --applied`** passando o nome exato da migration:
+   
+   ```powershell
+   # ⚠️ Atenção: A flag correta é "--applied" (com dois 'p')
+   npx prisma migrate resolve --applied "20260625161837"
+   ```
+
+4. **Retome o Deploy**
+   Com a divergência resolvida no histórico do Prisma, rode o deploy novamente para aplicar qualquer outra migration subsequente que estivesse pendente:
+   ```powershell
+   npx prisma migrate deploy
+   ```

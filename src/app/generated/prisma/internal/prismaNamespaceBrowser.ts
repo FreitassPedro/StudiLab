@@ -61,7 +61,8 @@ export const ModelName = {
   Profile: 'Profile',
   Follows: 'Follows',
   Badge: 'Badge',
-  UserBadge: 'UserBadge'
+  UserBadge: 'UserBadge',
+  UserStats: 'UserStats'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -221,6 +222,21 @@ export const UserBadgeScalarFieldEnum = {
 } as const
 
 export type UserBadgeScalarFieldEnum = (typeof UserBadgeScalarFieldEnum)[keyof typeof UserBadgeScalarFieldEnum]
+
+
+export const UserStatsScalarFieldEnum = {
+  userId: 'userId',
+  currentStreak: 'currentStreak',
+  longestStreak: 'longestStreak',
+  lastStudyDate: 'lastStudyDate',
+  totalMinutes: 'totalMinutes',
+  totalSessions: 'totalSessions',
+  weeklyMinutes: 'weeklyMinutes',
+  studyDays: 'studyDays',
+  updatedAt: 'updatedAt'
+} as const
+
+export type UserStatsScalarFieldEnum = (typeof UserStatsScalarFieldEnum)[keyof typeof UserStatsScalarFieldEnum]
 
 
 export const SortOrder = {

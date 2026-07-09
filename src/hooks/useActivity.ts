@@ -18,8 +18,8 @@ export function useActivityAnalysis(startDate: Date, endDate: Date) {
         queryKey: activityKeys.range(startDate, endDate),
         queryFn: () => getHistoryAnalysisAction(startUtc, endUtc),
 
-        staleTime: Infinity, // Mantemos os dados em cache indefinidamente, pois são históricos e não mudam.
-        gcTime: 1000 * 60 * 60 * 24, // 24 horas para coleta de lixo, caso não seja usado.
+        staleTime: 1000 * 60 * 60 * 24 * 7, // 1 semana
+        gcTime: 1000 * 60 * 60 * 24 * 7, // 1 semana
         enabled: !!startDate && !!endDate,
 
         refetchOnWindowFocus: false, // Não refazemos a query ao focar a janela, pois os dados são históricos.

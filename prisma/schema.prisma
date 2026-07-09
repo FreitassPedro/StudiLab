@@ -50,19 +50,20 @@ model StudyLogs {
 }
 
 model User {
-  id            String    @id
+  id            String     @id
   name          String
-  email         String    @unique
-  emailVerified Boolean   @default(false)
+  email         String     @unique
+  emailVerified Boolean    @default(false)
   image         String?
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
+  createdAt     DateTime   @default(now())
+  updatedAt     DateTime   @updatedAt
   subjects      Subject[]
   accounts      Account[]
   sessions      Session[]
   profile       Profile?
-  followers     Follows[] @relation("Following")
-  following     Follows[] @relation("Follower")
+  stats         UserStats?
+  followers     Follows[]  @relation("Following")
+  following     Follows[]  @relation("Follower")
   badges        UserBadge[]
 
   @@map("user")
@@ -164,4 +165,29 @@ model UserBadge {
   unlockedAt DateTime @default(now())
 
   @@id([userId, badgeId])
+}
+
+/// Tabela desnormalizada com métricas pré-calculadas por usuário.
+/// Atualizada incrementalmente em cada mutação de StudyLog — nunca calculada em tempo de request.
+model UserStats {
+  userId        String    @id
+  user          User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  /// Dias consecutivos de estudo até hoje (ou ontem se ainda não estudou hoje)
+  currentStreak Int       @default(0)
+  /// Maior ofensiva já registrada
+  longestStreak Int       @default(0)
+  /// Data da última sessão de estudo (UTC Date)
+  lastStudyDate DateTime? @db.Date
+
+  /// Total de minutos estudados (histórico completo)
+  totalMinutes  Int       @default(0)
+  /// Total de sessões criadas (histórico completo)
+  totalSessions Int       @default(0)
+  /// Minutos estudados na semana corrente (seg–dom)
+  weeklyMinutes Int       @default(0)
+  /// Número de dias únicos com pelo menos uma sessão
+  studyDays     Int       @default(0)
+
+  updatedAt     DateTime  @updatedAt
 }

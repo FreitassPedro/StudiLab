@@ -2,12 +2,15 @@
 
 import { Card, CardContent } from "@/components/ui/card";
 import { useDashboardData } from "@/hooks/useDashboard";
+import { useUserStats } from "@/hooks/useUserStats";
 import { TodaySummarySkeleton } from "./Skeletons";
 import { Flame, Target } from "lucide-react";
 import { DailyProgress } from "./DailyProgress";
 
 export function TodaySummary() {
     const { data: dashboardData, isLoading } = useDashboardData();
+    const { data: userStats } = useUserStats();
+
     const logs = dashboardData?.logs;
     const summary = dashboardData?.summary;
 
@@ -16,7 +19,8 @@ export function TodaySummary() {
     }
 
     const lastSubject = summary.topSubject?.name || "Nenhuma";
-    const streak = 10; // mock — substituir por dado real quando disponível
+    // Streak lido diretamente de UserStats — dado real, persistido no banco
+    const streak = userStats?.currentStreak ?? 0;
 
     return (
         <div className="grid gap-4 md:grid-cols-4 bg-card border-none bg-linear-to-br from-card/50 via-background to-secondary/20 ">
@@ -36,8 +40,6 @@ export function TodaySummary() {
                         </p>
                         <p className="text-sm text-muted-foreground font-medium mt-1">Ofensiva</p>
                     </div>
-                    {/* Divisor vertical*/}
-
                 </CardContent>
             </Card>
 
@@ -52,8 +54,6 @@ export function TodaySummary() {
                     </div>
                 </CardContent>
             </Card>
-
-
         </div>
     );
 }

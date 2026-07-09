@@ -24,3 +24,7 @@ export const metadataKeys = {
     topics: ['metadata', 'topics'] as const,
     subjectTree: ['metadata', 'subjects', 'tree'] as const,
 };
+
+export const userStatsKeys = {
+    current: () => ['user-stats'] as const,
+};

@@ -3,6 +3,7 @@
 import { prisma } from "@/lib/prisma";
 import { requireAuth } from "./requireAuth";
 import { revalidatePath, revalidateTag } from "next/cache";
+import { recomputeUserStats } from "./userStats.action";
 
 const include = {
     topic: {
@@ -58,6 +59,8 @@ export async function createStudyLogAction(data: StudyLogInput) {
     revalidatePath("/historico");
     revalidateTag(`study-logs-${user.id}`, "max");
     revalidateTag(`profile-stats-${user.id}`, "max");
+    // Recalcula e persiste métricas desnormalizadas (streak, totais, semanal)
+    await recomputeUserStats(user.id);
     return result;
 }
 
@@ -96,6 +99,8 @@ export async function updateStudyLogAction(data: UpdateStudyLogInput) {
     revalidatePath("/historico");
     revalidateTag(`study-logs-${user.id}`, "max");
     revalidateTag(`profile-stats-${user.id}`, "max");
+    // Recalcula métricas (duração pode ter mudado)
+    await recomputeUserStats(user.id);
     return result;
 }
 
@@ -108,6 +113,8 @@ export async function deleteStudyLogAction(id: string) {
     revalidatePath("/historico");
     revalidateTag(`study-logs-${user.id}`, "max");
     revalidateTag(`profile-stats-${user.id}`, "max");
+    // Recalcula métricas (um dia pode ter ficado sem logs)
+    await recomputeUserStats(user.id);
     return result;
 }
 
