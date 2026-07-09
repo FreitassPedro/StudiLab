@@ -10,6 +10,7 @@ import { toast } from "sonner";
 import { NewTopicDialog } from "./NewTopicDialog";
 import { EditSubjectDialog, EditTopicDialog } from "./EditSubjectDialog";
 import { SubjectBook } from "./SubjectBook";
+import { NewSubject } from "./NewSubject";
 
 function NodeRow({
     node,
@@ -246,7 +247,7 @@ export default function SubjectList() {
     }
 
     const activeTree = tree.filter(t => !t.subject.isArchived);
-    const archivedTree = tree.filter(t => t.subject.isArchived);
+        const archivedTree = tree.filter(t => t.subject.isArchived);
 
     return (
         <div className="mt-10">
@@ -254,6 +255,7 @@ export default function SubjectList() {
                 <h2 className="text-2xl font-bold text-foreground shrink-0">Meus Notebooks</h2>
                 <div className="h-1 w-full bg-secondary rounded-full mt-3" />
             </div>
+            <NewSubject />
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-8">
                 {activeTree.map((treeNode) => (
                     <SubjectBook key={treeNode.subject.id} subjectTree={treeNode} />

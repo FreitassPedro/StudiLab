@@ -8,7 +8,6 @@ export default function MateriasPage() {
             <div className="flex items-center justify-between mb-6">
                 <h1 className="text-2xl font-bold">Gerenciar Matérias</h1>
             </div>
-            <NewSubject />
             <SubjectList />
         </div>
     );

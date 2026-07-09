@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
-import { PaletteIcon, Plus, SparkleIcon } from 'lucide-react';
+import { PaletteIcon, Plus, SparkleIcon, XIcon } from 'lucide-react';
 import React from 'react';
 import { toast } from 'sonner';
 import { useCreateSubject, SubjectCreate } from '@/hooks/useSubjects';
@@ -23,6 +23,7 @@ const PRESET_COLORS = [
 export function NewSubject() {
     const router = useRouter();
     const createSubject = useCreateSubject();
+    const [isExpanded, setIsExpanded] = React.useState(false);
 
     const [rgbColor, setRgbColor] = React.useState('#f1f1f1');
 
@@ -65,6 +66,7 @@ export function NewSubject() {
             });
             router.refresh();
             reset();
+            setIsExpanded(false);
             toast.success('Matéria criada!');
         } catch (error) {
             const errorMessage = error instanceof Error ? error.message : 'Erro ao criar matéria';
@@ -74,35 +76,59 @@ export function NewSubject() {
     };
 
 
+    if (!isExpanded) {
+        return (
+            <Card
+                className="border-border/60 border-dashed shadow-sm py-3 cursor-pointer hover:border-primary/50 transition-colors mb-6"
+                onClick={() => setIsExpanded(true)}
+            >
+                <div className="flex flex-row items-center gap-3 p-1 justify-center">
+                    <div className="bg-primary/10 p-2 rounded-full">
+                        <Plus className="w-5 h-5 text-primary" />
+                    </div>
+                    <div className="font-semibold text-foreground">Criar nova matéria</div>
+                </div>
+            </Card>
+        );
+    }
+
     return (
-        <div className='grid grid-cols-1 md:grid-cols-6 gap-6'>
-            <Card className='md:col-span-5 col-span-full border-border/60 shadow-sm'>
-                <CardHeader className="flex items-center justify-between">
-                    <CardTitle>Nova Matéria</CardTitle>
-                    <EnemSuggestionsDialog />
+        <div className='flex flex-col md:flex-row gap-6 mb-8 animate-in fade-in duration-300'>
+            <Card className='flex-1 max-w-2xl border-border/60 shadow-sm'>
+                <CardHeader className="flex flex-row items-center justify-between  border-b border-border/40">
+                    <CardTitle className="text-lg">Nova Matéria</CardTitle>
+                    <div className="flex items-center gap-2">
+                        <EnemSuggestionsDialog />
+                        <div >
+                            <Button variant="ghost" size="sm" onClick={() => setIsExpanded(false)} className="text-muted-foreground hover:text-foreground flex items-center gap-2">
+                                Cancelar
+                                <XIcon />
+                            </Button>
+                        </div>
+                    </div>
                 </CardHeader>
                 <CardContent>
-                    <form onSubmit={handleSubmit(handleCreate)} className="space-y-4">
+                    <form onSubmit={handleSubmit(handleCreate)} className="space-y-6">
 
-                        <div className="space-y-2">
-                            <Label htmlFor="subjectName">Nome</Label>
-                            <div className="flex items-center gap-2">
+                        <div className="space-y-1.5">
+                            <Label htmlFor="subjectName" className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Identificação</Label>
+                            <div className="flex items-center gap-3">
                                 <DropdownMenu>
                                     <DropdownMenuTrigger asChild>
                                         <button
                                             type="button"
-                                            className={`rounded-md border-2 flex items-center justify-center w-10 h-10 cursor-pointer hover:opacity-80 transition-opacity`}
-                                            style={{ backgroundColor: color }}
+                                            className="rounded-xl border-2 flex items-center justify-center w-12 h-12 cursor-pointer hover:opacity-80 transition-all shadow-sm"
+                                            style={{ backgroundColor: color, borderColor: `${color}40` }}
                                         >
-                                            <span className="text-xl">{icon}</span>
+                                            <span className="text-2xl">{icon}</span>
                                         </button>
                                     </DropdownMenuTrigger>
-                                    <DropdownMenuContent align="start" className="w-48 grid grid-cols-4 gap-2 p-2">
+                                    <DropdownMenuContent align="start" className="w-56 grid grid-cols-4 gap-2 p-2 rounded-xl">
                                         {EMOJIS.map((emoji) => (
                                             <DropdownMenuItem
                                                 key={emoji}
                                                 onClick={() => setValue('icon', emoji)}
-                                                className="flex items-center justify-center text-xl p-2 cursor-pointer rounded-md hover:bg-muted shadow-sm"
+                                                className="flex items-center justify-center text-xl p-2 cursor-pointer rounded-lg hover:bg-primary/10 hover:text-primary transition-colors"
                                             >
                                                 {emoji}
                                             </DropdownMenuItem>
@@ -111,33 +137,25 @@ export function NewSubject() {
                                 </DropdownMenu>
                                 <Input
                                     id="subjectName"
-                                    placeholder="Ex: Matemática, Biologia, Inglês..."
+                                    placeholder="Ex: Matemática, Biologia..."
                                     {...register('name')}
                                     maxLength={50}
+                                    className="h-12 text-base rounded-xl bg-muted/20"
                                 />
                             </div>
-
                         </div>
 
-                        <div className="space-y-2">
-                            <Label>Cor</Label>
-                            <div className='flex flex-row space-x-2 items-center'>
-                                <div className={`relative bg-card ${color === rgbColor
-                                    ? 'border-foreground '
-                                    : 'border-border/60'
-                                    } border rounded-xl p-2 flex flex-row items-center justify-center gap-2`}>
-                                    <PaletteIcon />
-
+                        <div className="space-y-1.5">
+                            <Label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Cor do Caderno</Label>
+                            <div className='flex flex-wrap gap-2 items-center p-3 rounded-xl border border-border/40 bg-muted/10'>
+                                <div className={`relative ${color === rgbColor ? 'ring-2 ring-primary ring-offset-1 ring-offset-background' : ''} rounded-full`}>
                                     <button
                                         type='button'
                                         onClick={() => colorInputRef.current?.click()}
-                                        className={`w-6 h-6 rounded-full border-2 transition-transform 
-                                            ${color === rgbColor
-                                                ? 'border-foreground scale-110'
-                                                : 'border-transparent'
-                                            } flex items-center justify-center text-[10px] font-bold text-white`}
+                                        className="w-8 h-8 rounded-full border-2 border-transparent hover:scale-110 transition-transform flex items-center justify-center shadow-sm"
                                         style={{ backgroundColor: rgbColor }}
                                         title="Escolher cor personalizada">
+                                        <PaletteIcon className="w-3.5 h-3.5 text-white/70 mix-blend-difference" />
                                     </button>
 
                                     <input
@@ -148,53 +166,56 @@ export function NewSubject() {
                                         className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
                                     />
                                 </div>
-                                <div className='border-r border-gray-300'></div>
+
+                                <div className='w-px h-6 bg-border/50 mx-1'></div>
+
                                 <div className="flex flex-wrap gap-2">
-                                    {PRESET_COLORS.map((color) => (
+                                    {PRESET_COLORS.map((presetColor) => (
                                         <button
-                                            key={color}
+                                            key={presetColor}
                                             type="button"
-                                            onClick={() => setValue('color', color)}
-                                            className={`w-6 h-6 rounded-full border-2 transition-transform ${color === color
-                                                ? 'border-foreground scale-110'
+                                            onClick={() => setValue('color', presetColor)}
+                                            className={`w-8 h-8 rounded-full border-2 transition-all shadow-sm hover:scale-110 ${presetColor === color
+                                                ? 'border-foreground scale-110 ring-2 ring-primary/20 ring-offset-1 ring-offset-background'
                                                 : 'border-transparent'
                                                 }`}
-                                            style={{ backgroundColor: color }}
+                                            style={{ backgroundColor: presetColor }}
                                         />
                                     ))}
                                 </div>
                             </div>
                         </div>
 
-                        <Button type="submit" disabled={createSubject.isPending} className="w-full">
-                            <Plus className="h-4 w-4 mr-2" />
+                        <Button type="submit" disabled={createSubject.isPending} className="w-full h-11 rounded-xl text-base font-medium mt-2">
+                            <Plus className="h-5 w-5 mr-2" />
                             {createSubject.isPending ? 'Criando...' : 'Criar Matéria'}
                         </Button>
                     </form>
                 </CardContent>
             </Card>
+
             {name?.length > 0 && (
-                <div className='md:col-span-1 flex flex-col'>
-                    <div className="text-xs text-muted-foreground uppercase tracking-wide flex items-center gap-2">
-                        <SparkleIcon size={10} />
-                        Pre visalização
+                <div className='w-full md:w-64 shrink-0 flex flex-col pt-2 animate-in slide-in-from-right-4 duration-300'>
+                    <div className="text-[11px] font-bold text-muted-foreground uppercase tracking-wider flex items-center gap-1.5 mb-2 px-1">
+                        <SparkleIcon size={12} className="text-primary" />
+                        Pré-visualização
                     </div>
-                    <div className='bg-card relative rounded-2xl flex-1 overflow-hidden border border-border/60 shadow-lg min-h-[200px]'>
-                        <div className='w-3 absolute left-0 inset-y-0' style={{ backgroundColor: color }} />
-                        <div className='flex flex-col pl-6 py-4 pr-5 gap-3 h-full flex-1'>
+                    <div className='bg-card relative rounded-2xl overflow-hidden border border-border/60 shadow-lg h-[220px] transition-all hover:-translate-y-1 hover:shadow-xl'>
+                        <div className='w-3 absolute left-0 inset-y-0 transition-colors duration-300' style={{ backgroundColor: color }} />
+                        <div className='flex flex-col pl-7 py-5 pr-5 gap-4 h-full'>
                             {/* Icon */}
-                            <div className='w-12 h-12 rounded-lg flex items-center justify-center shadow-sm'
+                            <div className='w-14 h-14 rounded-xl flex items-center justify-center shadow-md transition-colors duration-300'
                                 style={{ backgroundColor: color }}>
-                                <div className='font-bold text-xl'>
+                                <div className='font-bold text-2xl drop-shadow-sm'>
                                     {icon}
                                 </div>
                             </div>
-                            <h4 className='font-semibold text-foreground text-base leading-tight'>{name}</h4>
+                            <h4 className='font-bold text-foreground text-lg leading-tight line-clamp-2 mt-1'>{name}</h4>
                             {/* lines decorations */}
-                            <div className='mt-auto space-y-1'>
-                                {[100, 75, 50].map((percent) => (
+                            <div className='mt-auto space-y-2 opacity-80'>
+                                {[100, 85, 60].map((percent) => (
                                     <div key={percent}
-                                        className='h-[2px] rounded-full'
+                                        className='h-1.5 rounded-full transition-colors duration-300'
                                         style={{ width: `${percent}%`, backgroundColor: color }}
                                     />
                                 ))}
