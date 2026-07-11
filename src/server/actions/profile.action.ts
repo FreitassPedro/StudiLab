@@ -138,6 +138,7 @@ const getCachedUserRecord = async (username: string | undefined, currentUserId: 
   )();
 };
 
+
 export async function getProfileDataAction(username?: string): Promise<ProfileData> {
   const currentUser = await requireAuth();
 
@@ -320,8 +321,7 @@ export async function updateProfile(data: {
 }
 
 
-export const getFriends = async () => {
-  const user = await requireAuth();
+export const getFriends = async ({ targetUserId }: { targetUserId: string }) => {
   const data = await prisma.user.findMany({
     select: {
       id: true,
@@ -337,7 +337,7 @@ export const getFriends = async () => {
     where: {
       followers: {
         some: {
-          followerId: user.id,
+          followerId: targetUserId,
         },
       },
     },

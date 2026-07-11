@@ -12,7 +12,7 @@ import { ProfileData, Theme } from "../types";
 
 import { StudyCharts } from "../components/StudyCharts";
 import { FriendsRanking } from "../components/FriendsRanking";
-import { Friends } from "@/app/(protected)/dashboard/components/Friends";
+import { Friends } from "../components/Friends";
 
 async function MainPage({ data }: { data: ProfileData }) {
   return (
@@ -45,7 +45,7 @@ async function MainPage({ data }: { data: ProfileData }) {
             {/* <ObjectiveCard objective={data.objective} /> */}
             <FriendsRanking ranking={data.friendsRanking} />
 
-            <Friends />
+            <Friends targetUserId={data.user.id} />
 
             {/* <SocialActivity /> */}
             <AchievementBadges badges={data.badges} />
