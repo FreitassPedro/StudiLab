@@ -125,7 +125,7 @@ export function MainSection({
                         onClick={(e) => {
                             e.preventDefault();
                             if (!isCronometerRunning) {
-                                setSelectedGoal('60' as any)
+                                setSelectedGoal(g as Goal)
                             }
                         }}
                         className={`px-3 py-1 rounded-full text-xs font-mono transition-all ${selectedGoal === g
@@ -256,7 +256,7 @@ export function MainSection({
                         onClick={() => handlePause()}
                     >
                         <Pause className="h-6 w-6 fill-current" />
-                        Pausar
+                        Parar
                     </Button>
                 ) : (
                     <Button
