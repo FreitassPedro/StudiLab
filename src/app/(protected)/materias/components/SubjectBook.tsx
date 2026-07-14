@@ -25,6 +25,7 @@ import { EditSubjectDialog, EditTopicDialog } from "./EditSubjectDialog";
 import { NewTopicDialog } from "./NewTopicDialog";
 import { cn } from "@/lib/utils";
 import Link from "next/link";
+import { Button } from "@/components/ui/button";
 
 // ─── Topic Row ────────────────────────────────────────────────────────────────
 
@@ -144,9 +145,25 @@ export function SubjectBook({ subjectTree }: { subjectTree: SubjectTree }) {
 
     return (
         <div
-            className={`group relative rounded-2xl min-h-[200px] overflow-hidden border border-border/60 bg-card shadow-sm transition-all duration-300 ${isArchived ? "opacity-60 grayscale" : "hover:shadow-md"
+            className={`group relative rounded-2xl min-h-[200px] max-h-[600px] overflow-hidden border border-border/60 bg-card shadow-sm transition-all duration-300 ${isArchived ? "opacity-60 grayscale" : "hover:shadow-md"
                 }`}
         >
+            {/* ── Overlay for closed state ── */}
+            {!isOpen && (
+                <div className="absolute inset-0 z-20 bg-background/40 backdrop-blur-sm opacity-0 group-hover:opacity-100 transition-all duration-300 flex flex-col items-center justify-center gap-3">
+                    <Link href={`/materias/${subject.id}`}>
+                        <Button size="lg" className="rounded-xl shadow-xl hover:scale-105 transition-transform font-bold gap-2">
+                            <ExternalLink size={18} />
+                            Ir para o Painel
+                        </Button>
+                    </Link>
+                    <Button size="sm" variant="secondary" className="rounded-xl shadow-md hover:scale-105 transition-transform gap-2" onClick={handleToggleExpand}>
+                        <BookOpen size={16} />
+                        Abrir Caderno
+                    </Button>
+                </div>
+            )}
+
             {/* ── Spine (lombada lateral) ── */}
             <div
                 className={cn("absolute inset-y-0 left-0 rounded-2xl transition-all duration-300 ease-in-out shadow-inner ",
@@ -159,8 +176,8 @@ export function SubjectBook({ subjectTree }: { subjectTree: SubjectTree }) {
             < div className="relative z-10 pl-5 pr-4 pt-4 pb-3" >
                 {/* top row */}
                 < div className="flex items-start justify-between gap-3" >
-                    <button
-                        onClick={handleToggleExpand}
+                    <Link
+                        href={`/materias/${subject.id}`}
                         className="flex items-center gap-3 flex-1 text-left group/btn"
                     >
                         {/* color dot + chevron stacked */}
@@ -181,7 +198,7 @@ export function SubjectBook({ subjectTree }: { subjectTree: SubjectTree }) {
                         </div>
 
                         <div className="flex-1 min-w-0">
-                            <h3 className="font-semibold text-foreground text-base leading-tight truncate">
+                            <h3 className="font-semibold text-foreground text-base leading-tight truncate group-hover/btn:underline decoration-foreground/30 underline-offset-4">
                                 {subject.name}
                             </h3>
                             <div className="flex items-center gap-2 mt-1">
@@ -196,7 +213,13 @@ export function SubjectBook({ subjectTree }: { subjectTree: SubjectTree }) {
                                 )}
                             </div>
                         </div>
+                    </Link>
 
+                    <button 
+                        onClick={handleToggleExpand}
+                        className="p-1 hover:bg-muted/50 rounded-md transition-colors mt-1"
+                        title={isOpen ? "Fechar caderno" : "Abrir caderno"}
+                    >
                         <ChevronDown
                             size={16}
                             className={`text-muted-foreground/50 shrink-0 transition-transform duration-200 ${isOpen ? "-rotate-90" : ""
@@ -216,10 +239,6 @@ export function SubjectBook({ subjectTree }: { subjectTree: SubjectTree }) {
                         <EditSubjectDialog subjectId={subject.id}>
                             <ActionBtn icon={<Settings size={13} />} label="Editar" />
                         </EditSubjectDialog>
-
-                        <Link href={`/materias/${subject.id}`}>
-                            <ActionBtn icon={<ExternalLink size={13} />} label="Painel" />
-                        </Link>
 
                         <div className="flex-1" />
 

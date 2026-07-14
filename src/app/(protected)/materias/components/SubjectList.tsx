@@ -257,10 +257,6 @@ export default function SubjectList() {
             <div className="flex flex-row items-center gap-2 mb-6">
                 <h2 className="text-2xl font-bold text-foreground shrink-0">Meus Notebooks</h2>
                 <div className="h-1 w-full bg-secondary rounded-full mt-3" />
-                <Button className="outline" onClick={() => router.push(`/materias/${activeTree.at(0)?.subject.id}`)}>
-                    <ExternalLinkIcon className="h-4 w-4" />
-                    Ir para o painel
-                </Button>
             </div>
             <NewSubject />
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-8">

@@ -3,10 +3,7 @@ import SubjectList from "./components/SubjectList";
 export default function MateriasPage() {
 
     return (
-        <div className="p-4 max-w-4xl mx-auto">
-            <div className="flex items-center justify-between mb-6">
-                <h1 className="text-2xl font-bold">Gerenciar Matérias</h1>
-            </div>
+        <div className="container mx-auto p-4 md:p-8 max-w-5xl space-y-8 animate-in fade-in duration-500">
             <SubjectList />
         </div>
     );

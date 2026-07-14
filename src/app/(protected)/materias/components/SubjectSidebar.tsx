@@ -4,11 +4,11 @@ import Link from "next/link";
 import { useSubjects } from "@/hooks/useSubjects";
 import { cn } from "@/lib/utils";
 
-interface Props {
-  currentSubjectId: string;
-}
+import { useParams } from "next/navigation";
 
-export function SubjectSidebar({ currentSubjectId }: Props) {
+export function SubjectSidebar() {
+  const params = useParams();
+  const currentSubjectId = params.subjectId as string | undefined;
   const { data: subjects, isLoading } = useSubjects();
 
   if (isLoading) {
