@@ -78,13 +78,31 @@ export async function recomputeUserStats(userId: string): Promise<void> {
         }
     }
 
-    // longestStreak é monotônico: só aumenta, nunca diminui
-    // (exceto se deletar um log de um dia único — mas aceitamos esse trade-off)
+    // Calcular longestStreak de todo o histórico!
+    let allTimeLongestStreak = 0;
+    if (distinctDays.length > 0) {
+        let tempStreak = 1;
+        allTimeLongestStreak = 1;
+        for (let i = 0; i < distinctDays.length - 1; i++) {
+            const current = distinctDays[i].study_date.getTime();
+            const prev = distinctDays[i + 1].study_date.getTime(); // prev in time because array is DESC
+            if (current - prev === msInDay) {
+                tempStreak++;
+                if (tempStreak > allTimeLongestStreak) {
+                    allTimeLongestStreak = tempStreak;
+                }
+            } else {
+                tempStreak = 1;
+            }
+        }
+    }
+
+    // longestStreak é o máximo entre a ofensiva atual, a maior ofensiva histórica e o recorde salvo.
     const currentRecord = await prisma.userStats.findUnique({
         where: { userId },
         select: { longestStreak: true },
     });
-    const longestStreak = Math.max(currentStreak, currentRecord?.longestStreak ?? 0);
+    const longestStreak = Math.max(currentStreak, allTimeLongestStreak, currentRecord?.longestStreak ?? 0);
 
     await prisma.userStats.upsert({
         where: { userId },

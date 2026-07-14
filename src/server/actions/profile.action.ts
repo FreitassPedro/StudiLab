@@ -12,6 +12,7 @@ import type {
 } from "@/app/(protected)/profile/types";
 import { notFound } from "next/navigation";
 import { revalidateTag, unstable_cache } from "next/cache";
+import { recomputeUserStats } from "./userStats.action";
 
 // 1. Cache Global Invariável
 const getCachedBadges = unstable_cache(
@@ -26,25 +27,31 @@ const getCachedProfileStats = async (targetUserId: string) => {
     async () => {
       const today = new Date();
       today.setUTCHours(0, 0, 0, 0);
-      const fifteenDaysAgo = new Date(today.getTime() - 14 * 86400000);
+      const sixMonthsAgo = new Date(today.getTime() - 182 * 86400000);
 
       // Ler métricas pré-calculadas de UserStats — O(1), uma linha, sem JOINs
-      const userStats = await prisma.userStats.findUnique({
+      let userStats = await prisma.userStats.findUnique({
         where: { userId: targetUserId },
       });
 
-      // Buscar apenas os últimos 15 dias com JOINs — necessário para heatmap, topSubjects e sessões recentes
-      // Essa query é aceitável: janela de tempo fixa e pequena (máx. ~15 dias × sessões/dia)
+      if (!userStats) {
+        await recomputeUserStats(targetUserId);
+        userStats = await prisma.userStats.findUnique({
+          where: { userId: targetUserId },
+        });
+      }
+
+      // Buscar apenas os últimos 6 meses com JOINs — necessário para heatmap, topSubjects e sessões recentes
       const recentLogs = await prisma.studyLogs.findMany({
         where: {
           topic: { subject: { userId: targetUserId } },
-          study_date: { gte: fifteenDaysAgo, lte: today },
+          study_date: { gte: sixMonthsAgo, lte: today },
         },
         include: { topic: { include: { subject: true } } },
         orderBy: { start_time: "desc" },
       });
 
-      // Heatmap e top subjects derivados apenas dos últimos 15 dias
+      // Heatmap e top subjects derivados apenas dos últimos 6 meses
       const heatmap: Record<string, number> = {};
       const subjectMap = new Map<string, { name: string; color: string; minutes: number; emoji: string }>();
       let todayMinutes = 0;
