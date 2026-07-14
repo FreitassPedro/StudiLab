@@ -15,9 +15,9 @@ import { useForm } from "react-hook-form";
 import Image from "next/image";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
+import { prisma } from "@/lib/prisma";
 
 const formSchema = z.object({
-    name: z.string().min(2, "O nome deve ter pelo menos 2 caracteres"),
     username: z.string().min(2, "O username deve ter pelo menos 2 caracteres").regex(/^[a-zA-Z0-9_]+$/, "Apenas letras, números e underline (_)"),
     password: z.string().min(6, "A senha deve ter pelo menos 6 caracteres"),
     confirmPassword: z.string().min(6, "A senha deve ter pelo menos 6 caracteres"),
@@ -44,10 +44,11 @@ export default function SignUpPage() {
         };
         try {
             const email = `${data.username.toLowerCase().replace(/\s+/g, "")}@email.com`;
-            const { error } = await authClient.signUp.email({
-                name: data.name,
+
+            const { error, data: user } = await authClient.signUp.email({
+                name: data.username,
                 email: email,
-                password: data.password
+                password: data.password,
             });
 
             if (error) {
@@ -55,6 +56,18 @@ export default function SignUpPage() {
                 toast.error(error.message || "Falha ao criar conta");
                 return;
             }
+
+            if (!user) {
+                throw new Error("Usuário não criado");
+            }
+
+            await prisma.profile.create({
+                data: {
+                    userId: user?.user?.id,
+                    username: data.username,
+                },
+            });
+
             toast.success("Conta criada com sucesso!");
             router.push("/");
 
@@ -103,17 +116,6 @@ export default function SignUpPage() {
                         </CardHeader>
                         <CardContent>
                             <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-                                <div className="space-y-2">
-                                    <Label htmlFor="name">Nome de Exibição</Label>
-                                    <Input
-                                        id="name"
-                                        placeholder="Seu Nome"
-                                        {...register("name")}
-                                        className={errors.name ? "border-destructive" : ""}
-                                    />
-                                    {errors.name && <p className="text-xs text-destructive font-medium">{errors.name.message}</p>}
-                                </div>
-
                                 <div className="space-y-2">
                                     <Label htmlFor="username">Username (@)</Label>
                                     <Input
