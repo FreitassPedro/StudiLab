@@ -15,7 +15,6 @@ import { useForm } from "react-hook-form";
 import Image from "next/image";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
-import { prisma } from "@/lib/prisma";
 
 const formSchema = z.object({
     username: z.string().min(2, "O username deve ter pelo menos 2 caracteres").regex(/^[a-zA-Z0-9_]+$/, "Apenas letras, números e underline (_)"),
@@ -65,17 +64,6 @@ export default function SignUpPage() {
                 toast.error(error.message || "Falha ao criar conta");
                 return;
             }
-
-            if (!user) {
-                throw new Error("Usuário não criado");
-            }
-
-            await prisma.profile.create({
-                data: {
-                    userId: user?.user?.id,
-                    username: data.username,
-                },
-            });
 
             toast.success("Conta criada com sucesso!");
             router.push("/");
@@ -205,7 +193,7 @@ export default function SignUpPage() {
                                     onClick={handleGoogleSignIn}
                                 >
                                     <GoogleIcon className="mr-2 h-5 w-5" />
-                                    Continuar com Google
+                                    Criar conta com Google
                                 </Button>
 
                                 <div className="text-center space-y-3 mt-4">

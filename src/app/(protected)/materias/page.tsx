@@ -1,5 +1,4 @@
 import SubjectList from "./components/SubjectList";
-import { NewSubject } from "./components/NewSubject";
 
 export default function MateriasPage() {
 
