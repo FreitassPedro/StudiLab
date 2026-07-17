@@ -10,7 +10,7 @@ export default async function ProfilePage() {
 
     if (username) {
         redirect(`/profile/${username}`);
-    }
+    }   
 
     return null;
 }

@@ -206,7 +206,7 @@ function AvatarFrame({
 
   return (
     <div
-      className="h-[180px] w-[180px] shrink-0 z-10 rounded-full p-[3px]"
+      className="h-[180px] w-[180px] -mt-16 shrink-0 z-10 rounded-full p-[3px]"
     >
       <div className="flex h-full w-full items-center justify-center overflow-hidden rounded-full border-[3px] border-background bg-card">
         {image ? (
@@ -242,7 +242,7 @@ export function ProfileHeader({ user, stats, isOwner, isFollowing }: ProfileHead
   const { accent } = useProfileTheme();
 
   return (
-    <div className="mb-8  flex flex-wrap items-end gap-5">
+    <div className="mb-8 mt-4 flex flex-wrap items-end gap-5">
       <AvatarFrame name={user.name} image={user.image} accent={accent} />
 
       <div className="min-w-[200px] flex-1 pb-1">
@@ -327,9 +327,9 @@ export function ProfileHeader({ user, stats, isOwner, isFollowing }: ProfileHead
 
           {isOwner && (
             <UserSearchModal>
-              <Button 
-                variant="secondary" 
-                size="sm" 
+              <Button
+                variant="secondary"
+                size="sm"
                 className="rounded-xl shadow-sm transition-all hover:-translate-y-0.5 border border-border/40 font-medium"
               >
                 <Search className="w-4 h-4 mr-2" />
