@@ -11,7 +11,7 @@ import type {
   ProfileUser,
 } from "@/app/(protected)/profile/types";
 import { notFound } from "next/navigation";
-import { revalidateTag, unstable_cache } from "next/cache";
+import { revalidateTag, revalidatePath, unstable_cache } from "next/cache";
 import { recomputeUserStats } from "./userStats.action";
 
 // 1. Cache Global Invariável
@@ -323,7 +323,12 @@ export async function updateProfile(data: {
 
   revalidateTag(`user-${currentUser.id}`, "max");
 
-  if (data.username) revalidateTag(`user-${profile.username}`, "max");
+  if (profile.username) {
+    revalidateTag(`user-${profile.username}`, "max");
+    revalidatePath(`/profile/${profile.username}`);
+  }
+  revalidatePath('/profile');
+
   return profile;
 }
 
