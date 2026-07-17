@@ -22,6 +22,14 @@ function formatHourLabel(hour: number) {
 }
 
 export default function Page() {
+    // ── Week navigation ──────────────────────────────────────────────────────
+    const [weekOffset, setWeekOffset] = useState(0);
+    const monday = useMemo(() => {
+        const base = getMondayOfCurrentWeek();
+        return weekOffset === 0 ? base : addWeeks(base, weekOffset);
+    }, [weekOffset]);
+    const weekDates = useMemo(() => getWeekDates(monday), [monday]);
+
     const {
         blocks,
         subjects,
@@ -50,15 +58,12 @@ export default function Page() {
         toggleBlockStatus,
         moveToBacklog,
         addQuickBlock,
-    } = usePlannerState();
+        updateSubjectLocally,
+        showLogs,
+        setShowLogs,
+    } = usePlannerState(weekDates);
 
-    // ── Week navigation ──────────────────────────────────────────────────────
-    const [weekOffset, setWeekOffset] = useState(0);
-    const monday = useMemo(() => {
-        const base = getMondayOfCurrentWeek();
-        return weekOffset === 0 ? base : addWeeks(base, weekOffset);
-    }, [weekOffset]);
-    const weekDates = useMemo(() => getWeekDates(monday), [monday]);
+    // week navigation was moved above
 
     // ── Timeline metrics ─────────────────────────────────────────────────────
     const hourHeights = useMemo(() => buildHourHeights(blocks), [blocks]);
@@ -167,11 +172,14 @@ export default function Page() {
         toggleViewSubject,
         moveToBacklog,
         addQuickBlock,
+        updateSubjectLocally,
+        showLogs,
+        setShowLogs,
     }), [
         blocks, subjects, hiddenSubjects, subjectsSummary, draggedId, resizingId,
         dragOffsetY, openAddModal, openEditBlock, removeBlock, duplicateBlock,
         handleDragStart, handleResizeStart, toggleBlockStatus, toggleViewSubject,
-        moveToBacklog, addQuickBlock,
+        moveToBacklog, addQuickBlock, updateSubjectLocally, showLogs, setShowLogs,
     ]);
 
     const blocksByDay = useMemo(() => {
@@ -196,6 +204,19 @@ export default function Page() {
     }, [weekDates]);
 
     const isCurrentWeek = weekOffset === 0;
+
+    // ── Auto-scroll to morning ───────────────────────────────────────────────
+    useEffect(() => {
+        if (!isLoaded) return;
+        const timer = setTimeout(() => {
+            const container = document.getElementById("planner-scroll-container");
+            if (container && hourOffsets.length > 8) {
+                const targetY = Math.max(0, hourOffsets[8] - 50);
+                container.scrollTo({ top: targetY, behavior: "smooth" });
+            }
+        }, 100);
+        return () => clearTimeout(timer);
+    }, [isLoaded]); // Empty deps apart from isLoaded so it only scrolls on mount
 
     if (!isLoaded) {
         return (
@@ -275,10 +296,10 @@ export default function Page() {
                     <div className="flex flex-1 overflow-hidden min-h-0">
                         {/* Grid */}
                         <div className="flex-1 flex flex-col min-w-0 bg-muted/5">
-                            <div className="flex-1 overflow-auto">
+                            <div className="flex-1 overflow-auto" id="planner-scroll-container">
                                 <div
                                     ref={gridRef}
-                                    className="grid gap-px px-2 py-2 min-w-[760px]"
+                                    className="grid px-2 py-2 min-w-[760px]"
                                     style={{ gridTemplateColumns: "52px repeat(7, minmax(0, 1fr))" }}
                                 >
                                     {/* Hour labels — every 1h */}
@@ -311,7 +332,7 @@ export default function Page() {
                                     {/* Day columns */}
                                     <Suspense fallback={<div />}>
                                         {weekDates.map((date, dayIndex) => (
-                                            <div key={dayIndex}>
+                                            <div key={dayIndex} className={cn("border-l border-border/30 pl-1", dayIndex === 6 && "border-r pr-1")}>
                                                 <DayColumn
                                                     blocks={blocksByDay[dayIndex]}
                                                     date={date}

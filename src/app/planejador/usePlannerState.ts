@@ -1,9 +1,11 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { BlockType, MOCK_BLOCKS, StudyBlock, ColorName, Subject, MOCK_SUBJECTS } from "./components/mockData";
+import { BlockType, StudyBlock, ColorName, Subject } from "./components/mockData";
 import { generateId } from "../teste/4/components/planner-utils";
-import { normalizeSubjectName, parseTimeToMinutes } from "./utils";
+import { checkTimeOverlap, normalizeSubjectName, parseTimeToMinutes } from "./utils";
+import { getSubjectsAction } from "@/server/actions/subject.actions";
+import { getStudyLogsByDateRangeAction } from "@/server/actions/studyLogs.action";
 
 const PLANNER_BLOCKS_STORAGE_KEY = "planner.blocks.v1";
 
@@ -34,50 +36,92 @@ export function minutesToTimeStr(minutes: number): string {
     return `${String(h).padStart(2, "0")}:${String(m).padStart(2, "0")}`;
 }
 
-export function usePlannerState() {
-    const [blocks, setBlocks] = useState<StudyBlock[]>(MOCK_BLOCKS);
-    const [subjects, setSubjects] = useState<Subject[]>(MOCK_SUBJECTS); // Derivado dos blocos, mas pode ser enriquecido com dados adicionais
+export function usePlannerState(weekDates?: Date[]) {
+    const [blocks, setBlocks] = useState<StudyBlock[]>([]);
+    const [logBlocks, setLogBlocks] = useState<StudyBlock[]>([]);
+    const [subjects, setSubjects] = useState<Subject[]>([]);
     const [hiddenSubjects, setHiddenSubjects] = useState<Set<string>>(new Set());
     const [isLoaded, setIsLoaded] = useState(false);
+    const [showLogs, setShowLogs] = useState(true);
 
-    // 2. Transição de Estado Assíncrona: Delegação da leitura do cache para a fase pós-hidratação.
     useEffect(() => {
         const stored = localStorage.getItem(PLANNER_BLOCKS_STORAGE_KEY);
         if (stored) {
             try {
                 const parsed = JSON.parse(stored) as StudyBlock[];
-                // eslint-disable-next-line react-hooks/set-state-in-effect
                 setBlocks(parsed);
-
-                // Deriva matérias a partir dos blocos salvos (enriquece o estado inicial)
-                setSubjects(prev => {
-                    const newSubjectsMap = new Map(prev.map(s => [s.id, s]));
-                    parsed.forEach(b => {
-                        if (!newSubjectsMap.has(b.subjectId)) {
-                            newSubjectsMap.set(b.subjectId, {
-                                id: b.subjectId,
-                                name: b.subjectId,
-                                color: b.color,
-                                isVisible: true
-                            });
-                        }
-                    });
-                    return Array.from(newSubjectsMap.values());
-                });
             } catch {
                 console.error("Failed to parse stored blocks");
             }
         }
-        // Sinaliza que a árvore cliente-side está pronta e o estado reflete a persistência local
+        
+        // Fetch subjects from DB
+        getSubjectsAction().then((dbSubjects) => {
+            const mappedSubjects: Subject[] = dbSubjects.map(s => ({
+                id: s.id,
+                name: s.name,
+                color: s.color as ColorName,
+                isVisible: true
+            }));
+            
+            // Se existirem matérias no localStorage que não estão no DB (criadas offline), podemos mesclar
+            setSubjects(prev => {
+                const newMap = new Map(mappedSubjects.map(s => [s.id, s]));
+                prev.forEach(s => {
+                    if (!newMap.has(s.id)) newMap.set(s.id, s);
+                });
+                return Array.from(newMap.values());
+            });
+        });
+        
         setIsLoaded(true);
     }, []);
 
-    // 3. Serialização: Omitida no primeiro render, acionada somente após a sincronização do cache.
+    useEffect(() => {
+        if (!weekDates || weekDates.length === 0) return;
+        
+        // Ajusta endDate para o final do domingo para pegar logs até 23:59
+        const startDate = weekDates[0];
+        const endDate = new Date(weekDates[6]);
+        endDate.setHours(23, 59, 59, 999);
+
+        getStudyLogsByDateRangeAction(startDate, endDate).then(logs => {
+            const mapped: StudyBlock[] = logs.map(log => {
+                const startH = log.start_time.getHours().toString().padStart(2, '0');
+                const startM = log.start_time.getMinutes().toString().padStart(2, '0');
+                const endH = log.end_time.getHours().toString().padStart(2, '0');
+                const endM = log.end_time.getMinutes().toString().padStart(2, '0');
+                
+                // Converter de Date.getDay() (0=Dom) para Planner dayIndex (0=Seg)
+                const dayIndex = (log.start_time.getDay() + 6) % 7;
+
+                return {
+                    id: `log-${log.id}`,
+                    subjectId: log.topic.subject.id,
+                    topic: log.topic.name,
+                    startTime: `${startH}:${startM}`,
+                    endTime: `${endH}:${endM}`,
+                    color: log.topic.subject.color as ColorName,
+                    dayIndex,
+                    type: "exercise", // fallback
+                    status: "done",
+                    isLog: true,
+                    logId: log.id,
+                };
+            });
+            setLogBlocks(mapped);
+        });
+    }, [weekDates]);
+
     useEffect(() => {
         if (isLoaded) {
             localStorage.setItem(PLANNER_BLOCKS_STORAGE_KEY, JSON.stringify(blocks));
         }
     }, [blocks, isLoaded]);
+
+    const allBlocks = useMemo(() => {
+        return showLogs ? [...blocks, ...logBlocks] : blocks;
+    }, [blocks, logBlocks, showLogs]);
 
     const [editingBlock, setEditingBlock] = useState<StudyBlock | null>(null);
     const [modalOpen, setModalOpen] = useState(false);
@@ -85,14 +129,12 @@ export function usePlannerState() {
     const [draggedId, setDraggedId] = useState<string | null>(null);
     const [resizingId, setResizingId] = useState<string | null>(null);
 
-    // Used to detect single-click vs drag
     const dragMovedRef = useRef(false);
-
 
     const subjectsSummary = useMemo(() => {
         const summary = new Map<string, { plannedMinutes: number; doneMinutes: number }>();
 
-        for (const block of blocks) {
+        for (const block of allBlocks) {
             const [startH, startM] = block.startTime.split(":").map(Number);
             const [endH, endM] = block.endTime.split(":").map(Number);
             const minutes = Math.max(0, (endH * 60 + endM) - (startH * 60 + startM));
@@ -112,7 +154,7 @@ export function usePlannerState() {
         return Array.from(summary.entries())
             .map(([subjectId, values]) => ({ subjectId, ...values }))
             .sort((a, b) => b.plannedMinutes - a.plannedMinutes);
-    }, [blocks]);
+    }, [allBlocks]);
 
     const openAddModal = useCallback((dayIndex: number, startTime?: string) => {
         setEditingBlock(null);
@@ -130,9 +172,11 @@ export function usePlannerState() {
     }, []);
 
     const openEditBlock = useCallback((block: StudyBlock) => {
+        if (block.isLog) return; // Nao editar study logs no planejador
+        
         const subject = subjects.find(s => s.id === block.subjectId);
         setNewBlockForm({
-            subjectId: block.subjectId,
+            subjectId: subject?.name ?? block.subjectId,
             topic: block.topic ?? "",
             startTime: block.startTime,
             endTime: block.endTime,
@@ -154,7 +198,6 @@ export function usePlannerState() {
             const newBlocks = prev.filter((b) => b.id !== blockId);
             const block = prev.find(b => b.id === blockId);
             if (block) {
-                // Se for o último bloco da matéria, remova a matéria se ela foi gerada dinamicamente
                 const hasOther = newBlocks.some(b => b.subjectId === block.subjectId);
                 if (!hasOther) {
                     setSubjects(prevSubjs => prevSubjs.filter(s => s.id !== block.subjectId));
@@ -174,9 +217,20 @@ export function usePlannerState() {
             startTime: minutesToTimeStr(parseTimeToMinutes(block.startTime) + 60),
             endTime: minutesToTimeStr(parseTimeToMinutes(block.endTime) + 60),
         };
-        setBlocks((prev) => [...prev, newblock]);
-    }, [blocks]);
+        
+        // Verifica overlap para o novo bloco
+        const overlap = allBlocks.some(b => 
+            b.dayIndex === newblock.dayIndex && 
+            checkTimeOverlap(b.startTime, b.endTime, newblock.startTime, newblock.endTime)
+        );
+        
+        if (overlap) {
+            alert("Não é possível duplicar: conflito de horário.");
+            return;
+        }
 
+        setBlocks((prev) => [...prev, newblock]);
+    }, [blocks, allBlocks]);
 
     const saveBlock = useCallback((newBlockForm: Partial<StudyBlock>) => {
         const payloadSubjectId = newBlockForm.subjectId?.trim();
@@ -185,13 +239,23 @@ export function usePlannerState() {
             return;
         }
 
-        // Tenta encontrar a matéria pelo ID ou nome normalizado
+        const overlap = allBlocks.some(b => 
+            b.dayIndex === (newBlockForm.dayIndex ?? 0) &&
+            b.id !== editingBlock?.id &&
+            checkTimeOverlap(b.startTime, b.endTime, newBlockForm.startTime || "09:00", newBlockForm.endTime || "10:00")
+        );
+
+        if (overlap) {
+            alert("Já existe um bloco neste mesmo horário.");
+            return;
+        }
+
         let subject = subjects.find(s => s.id === payloadSubjectId || normalizeSubjectName(s.name) === normalizeSubjectName(payloadSubjectId));
         let subjectWasCreated = false;
 
         if (!subject) {
             subject = {
-                id: payloadSubjectId, // O próprio nome é o ID para preservar e não precisar persistir separadamente
+                id: payloadSubjectId,
                 name: payloadSubjectId,
                 color: newBlockForm.color || "blue",
                 isVisible: true,
@@ -204,7 +268,7 @@ export function usePlannerState() {
             topic: newBlockForm.topic || "",
             startTime: newBlockForm.startTime || "09:00",
             endTime: newBlockForm.endTime || "10:00",
-            color: subject.color, // A cor do bloco deriva da matéria
+            color: subject.color,
             dayIndex: newBlockForm.dayIndex ?? 0,
             type: newBlockForm.type || "exercise",
         };
@@ -225,7 +289,7 @@ export function usePlannerState() {
         }
 
         closeModal();
-    }, [editingBlock, subjects, closeModal]);
+    }, [editingBlock, subjects, closeModal, allBlocks]);
 
     const deleteBlock = useCallback((blockId: string) => {
         removeBlock(blockId);
@@ -233,6 +297,9 @@ export function usePlannerState() {
     }, [removeBlock, closeModal]);
 
     const toggleBlockStatus = useCallback((blockId: string) => {
+        // Study Logs cannot be toggled
+        if (logBlocks.some(b => b.id === blockId)) return;
+        
         setBlocks((prev) =>
             prev.map((block) =>
                 block.id === blockId
@@ -240,9 +307,12 @@ export function usePlannerState() {
                     : block
             )
         );
+    }, [logBlocks]);
+
+    const updateSubjectLocally = useCallback((subjectId: string, color: ColorName) => {
+        setSubjects((prev) => prev.map((s) => s.id === subjectId ? { ...s, color } : s));
     }, []);
 
-    // Tres modo: Normal, Foquem e Oculto
     const toggleViewSubject = useCallback((subjectId: string) => {
         if (!subjectId) return;
 
@@ -287,11 +357,6 @@ export function usePlannerState() {
         });
     }, []);
 
-    /**
-     * Move a block to a new day + pixel offset within the timeline.
-     * pixelTop: distance from top of timeline container (px).
-     * timelineHeight: total height of the timeline (px).
-     */
     const moveBlockByPixel = useCallback(
         (blockId: string, targetDay: number, pixelTop: number, hourHeights: number[]) => {
             setBlocks((prev) => {
@@ -306,27 +371,36 @@ export function usePlannerState() {
                 const snapped = snapToGrid(newStart, 15);
                 const newEnd = snapped + duration;
 
+                const startStr = minutesToTimeStr(snapped);
+                const endStr = minutesToTimeStr(newEnd);
+
+                const overlap = allBlocks.some(b => 
+                    b.dayIndex === targetDay && 
+                    b.id !== blockId &&
+                    checkTimeOverlap(b.startTime, b.endTime, startStr, endStr)
+                );
+                
+                if (overlap) {
+                    return prev;
+                }
+
                 return prev.map((b) =>
                     b.id === blockId
                         ? {
                             ...b,
                             dayIndex: targetDay,
-                            startTime: minutesToTimeStr(snapped),
-                            endTime: minutesToTimeStr(newEnd),
+                            startTime: startStr,
+                            endTime: endStr,
                         }
                         : b
                 );
             });
         },
-        []
+        [allBlocks]
     );
 
-    /**
-     * Resize a block by setting a new end time from pixel position.
-     */
     const resizeBlockByPixel = useCallback(
         (blockId: string, pixelBottom: number, hourHeights: number[]) => {
-            console.log("resizeBlockByPixel", { blockId, pixelBottom });
             setBlocks((prev) => {
                 const block = prev.find((b) => b.id === blockId);
                 if (!block) return prev;
@@ -336,18 +410,29 @@ export function usePlannerState() {
                 const snapped = snapToGrid(newEnd, 15);
 
                 if (snapped <= startMinutes + 15) return prev;
+                const endStr = minutesToTimeStr(snapped);
+
+                const overlap = allBlocks.some(b => 
+                    b.dayIndex === block.dayIndex && 
+                    b.id !== blockId &&
+                    checkTimeOverlap(b.startTime, b.endTime, block.startTime, endStr)
+                );
+                
+                if (overlap) {
+                    return prev;
+                }
 
                 return prev.map((b) =>
                     b.id === blockId
-                        ? { ...b, endTime: minutesToTimeStr(snapped) }
+                        ? { ...b, endTime: endStr }
                         : b
                 );
             });
-        }, []);
+        }, [allBlocks]);
 
 
     return {
-        blocks,
+        blocks: allBlocks,
         isLoaded,
         form: newBlockForm,
         setForm: setNewBlockForm,
@@ -374,10 +459,11 @@ export function usePlannerState() {
         toggleBlockStatus,
         moveToBacklog,
         addQuickBlock,
+        updateSubjectLocally,
+        showLogs,
+        setShowLogs,
     };
 }
-
-// Helpers
 
 function snapToGrid(minutes: number, gridMinutes: number): number {
     return Math.round(minutes / gridMinutes) * gridMinutes;

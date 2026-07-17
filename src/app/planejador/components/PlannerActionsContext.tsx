@@ -21,6 +21,9 @@ interface PlannerActionsContextValue {
     toggleViewSubject: (subjectId: string) => void;
     moveToBacklog: (blockId: string) => void;
     addQuickBlock: (template: { subject: string; type: BlockType; color: ColorName }) => void;
+    updateSubjectLocally: (subjectId: string, color: ColorName) => void;
+    showLogs: boolean;
+    setShowLogs: (show: boolean | ((prev: boolean) => boolean)) => void;
 }
 
 const PlannerActionsContext = createContext<PlannerActionsContextValue | null>(null);

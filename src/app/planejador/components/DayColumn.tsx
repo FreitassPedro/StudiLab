@@ -190,7 +190,8 @@ export function DayColumn({
                     "relative rounded-xl transition-colors duration-150",
                     isDragOver && draggedId
                         ? "bg-primary/8 ring-1 ring-primary/30"
-                        : "bg-muted/5 hover:bg-muted/10"
+                        : "bg-muted/5 hover:bg-muted/10",
+                    blocks.length === 0 && !isDragOver && "opacity-60 hover:opacity-100 transition-opacity"
                 )}
                 style={{ height: `${timelineHeightPx}px` }}
                 onMouseMove={handleMouseMove}

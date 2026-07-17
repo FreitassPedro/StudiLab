@@ -65,6 +65,30 @@ export const COLOR_MAP: Record<
         border: "border-pink-200 dark:border-pink-800",
         badge: "bg-pink-100 text-pink-700 dark:bg-pink-900 dark:text-pink-300",
     },
+    cyan: {
+        bg: "bg-cyan-50 dark:bg-cyan-950/70",
+        text: "text-cyan-800 dark:text-cyan-200",
+        border: "border-cyan-200 dark:border-cyan-800",
+        badge: "bg-cyan-100 text-cyan-700 dark:bg-cyan-900 dark:text-cyan-300",
+    },
+    fuchsia: {
+        bg: "bg-fuchsia-50 dark:bg-fuchsia-950/70",
+        text: "text-fuchsia-800 dark:text-fuchsia-200",
+        border: "border-fuchsia-200 dark:border-fuchsia-800",
+        badge: "bg-fuchsia-100 text-fuchsia-700 dark:bg-fuchsia-900 dark:text-fuchsia-300",
+    },
+    lime: {
+        bg: "bg-lime-50 dark:bg-lime-950/70",
+        text: "text-lime-800 dark:text-lime-200",
+        border: "border-lime-200 dark:border-lime-800",
+        badge: "bg-lime-100 text-lime-700 dark:bg-lime-900 dark:text-lime-300",
+    },
+    indigo: {
+        bg: "bg-indigo-50 dark:bg-indigo-950/70",
+        text: "text-indigo-800 dark:text-indigo-200",
+        border: "border-indigo-200 dark:border-indigo-800",
+        badge: "bg-indigo-100 text-indigo-700 dark:bg-indigo-900 dark:text-indigo-300",
+    },
 };
 
 
@@ -211,4 +235,15 @@ export function normalizeSubjectName(subject: string): string {
         .trim()
         .toLowerCase()
         .replace(/\s+/g, " ");
+}
+
+export function checkTimeOverlap(
+    startA: string, endA: string,
+    startB: string, endB: string
+): boolean {
+    const startAMin = parseTimeToMinutes(startA);
+    const endAMin = parseTimeToMinutes(endA);
+    const startBMin = parseTimeToMinutes(startB);
+    const endBMin = parseTimeToMinutes(endB);
+    return startAMin < endBMin && endAMin > startBMin;
 }

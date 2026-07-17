@@ -5,6 +5,7 @@ import { TodayTimeline } from "../nova-sessao/components/TodayTimeline";
 import { TodaySummarySkeleton, RecentSessionsSkeleton } from "./components/Skeletons";
 import { BiologicalClock } from "./components/BiologicalClock";
 import { Friends } from "./components/Friends";
+import { DailyPlannerSummary } from "./components/DailyPlannerSummary";
 import { DashboardWeeklyChart } from "./components/WeeklyChart";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
@@ -110,6 +111,9 @@ export default async function DashboardPage() {
                     <Suspense fallback={<div className="h-48 bg-muted/40 animate-pulse rounded-2xl" />}>
                         <BiologicalClock />
                     </Suspense>
+
+                    {/* Planejador Diário */}
+                    <DailyPlannerSummary />
                 </aside>
             </div>
         </div>

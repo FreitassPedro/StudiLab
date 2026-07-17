@@ -40,7 +40,7 @@ export function BlockCard({
 
     const subject = subjects.find(s => s.id === block.subjectId);
 
-    const colors = COLOR_MAP[block.color];
+    const colors = COLOR_MAP[block.color as ColorName] ?? COLOR_MAP["blue"];
     const isDragging = draggedId === block.id;
     const isResizing = resizingId === block.id;
 
@@ -79,14 +79,15 @@ export function BlockCard({
             className={cn(
                 "absolute z-10 group rounded-lg border select-none left-1 right-1",
                 "transition-shadow overflow-hidden flex flex-col",
-                colors.bg,
-                colors.border,
                 isDragging
                     ? "opacity-40 shadow-lg ring-2 ring-primary/50 cursor-grabbing"
                     : isResizing
                         ? "shadow-md ring-2 ring-primary/30 cursor-ns-resize"
                         : "cursor-grab hover:shadow-md hover:z-20",
-                block.status === "done" && "opacity-60 grayscale-[0.3]"
+                block.status === "done" 
+                    ? "bg-muted/60 border-muted grayscale-[0.5] opacity-80 text-muted-foreground" 
+                    : [colors.bg, colors.border],
+                block.isLog && "cursor-default ring-1 ring-primary/20 hover:shadow-none"
             )}
             style={{
                 height: `${heightPx}px`,
@@ -107,23 +108,23 @@ export function BlockCard({
                 <button
                     onClick={(e) => {
                         e.stopPropagation();
-                        toggleBlockStatus(block.id);
+                        if (!block.isLog) toggleBlockStatus(block.id);
                     }}
-                    className="absolute opacity-0 hover:opacity-100"
+                    className={cn("absolute opacity-0 hover:opacity-100", block.status === "done" && "opacity-100")}
                 >
                     {block.status === "done" ? (
-                        <CheckCircle2 className="w-3.5 h-3.5 text-current opacity-80" />
+                        <CheckCircle2 className="w-4 h-4 text-primary opacity-100" />
                     ) : (
                         <Circle className="w-3.5 h-3.5 text-current opacity-40 hover:opacity-80 transition-opacity" />
                     )}
                 </button>
 
-                <h3 className={cn("font-semibold truncate leading-tight text-xs", colors.text)}>
+                <h3 className={cn("font-semibold truncate leading-tight text-xs", block.status === "done" ? "line-through opacity-70" : colors.text)}>
                     {subject?.name ?? block.subjectId}
                 </h3>
 
                 {!compact && block.topic && (
-                    <p className="text-xs text-muted-foreground truncate leading-tight">{block.topic}</p>
+                    <p className={cn("text-xs truncate leading-tight", block.status === "done" ? "line-through opacity-70" : "text-muted-foreground")}>{block.topic}</p>
                 )}
 
                 {!compact && (
@@ -158,23 +159,27 @@ export function BlockCard({
                 <DropdownMenuContent>
                     <DropdownMenuGroup>
                         {/* Edit button */}
-                        <DropdownMenuItem
-                            onClick={(e) => {
-                                e.stopPropagation();
-                                openEditBlock(block);
-                            }}
-                        >
-                            <Pencil className="w-2.5 h-2.5" />
-                            Editar
-                        </DropdownMenuItem>
-                        <DropdownMenuItem
-                            onClick={(e) => {
-                                e.stopPropagation();
-                                duplicateBlock(block.id);
-                            }}
-                        >
-                            Duplicar
-                        </DropdownMenuItem>
+                        {!block.isLog && (
+                            <>
+                                <DropdownMenuItem
+                                    onClick={(e) => {
+                                        e.stopPropagation();
+                                        openEditBlock(block);
+                                    }}
+                                >
+                                    <Pencil className="w-2.5 h-2.5" />
+                                    Editar
+                                </DropdownMenuItem>
+                                <DropdownMenuItem
+                                    onClick={(e) => {
+                                        e.stopPropagation();
+                                        duplicateBlock(block.id);
+                                    }}
+                                >
+                                    Duplicar
+                                </DropdownMenuItem>
+                            </>
+                        )}
                         <DropdownMenuItem variant="destructive"
                             onClick={(e) => {
                                 e.stopPropagation();
@@ -213,7 +218,7 @@ export function BlockCard({
 // ── Color picker ────────────────────────────────────────────────────────────
 
 const COLOR_OPTIONS: ColorName[] = [
-    "blue", "emerald", "violet", "amber", "rose", "orange", "teal", "pink",
+    "blue", "emerald", "violet", "amber", "rose", "orange", "teal", "pink", "cyan", "fuchsia", "lime", "indigo"
 ];
 
 
@@ -237,6 +242,10 @@ function ColorPicker({
         orange: "bg-orange-400",
         teal: "bg-teal-400",
         pink: "bg-pink-400",
+        cyan: "bg-cyan-400",
+        fuchsia: "bg-fuchsia-400",
+        lime: "bg-lime-400",
+        indigo: "bg-indigo-400",
     };
 
     return (

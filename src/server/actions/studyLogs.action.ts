@@ -194,3 +194,24 @@ export type SummaryStats = {
     topSubjectMinutes: number;
     avgMinutesPerDay: number;
 };
+
+export async function getStudyLogsByDateRangeAction(startDate: Date, endDate: Date) {
+    const user = await requireAuth();
+    return prisma.studyLogs.findMany({
+        where: {
+            study_date: {
+                gte: startDate,
+                lte: endDate,
+            },
+            topic: {
+                subject: {
+                    userId: user.id,
+                }
+            }
+        },
+        include,
+        orderBy: {
+            start_time: 'asc'
+        }
+    });
+}

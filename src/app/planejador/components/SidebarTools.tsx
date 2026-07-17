@@ -4,9 +4,11 @@ import { cn } from "@/lib/utils";
 import { COLOR_MAP, formatDuration } from "../utils";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
-import { useState, useCallback, useMemo } from "react";
+import { useState, useCallback, useMemo, useTransition } from "react";
 import { usePlannerActions } from "./PlannerActionsContext";
 import { Button } from "@/components/ui/button";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { updateSubjectAction } from "@/server/actions/subject.actions";
 import {
     ChevronLeft,
     ChevronRight,
@@ -16,6 +18,8 @@ import {
     LayoutGrid,
     Circle,
     GripVertical,
+    Eye,
+    EyeOff
 } from "lucide-react";
 import { ColorName } from "./mockData";
 import { Badge } from "@/components/ui/badge";
@@ -193,7 +197,12 @@ export function SidebarTools() {
         openAddModal,
         handleDragStart,
         draggedId,
+        updateSubjectLocally,
+        showLogs,
+        setShowLogs,
     } = usePlannerActions();
+
+    const [isPending, startTransition] = useTransition();
 
     const [isCollapsed, setIsCollapsed] = useState(false);
 
@@ -414,23 +423,46 @@ export function SidebarTools() {
                                             )}
                                         >
                                             <div className="flex items-center justify-between gap-2">
-                                                <button
-                                                    className="flex items-center gap-2 flex-1 min-w-0 group text-left"
-                                                    onClick={() => toggleViewSubject(subjectId)}
-                                                    title={isHidden ? "Mostrar" : "Ocultar"}
-                                                >
-                                                    <div
-                                                        className={cn(
-                                                            "flex items-center justify-center w-4 h-4 rounded-full shrink-0 transition-opacity",
-                                                            colors.badge
-                                                        )}
+                                                <div className="flex items-center gap-2 flex-1 min-w-0 group">
+                                                    <DropdownMenu>
+                                                        <DropdownMenuTrigger asChild>
+                                                            <button
+                                                                className={cn(
+                                                                    "flex items-center justify-center w-4 h-4 rounded-full shrink-0 transition-opacity hover:opacity-80 ring-offset-1 focus-visible:ring-2",
+                                                                    colors.badge
+                                                                )}
+                                                                title="Alterar cor"
+                                                            >
+                                                                <Circle className="w-2 h-2" />
+                                                            </button>
+                                                        </DropdownMenuTrigger>
+                                                        <DropdownMenuContent className="w-40 p-1 flex flex-wrap gap-1" align="start">
+                                                            {(Object.keys(COLOR_MAP) as ColorName[]).map((c) => (
+                                                                <DropdownMenuItem
+                                                                    key={c}
+                                                                    className={cn("w-6 h-6 rounded-full p-0 cursor-pointer", COLOR_MAP[c].bg)}
+                                                                    onClick={() => {
+                                                                        if (!subject) return;
+                                                                        updateSubjectLocally(subject.id, c);
+                                                                        startTransition(() => {
+                                                                            updateSubjectAction({ id: subject.id, name: subject.name, color: c }).catch(console.error);
+                                                                        });
+                                                                    }}
+                                                                />
+                                                            ))}
+                                                        </DropdownMenuContent>
+                                                    </DropdownMenu>
+
+                                                    <button
+                                                        className="flex-1 min-w-0 text-left"
+                                                        onClick={() => toggleViewSubject(subjectId)}
+                                                        title={isHidden ? "Mostrar" : "Ocultar"}
                                                     >
-                                                        <Circle className="w-2 h-2" />
-                                                    </div>
-                                                    <span className="text-[11px] font-medium truncate group-hover:text-foreground text-muted-foreground transition-colors">
-                                                        {subject?.name ?? subjectId}
-                                                    </span>
-                                                </button>
+                                                        <span className="text-[11px] font-medium truncate group-hover:text-foreground text-muted-foreground transition-colors">
+                                                            {subject?.name ?? subjectId}
+                                                        </span>
+                                                    </button>
+                                                </div>
                                                 <span className="text-[9px] tabular-nums text-muted-foreground/60 shrink-0 font-medium">
                                                     {formatDuration(doneMinutes)}<span className="opacity-40">/</span>{formatDuration(plannedMinutes)}
                                                 </span>
@@ -447,6 +479,16 @@ export function SidebarTools() {
 
             {/* ── Footer ── */}
             <div className="p-4 border-t shrink-0 space-y-3 bg-muted/20">
+                <Button
+                    variant="ghost"
+                    size="sm"
+                    className="w-full text-[11px] text-muted-foreground/70 hover:bg-muted/50 h-7 gap-1.5"
+                    onClick={() => setShowLogs(prev => !prev)}
+                >
+                    {showLogs ? <EyeOff className="w-3 h-3" /> : <Eye className="w-3 h-3" />}
+                    {showLogs ? "Ocultar sessões da semana" : "Mostrar sessões da semana"}
+                </Button>
+                
                 {/* Clear planner */}
                 <Button
                     variant="ghost"

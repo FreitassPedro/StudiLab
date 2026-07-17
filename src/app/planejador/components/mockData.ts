@@ -10,6 +10,8 @@ export interface StudyBlock {
     color: ColorName;
     dayIndex: number; // 0=Monday, ..., 6=Sunday
     status: "todo" | "done";
+    isLog?: boolean;
+    logId?: string;
 }
 export interface Subject {
     id: string;
@@ -25,7 +27,11 @@ export type ColorName =
     | "emerald"
     | "violet"
     | "orange"
-    | "pink";
+    | "pink"
+    | "cyan"
+    | "fuchsia"
+    | "lime"
+    | "indigo";
 
 export const MOCK_SUBJECTS: Subject[] = [
     { id: "Matemática", name: "Matemática", color: "blue", isVisible: true },
