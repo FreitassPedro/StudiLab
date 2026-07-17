@@ -21,6 +21,7 @@ const getCachedBadges = unstable_cache(
   { revalidate: 86400, tags: ["badges"] }
 );
 
+const REVALIDATE_TIME = 60 * 60 * 24 * 5;
 
 const getCachedProfileStats = async (targetUserId: string) => {
   return unstable_cache(
@@ -116,8 +117,8 @@ const getCachedProfileStats = async (targetUserId: string) => {
 };
 
 const getCachedUserRecord = async (username: string | undefined, currentUserId: string) => {
-  const cacheKeyStr = username ? `username-${username}` : `id-${currentUserId}`;
-  const tagStr = username ? `user-${username}` : `user-${currentUserId}`;
+  const cacheKeyStr = username ? `username-${username.toLowerCase()}` : `id-${currentUserId}`;
+  const tagStr = username ? `user-${username.toLowerCase()}` : `user-${currentUserId}`;
   return unstable_cache(
     async () => {
       const targetUserWhere = username ? { profile: { username: { equals: username, mode: "insensitive" as const } } } : { id: currentUserId };
@@ -321,10 +322,14 @@ export async function updateProfile(data: {
     });
   }
 
-  revalidateTag(`user-${currentUser.id}`, "max");
+  revalidateTag(`user-${currentUser.id}`, {
+    expire: REVALIDATE_TIME
+  });
 
   if (profile.username) {
-    revalidateTag(`user-${profile.username}`, "max");
+    revalidateTag(`user-${profile.username.toLowerCase()}`, {
+      expire: REVALIDATE_TIME
+    });
     revalidatePath(`/profile/${profile.username}`);
   }
   revalidatePath('/profile');
