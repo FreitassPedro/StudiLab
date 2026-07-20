@@ -1,5 +1,5 @@
 import { useCallback, useMemo } from "react";
-import { BlockType, StudyBlock, ColorName } from "./mockData";
+import { BlockType, StudyBlock, ColorName } from "../types";
 import { COLOR_MAP, formatDuration, getBlockTimelineMetrics, parseTimeToMinutes } from "../utils";
 import { CheckCircle2, Circle, Clock, GripVertical, MoreHorizontal, Pencil, Trash2, Trash2Icon } from "lucide-react";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
@@ -11,7 +11,6 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuGroup, DropdownMenuItem,
 import { Button } from "@/components/ui/button";
 import { usePlannerActions } from "./PlannerActionsContext";
 import { Combobox, ComboboxContent, ComboboxInput, ComboboxItem, ComboboxList } from "@/components/ui/combobox";
-import { usePlannerState } from "../usePlannerState";
 import { Controller, useForm, useWatch } from "react-hook-form";
 
 
@@ -295,7 +294,6 @@ export function NewBlockFormModal({
 }) {
 
     const { subjects } = usePlannerActions();
-    console.log("Initial Data", initialData);
 
     const initialSubject = subjects.find(s => s.id === initialData.subjectId)?.name ?? initialData.subjectId ?? "";
 

@@ -1,37 +1,6 @@
-export type BlockType = "leiture" | "revision" | "exercise" | "resume" | "exam";
-
-export interface StudyBlock {
-    id: string;
-    subjectId: string;
-    topic?: string;
-    type?: BlockType;
-    startTime: string; // "HH:MM"
-    endTime: string;   // "HH:MM"
-    color: ColorName;
-    dayIndex: number; // 0=Monday, ..., 6=Sunday
-    status: "todo" | "done";
-    isLog?: boolean;
-    logId?: string;
-}
-export interface Subject {
-    id: string;
-    name: string;
-    color: ColorName;
-    isVisible: boolean;
-}
-export type ColorName =
-    | "blue"
-    | "amber"
-    | "rose"
-    | "teal"
-    | "emerald"
-    | "violet"
-    | "orange"
-    | "pink"
-    | "cyan"
-    | "fuchsia"
-    | "lime"
-    | "indigo";
+// Re-export types from the centralized types file for backward compatibility
+export type { BlockType, StudyBlock, Subject, ColorName } from "../types";
+import type { Subject, StudyBlock } from "../types";
 
 export const MOCK_SUBJECTS: Subject[] = [
     { id: "Matemática", name: "Matemática", color: "blue", isVisible: true },
