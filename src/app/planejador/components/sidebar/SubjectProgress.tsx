@@ -2,12 +2,18 @@
 
 import { useTransition } from "react";
 import { cn } from "@/lib/utils";
-import { COLOR_MAP, formatDuration } from "../../utils";
+import { formatDuration, hexToRgba } from "../../utils";
 import { usePlannerActions } from "../PlannerActionsContext";
 import { updateSubjectAction } from "@/server/actions/subject.actions";
 import { ColorName } from "../../types";
 import { Circle, Target } from "lucide-react";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+
+const COLOR_OPTIONS = [
+    "#3b82f6", "#10b981", "#8b5cf6", "#f59e0b",
+    "#f43f5e", "#f97316", "#14b8a6", "#ec4899",
+    "#06b6d4", "#d946ef", "#84cc16", "#6366f1"
+];
 
 function ProgressBar({ progress }: { progress: number }) {
     return (
@@ -49,7 +55,7 @@ export function SubjectProgress() {
                     {subjectsSummary.map(({ subjectId, plannedMinutes, doneMinutes }) => {
                         const subject = subjects.find((s) => s.id === subjectId);
                         const progress = plannedMinutes > 0 ? (doneMinutes / plannedMinutes) * 100 : 0;
-                        const colors = COLOR_MAP[subject?.color as ColorName] ?? COLOR_MAP["blue"];
+                        const subjectColor = subject?.color || "#3b82f6";
                         const isHidden = hiddenSubjects.has(subjectId);
 
                         return (
@@ -63,19 +69,20 @@ export function SubjectProgress() {
                                             <DropdownMenuTrigger asChild>
                                                 <button
                                                     className={cn(
-                                                        "flex items-center justify-center w-4 h-4 rounded-full shrink-0 transition-opacity hover:opacity-80 ring-offset-1 focus-visible:ring-2",
-                                                        colors.badge
+                                                        "flex items-center justify-center w-4 h-4 rounded-full shrink-0 transition-opacity hover:opacity-80 ring-offset-1 focus-visible:ring-2"
                                                     )}
+                                                    style={{ backgroundColor: hexToRgba(subjectColor, 0.2), color: subjectColor }}
                                                     title="Alterar cor"
                                                 >
                                                     <Circle className="w-2 h-2" />
                                                 </button>
                                             </DropdownMenuTrigger>
                                             <DropdownMenuContent className="w-40 p-1 flex flex-wrap gap-1" align="start">
-                                                {(Object.keys(COLOR_MAP) as ColorName[]).map((c) => (
+                                                {COLOR_OPTIONS.map((c) => (
                                                     <DropdownMenuItem
                                                         key={c}
-                                                        className={cn("w-6 h-6 rounded-full p-0 cursor-pointer", COLOR_MAP[c].bg)}
+                                                        className="w-6 h-6 rounded-full p-0 cursor-pointer"
+                                                        style={{ backgroundColor: c }}
                                                         onClick={() => {
                                                             if (!subject) return;
                                                             updateSubjectLocally(subject.id, c);

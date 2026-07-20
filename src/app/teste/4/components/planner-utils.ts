@@ -112,8 +112,8 @@ export function computeWeekStats(blocks: StudyBlock[]): WeekStats {
 }
 
 export function getMondayOfCurrentWeek(): Date {
-  const dateString = "2026-03-15T03:02:22.279Z";
-  const today = new Date(dateString); // Use a fixed date for testing
+
+  const today = new Date(); // Use a fixed date for testing
   console.log("Hoje é:", today);
   const day = today.getDay();
   const diff = today.getDate() - (day === 0 ? 6 : day - 1);

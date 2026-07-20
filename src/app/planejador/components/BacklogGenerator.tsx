@@ -4,7 +4,6 @@ import { useEffect, useState } from "react";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { usePlannerActions } from "./PlannerActionsContext";
-import { COLOR_MAP } from "../utils";
 import { cn } from "@/lib/utils";
 import { Minus, Plus } from "lucide-react";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -75,11 +74,14 @@ export function BacklogGeneratorModal({ open, onClose }: BacklogGeneratorProps) 
                                 {subjects.map(subj => {
                                     const hours = hoursMap[subj.id] || 0;
                                     return (
-                                        <div key={subj.id} className="flex items-center justify-between p-2 rounded-md hover:bg-muted/50 transition-colors">
-                                            <div className="flex items-center gap-2">
-                                                <div className={cn("w-3 h-3 rounded-full", COLOR_MAP[subj.color]?.badge ?? COLOR_MAP.blue.badge)} />
-                                                <span className="text-sm font-medium">{subj.name}</span>
-                                            </div>
+                                            <div key={subj.id} className="flex items-center justify-between p-2 rounded-md hover:bg-muted/50 transition-colors">
+                                                <div className="flex items-center gap-2">
+                                                    <div 
+                                                        className="w-3 h-3 rounded-full" 
+                                                        style={{ backgroundColor: subj.color || "#3b82f6" }} 
+                                                    />
+                                                    <span className="text-sm font-medium">{subj.name}</span>
+                                                </div>
                                             
                                             <div className="flex items-center gap-3">
                                                 <Button

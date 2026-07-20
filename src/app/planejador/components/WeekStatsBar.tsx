@@ -2,9 +2,8 @@
 
 import { Clock, CheckCircle2, BarChart2 } from "lucide-react";
 import { StudyBlock, Subject } from "./mockData";
-import { COLOR_MAP, formatDuration, parseTimeToMinutes } from "../utils";
+import { formatDuration, parseTimeToMinutes, hexToRgba } from "../utils";
 import { cn } from "@/lib/utils";
-import { ColorName } from "./mockData";
 
 interface WeekStatsBarProps {
     blocks: StudyBlock[];
@@ -96,11 +95,13 @@ export function WeekStatsBar({ blocks, subjects }: WeekStatsBarProps) {
                         <div className="flex items-center gap-4 overflow-hidden">
                             {topSubjects.map(([subjectId, minutes]) => {
                                 const subject = subjects.find((s) => s.id === subjectId);
-                                const color = subject?.color as ColorName;
-                                const dotCls = COLOR_MAP[color]?.badge ?? "";
+                                const color = subject?.color || "#3b82f6";
                                 return (
                                     <div key={subjectId} className="flex items-center gap-1.5 shrink-0">
-                                        <div className={cn("w-2 h-2 rounded-full shrink-0", dotCls.split(" ")[0])} />
+                                        <div 
+                                            className="w-2 h-2 rounded-full shrink-0" 
+                                            style={{ backgroundColor: color }}
+                                        />
                                         <div>
                                             <p className="text-[10px] font-semibold text-muted-foreground truncate max-w-[80px] leading-none">
                                                 {subject?.name ?? subjectId}

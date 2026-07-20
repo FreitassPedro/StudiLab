@@ -1,6 +1,6 @@
 import { useCallback, useMemo } from "react";
 import { BlockType, StudyBlock, ColorName } from "../types";
-import { COLOR_MAP, formatDuration, getBlockTimelineMetrics, parseTimeToMinutes } from "../utils";
+import { formatDuration, getBlockTimelineMetrics, parseTimeToMinutes, hexToRgba } from "../utils";
 import { CheckCircle2, Circle, Clock, GripVertical, MoreHorizontal, Pencil, Trash2, Trash2Icon } from "lucide-react";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
@@ -39,7 +39,7 @@ export function BlockCard({
 
     const subject = subjects.find(s => s.id === block.subjectId);
 
-    const colors = COLOR_MAP[block.color as ColorName] ?? COLOR_MAP["blue"];
+    const baseColor = block.color || "#3b82f6";
     const isDragging = draggedId === block.id;
     const isResizing = resizingId === block.id;
 
@@ -85,12 +85,14 @@ export function BlockCard({
                         : "cursor-grab hover:shadow-md hover:z-20",
                 block.status === "done" 
                     ? "bg-muted/60 border-muted grayscale-[0.5] opacity-80 text-muted-foreground" 
-                    : [colors.bg, colors.border],
+                    : "",
                 block.isLog && "cursor-default ring-1 ring-primary/20 hover:shadow-none"
             )}
             style={{
                 height: `${heightPx}px`,
                 top: `${topPx}px`,
+                backgroundColor: block.status !== "done" ? hexToRgba(baseColor, 0.1) : undefined,
+                borderColor: block.status !== "done" ? hexToRgba(baseColor, 0.3) : undefined,
             }}
             onMouseDown={handleMouseDown}
             onDoubleClick={(e) => {
@@ -118,7 +120,10 @@ export function BlockCard({
                     )}
                 </button>
 
-                <h3 className={cn("font-semibold truncate leading-tight text-xs", block.status === "done" ? "line-through opacity-70" : colors.text)}>
+                <h3 
+                    className={cn("font-semibold truncate leading-tight text-xs", block.status === "done" && "line-through opacity-70")}
+                    style={block.status !== "done" ? { color: baseColor } : undefined}
+                >
                     {subject?.name ?? block.subjectId}
                 </h3>
 
@@ -129,7 +134,8 @@ export function BlockCard({
                 {!compact && (
                     <Badge
                         variant="outline"
-                        className={cn("w-fit text-xs mt-0.5 py-0 px-1.5 h-4", colors.border)}
+                        className={cn("w-fit text-xs mt-0.5 py-0 px-1.5 h-4")}
+                        style={block.status !== "done" ? { borderColor: hexToRgba(baseColor, 0.4), color: baseColor } : undefined}
                     >
                         {block.type}
                     </Badge>
@@ -216,8 +222,10 @@ export function BlockCard({
 }
 // ── Color picker ────────────────────────────────────────────────────────────
 
-const COLOR_OPTIONS: ColorName[] = [
-    "blue", "emerald", "violet", "amber", "rose", "orange", "teal", "pink", "cyan", "fuchsia", "lime", "indigo"
+const COLOR_OPTIONS: string[] = [
+    "#3b82f6", "#10b981", "#8b5cf6", "#f59e0b",
+    "#f43f5e", "#f97316", "#14b8a6", "#ec4899",
+    "#06b6d4", "#d946ef", "#84cc16", "#6366f1"
 ];
 
 
@@ -232,21 +240,6 @@ function ColorPicker({
     disabled?: boolean;
 }) {
 
-    const colorDots: Record<ColorName, string> = {
-        blue: "bg-blue-400",
-        emerald: "bg-emerald-400",
-        violet: "bg-violet-400",
-        amber: "bg-amber-400",
-        rose: "bg-rose-400",
-        orange: "bg-orange-400",
-        teal: "bg-teal-400",
-        pink: "bg-pink-400",
-        cyan: "bg-cyan-400",
-        fuchsia: "bg-fuchsia-400",
-        lime: "bg-lime-400",
-        indigo: "bg-indigo-400",
-    };
-
     return (
         <div className={cn("flex gap-2 flex-wrap", disabled && "pointer-events-none opacity-50")}>
             {COLOR_OPTIONS.map((c) => (
@@ -256,11 +249,11 @@ function ColorPicker({
                     onClick={() => onChange(c)}
                     className={cn(
                         "w-6 h-6 rounded-full transition-all ring-offset-2",
-                        colorDots[c],
                         value === c
                             ? "ring-2 ring-primary scale-110"
                             : "hover:scale-105 opacity-70 hover:opacity-100"
                     )}
+                    style={{ backgroundColor: c }}
                 />
             ))}
         </div>
@@ -383,7 +376,10 @@ export function NewBlockFormModal({
                                                 {filteredOptions.map((sbj) => (
                                                     <ComboboxItem key={sbj.id} value={sbj.name}>
                                                         <div>
-                                                            <div className={cn("w-2.5 h-2.5 rounded-full bg-current opacity-70 mr-2 inline-block", COLOR_MAP[sbj.color]?.badge ?? COLOR_MAP.blue.badge)} />
+                                                            <div 
+                                                                className="w-2.5 h-2.5 rounded-full opacity-70 mr-2 inline-block" 
+                                                                style={{ backgroundColor: sbj.color || "#3b82f6" }} 
+                                                            />
                                                             {sbj.name}
                                                         </div>
                                                     </ComboboxItem>
@@ -478,8 +474,9 @@ export function NewBlockFormModal({
                                         variant="outline"
                                         type="button"
                                     >
-                                        <div className={cn("w-2.5 h-2.5 rounded-full inline-block",
-                                            COLOR_MAP[color as ColorName]?.badge)}
+                                        <div 
+                                            className="w-2.5 h-2.5 rounded-full inline-block"
+                                            style={{ backgroundColor: color as string }}
                                         />
                                         {subject.name ?? "Sem matéria"}
                                     </Button>

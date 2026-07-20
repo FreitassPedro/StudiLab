@@ -2,7 +2,7 @@
 
 import { useCallback, useState } from "react";
 import { cn } from "@/lib/utils";
-import { COLOR_MAP } from "../../utils";
+import { hexToRgba } from "../../utils";
 import { usePlannerActions } from "../PlannerActionsContext";
 import { ColorName } from "../../types";
 import { Plus, Trash2, GripVertical, Zap } from "lucide-react";
@@ -57,9 +57,12 @@ export function BacklogList() {
                         key={block.id}
                         className={cn(
                             "group relative p-2.5 rounded-lg border bg-background hover:shadow-sm transition-all cursor-grab active:cursor-grabbing",
-                            COLOR_MAP[block.color as ColorName]?.border ?? COLOR_MAP.blue.border,
                             draggedId === block.id && "opacity-50"
                         )}
+                        style={{
+                            borderColor: hexToRgba(block.color || "#3b82f6", 0.3),
+                            backgroundColor: hexToRgba(block.color || "#3b82f6", 0.05),
+                        }}
                         onMouseDown={(e) => onMouseDownBlock(e, block.id)}
                     >
                         <div className="flex items-start gap-2">
@@ -85,7 +88,11 @@ export function BacklogList() {
                         <div className="mt-2 flex items-center justify-between pl-5">
                             <Badge
                                 variant="secondary"
-                                className={cn("text-[9px] px-1 h-3.5 font-normal", COLOR_MAP[block.color as ColorName]?.badge ?? COLOR_MAP.blue.badge)}
+                                className={cn("text-[9px] px-1 h-3.5 font-normal")}
+                                style={{
+                                    backgroundColor: hexToRgba(block.color || "#3b82f6", 0.15),
+                                    color: block.color || "#3b82f6"
+                                }}
                             >
                                 {block.type}
                             </Badge>

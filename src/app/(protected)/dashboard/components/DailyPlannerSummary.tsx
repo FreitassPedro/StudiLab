@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { StudyBlock } from "@/app/planejador/components/mockData";
-import { COLOR_MAP } from "@/app/planejador/utils";
+import { hexToRgba } from "@/app/planejador/utils";
 import { CheckCircle2, Circle, Target } from "lucide-react";
 import { cn } from "@/lib/utils";
 import Link from "next/link";
@@ -63,15 +63,18 @@ export function DailyPlannerSummary() {
             
             <div className="space-y-3 max-h-[350px] overflow-auto pr-1">
                 {todaysBlocks.map(block => {
-                    const colors = COLOR_MAP[block.color || "blue"];
+                    const baseColor = block.color || "#3b82f6";
                     return (
                         <div 
                             key={block.id} 
                             className={cn(
                                 "flex flex-col p-3 rounded-xl border transition-all",
-                                block.status === "done" ? "opacity-60 grayscale-[0.5] bg-muted/40" : colors.bg,
-                                colors.border
+                                block.status === "done" ? "opacity-60 grayscale-[0.5] bg-muted/40" : ""
                             )}
+                            style={{
+                                backgroundColor: block.status !== "done" ? hexToRgba(baseColor, 0.1) : undefined,
+                                borderColor: block.status !== "done" ? hexToRgba(baseColor, 0.3) : undefined,
+                            }}
                         >
                             <div className="flex items-start gap-3">
                                 <div className="shrink-0 mt-0.5">
@@ -82,7 +85,10 @@ export function DailyPlannerSummary() {
                                     )}
                                 </div>
                                 <div className="flex-1 min-w-0">
-                                    <h4 className={cn("text-sm font-semibold truncate", block.status === "done" ? "line-through text-muted-foreground" : colors.text)}>
+                                    <h4 
+                                        className={cn("text-sm font-semibold truncate", block.status === "done" && "line-through text-muted-foreground")}
+                                        style={block.status !== "done" ? { color: baseColor } : undefined}
+                                    >
                                         {block.subjectId}
                                     </h4>
                                     {block.topic && (

@@ -22,16 +22,4 @@ export interface Subject {
     isVisible: boolean;
 }
 
-export type ColorName =
-    | "blue"
-    | "amber"
-    | "rose"
-    | "teal"
-    | "emerald"
-    | "violet"
-    | "orange"
-    | "pink"
-    | "cyan"
-    | "fuchsia"
-    | "lime"
-    | "indigo";
+export type ColorName = string;

@@ -3,15 +3,15 @@ export type { BlockType, StudyBlock, Subject, ColorName } from "../types";
 import type { Subject, StudyBlock } from "../types";
 
 export const MOCK_SUBJECTS: Subject[] = [
-    { id: "Matemática", name: "Matemática", color: "blue", isVisible: true },
-    { id: "Física", name: "Física", color: "amber", isVisible: true },
-    { id: "História", name: "História", color: "rose", isVisible: true },
-    { id: "Inglês", name: "Inglês", color: "teal", isVisible: true },
-    { id: "Química", name: "Química", color: "emerald", isVisible: true },
-    { id: "Geografia", name: "Geografia", color: "violet", isVisible: true },
-    { id: "Biologia", name: "Biologia", color: "emerald", isVisible: true },
-    { id: "Português", name: "Português", color: "orange", isVisible: true },
-    { id: "Revisão Geral", name: "Revisão Geral", color: "violet", isVisible: true },
+    { id: "Matemática", name: "Matemática", color: "#3b82f6", isVisible: true }, // blue
+    { id: "Física", name: "Física", color: "#f59e0b", isVisible: true }, // amber
+    { id: "História", name: "História", color: "#f43f5e", isVisible: true }, // rose
+    { id: "Inglês", name: "Inglês", color: "#14b8a6", isVisible: true }, // teal
+    { id: "Química", name: "Química", color: "#10b981", isVisible: true }, // emerald
+    { id: "Geografia", name: "Geografia", color: "#8b5cf6", isVisible: true }, // violet
+    { id: "Biologia", name: "Biologia", color: "#10b981", isVisible: true }, // emerald
+    { id: "Português", name: "Português", color: "#f97316", isVisible: true }, // orange
+    { id: "Revisão Geral", name: "Revisão Geral", color: "#8b5cf6", isVisible: true }, // violet
 ];
 
 export const MOCK_BLOCKS: StudyBlock[] = [
@@ -22,7 +22,7 @@ export const MOCK_BLOCKS: StudyBlock[] = [
         topic: "Cálculo Diferencial",
         startTime: "08:00",
         endTime: "10:00",
-        color: "blue",
+        color: "#3b82f6",
         dayIndex: 0,
         type: "leiture",
         status: "todo"
@@ -33,7 +33,7 @@ export const MOCK_BLOCKS: StudyBlock[] = [
         topic: "Cinemática",
         startTime: "14:00",
         endTime: "15:30",
-        color: "amber",
+        color: "#f59e0b",
         dayIndex: 0,
         type: "leiture",
         status: "todo"
@@ -46,7 +46,7 @@ export const MOCK_BLOCKS: StudyBlock[] = [
         topic: "Revolução Industrial",
         startTime: "09:00",
         endTime: "11:00",
-        color: "rose",
+        color: "#f43f5e",
         dayIndex: 1,
         type: "exam",
         status: "todo"
@@ -57,7 +57,7 @@ export const MOCK_BLOCKS: StudyBlock[] = [
         topic: "Reading Comprehension",
         startTime: "15:00",
         endTime: "16:00",
-        color: "teal",
+        color: "#14b8a6",
         dayIndex: 1,
         type: "leiture",
         status: "todo"
@@ -70,7 +70,7 @@ export const MOCK_BLOCKS: StudyBlock[] = [
         topic: "Integrais",
         startTime: "08:00",
         endTime: "09:30",
-        color: "blue",
+        color: "#3b82f6",
         dayIndex: 2,
         type: "exercise",
         status: "todo"
@@ -82,7 +82,7 @@ export const MOCK_BLOCKS: StudyBlock[] = [
         topic: "Ligações Químicas",
         startTime: "10:00",
         endTime: "12:00",
-        color: "emerald",
+        color: "#10b981",
         dayIndex: 2,
         type: "revision",
         status: "todo"
@@ -93,7 +93,7 @@ export const MOCK_BLOCKS: StudyBlock[] = [
         topic: "Geopolítica",
         startTime: "14:00",
         endTime: "15:00",
-        color: "violet",
+        color: "#8b5cf6",
         dayIndex: 2,
         type: "resume",
         status: "todo"
@@ -106,7 +106,7 @@ export const MOCK_BLOCKS: StudyBlock[] = [
         topic: "Genética Mendeliana",
         startTime: "09:00",
         endTime: "11:30",
-        color: "emerald",
+        color: "#10b981",
         dayIndex: 3,
         type: "leiture",
         status: "todo"
@@ -117,7 +117,7 @@ export const MOCK_BLOCKS: StudyBlock[] = [
         topic: "Dinâmica",
         startTime: "14:00",
         endTime: "16:00",
-        color: "amber",
+        color: "#f59e0b",
         type: "leiture",
         dayIndex: 3,
         status: "todo"
@@ -130,7 +130,7 @@ export const MOCK_BLOCKS: StudyBlock[] = [
         topic: "Análise Sintática",
         startTime: "08:00",
         endTime: "09:00",
-        color: "orange",
+        color: "#f97316",
         dayIndex: 4,
         type: "leiture",
         status: "todo"
@@ -142,7 +142,7 @@ export const MOCK_BLOCKS: StudyBlock[] = [
         topic: "Grammar & Writing",
         startTime: "10:00",
         endTime: "11:00",
-        color: "teal",
+        color: "#14b8a6",
         dayIndex: 4,
         type: "exercise",
         status: "todo"
@@ -153,7 +153,7 @@ export const MOCK_BLOCKS: StudyBlock[] = [
         topic: "Flashcards da semana",
         startTime: "15:00",
         endTime: "17:00",
-        color: "violet",
+        color: "#8b5cf6",
         dayIndex: 4,
         type: "exercise",
         status: "todo"
@@ -166,7 +166,7 @@ export const MOCK_BLOCKS: StudyBlock[] = [
         topic: "Exercícios ENEM",
         startTime: "09:00",
         endTime: "12:00",
-        color: "blue",
+        color: "#3b82f6",
         dayIndex: 5,
         type: "exercise",
         status: "todo"
