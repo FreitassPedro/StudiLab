@@ -61,6 +61,7 @@ export default function Page() {
         updateSubjectLocally,
         showLogs,
         setShowLogs,
+        generateBacklog,
     } = usePlannerState(weekDates);
 
     // week navigation was moved above
@@ -175,11 +176,13 @@ export default function Page() {
         updateSubjectLocally,
         showLogs,
         setShowLogs,
+        generateBacklog,
     }), [
         blocks, subjects, hiddenSubjects, subjectsSummary, draggedId, resizingId,
         dragOffsetY, openAddModal, openEditBlock, removeBlock, duplicateBlock,
         handleDragStart, handleResizeStart, toggleBlockStatus, toggleViewSubject,
         moveToBacklog, addQuickBlock, updateSubjectLocally, showLogs, setShowLogs,
+        generateBacklog,
     ]);
 
     const blocksByDay = useMemo(() => {

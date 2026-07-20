@@ -294,10 +294,10 @@ export function NewBlockFormModal({
     isEditing?: boolean;
 }) {
 
-    const { subjects } = usePlannerState();
+    const { subjects } = usePlannerActions();
     console.log("Initial Data", initialData);
 
-    const initialSubject = subjects.find(s => s.id === initialData.subjectId)?.name ?? "";
+    const initialSubject = subjects.find(s => s.id === initialData.subjectId)?.name ?? initialData.subjectId ?? "";
 
     const { register, handleSubmit, reset, setValue, control } = useForm<FormValues>({
         defaultValues: {
@@ -371,8 +371,8 @@ export function NewBlockFormModal({
                                         value={field.value}
                                         inputValue={field.value}
                                         onInputValueChange={field.onChange}
-                                        onValueChange={(selectedId) => {
-                                            const subj = subjects.find(s => s.id === selectedId);
+                                        onValueChange={(selectedName) => {
+                                            const subj = subjects.find(s => s.name === selectedName);
                                             if (subj) {
                                                 field.onChange(subj.name);
                                                 setValue("color", subj.color);
@@ -383,7 +383,7 @@ export function NewBlockFormModal({
                                         <ComboboxContent>
                                             <ComboboxList>
                                                 {filteredOptions.map((sbj) => (
-                                                    <ComboboxItem key={sbj.id} value={sbj.id}>
+                                                    <ComboboxItem key={sbj.id} value={sbj.name}>
                                                         <div>
                                                             <div className={cn("w-2.5 h-2.5 rounded-full bg-current opacity-70 mr-2 inline-block", COLOR_MAP[sbj.color]?.badge ?? COLOR_MAP.blue.badge)} />
                                                             {sbj.name}

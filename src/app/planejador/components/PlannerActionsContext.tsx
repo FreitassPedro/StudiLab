@@ -24,6 +24,7 @@ interface PlannerActionsContextValue {
     updateSubjectLocally: (subjectId: string, color: ColorName) => void;
     showLogs: boolean;
     setShowLogs: (show: boolean | ((prev: boolean) => boolean)) => void;
+    generateBacklog: (hoursMap: Record<string, number>) => void;
 }
 
 const PlannerActionsContext = createContext<PlannerActionsContextValue | null>(null);

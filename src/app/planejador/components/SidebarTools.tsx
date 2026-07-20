@@ -19,10 +19,12 @@ import {
     Circle,
     GripVertical,
     Eye,
-    EyeOff
+    EyeOff,
+    Zap
 } from "lucide-react";
 import { ColorName } from "./mockData";
 import { Badge } from "@/components/ui/badge";
+import { BacklogGeneratorModal } from "./BacklogGenerator";
 
 // Utils
 function parseTimeToMinutes(timeStr: string) {
@@ -205,6 +207,7 @@ export function SidebarTools() {
     const [isPending, startTransition] = useTransition();
 
     const [isCollapsed, setIsCollapsed] = useState(false);
+    const [isGeneratorOpen, setIsGeneratorOpen] = useState(false);
 
     const unscheduledBlocks = allBlocks.filter(b => b.dayIndex === -1);
     
@@ -335,9 +338,20 @@ export function SidebarTools() {
                                     Backlog
                                 </h2>
                             </div>
-                            <Badge variant="outline" className="text-[10px] px-1.5 h-4 font-mono">
-                                {unscheduledBlocks.length}
-                            </Badge>
+                            <div className="flex items-center gap-2">
+                                <Button 
+                                    variant="outline" 
+                                    size="sm" 
+                                    className="h-6 px-2 text-[10px] gap-1"
+                                    onClick={() => setIsGeneratorOpen(true)}
+                                >
+                                    <Zap className="w-3 h-3 text-amber-500" />
+                                    Gerar
+                                </Button>
+                                <Badge variant="outline" className="text-[10px] px-1.5 h-4 font-mono">
+                                    {unscheduledBlocks.length}
+                                </Badge>
+                            </div>
                         </div>
                         
                         <div className="space-y-2">
@@ -504,6 +518,13 @@ export function SidebarTools() {
                     Limpar planejamento
                 </Button>
             </div>
+            
+            {isGeneratorOpen && (
+                <BacklogGeneratorModal 
+                    open={isGeneratorOpen} 
+                    onClose={() => setIsGeneratorOpen(false)} 
+                />
+            )}
         </aside>
     );
 }

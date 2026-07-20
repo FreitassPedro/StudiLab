@@ -174,9 +174,8 @@ export function usePlannerState(weekDates?: Date[]) {
     const openEditBlock = useCallback((block: StudyBlock) => {
         if (block.isLog) return; // Nao editar study logs no planejador
         
-        const subject = subjects.find(s => s.id === block.subjectId);
         setNewBlockForm({
-            subjectId: subject?.name ?? block.subjectId,
+            subjectId: block.subjectId,
             topic: block.topic ?? "",
             startTime: block.startTime,
             endTime: block.endTime,
@@ -186,7 +185,7 @@ export function usePlannerState(weekDates?: Date[]) {
         });
         setEditingBlock(block);
         setModalOpen(true);
-    }, [subjects]);
+    }, []);
 
     const closeModal = useCallback(() => {
         setModalOpen(false);
@@ -231,6 +230,30 @@ export function usePlannerState(weekDates?: Date[]) {
 
         setBlocks((prev) => [...prev, newblock]);
     }, [blocks, allBlocks]);
+
+    const generateBacklog = useCallback((hoursMap: Record<string, number>) => {
+        const newBlocks: StudyBlock[] = [];
+        subjects.forEach(subject => {
+            const hours = hoursMap[subject.id] || 0;
+            for (let i = 0; i < hours; i++) {
+                newBlocks.push({
+                    id: generateId(),
+                    subjectId: subject.id,
+                    topic: "",
+                    startTime: "09:00",
+                    endTime: "10:00",
+                    color: subject.color,
+                    dayIndex: -1,
+                    type: "exercise",
+                    status: "todo",
+                    isLog: false
+                });
+            }
+        });
+        if (newBlocks.length > 0) {
+            setBlocks(prev => [...prev, ...newBlocks]);
+        }
+    }, [subjects]);
 
     const saveBlock = useCallback((newBlockForm: Partial<StudyBlock>) => {
         const payloadSubjectId = newBlockForm.subjectId?.trim();
@@ -462,6 +485,7 @@ export function usePlannerState(weekDates?: Date[]) {
         updateSubjectLocally,
         showLogs,
         setShowLogs,
+        generateBacklog,
     };
 }
 
