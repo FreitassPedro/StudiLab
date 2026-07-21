@@ -229,6 +229,20 @@ function AvatarFrame({
   );
 }
 
+// Ranks 6h, 24h, 60h, 100h, 200h, 500h, 1000h 
+function getStreakTier(totalMinutes: number) {
+  const hours = totalMinutes / 60;
+  console.log("hours: ", hours);
+  
+  if (hours < 1) return { tier: 1, rank: "Novato", color: "#9CA3AF" };
+  if (hours < 80) return { tier: 2, rank: "Estudante", color: "#60A5FA" };
+  if (hours < 500) return { tier: 3, rank: "★ Elite I", color: "#A855F7" };
+  if (hours < 800) return { tier: 4, rank: "★ Elite II", color: "#EC4899" };
+  if (hours < 2000) return { tier: 5, rank: "★ Elite III", color: "#EC4899" };
+  if (totalMinutes < 4000) return { tier: 6, rank: "✧ Mestre I", color: "#EC4899" };
+  if (totalMinutes < 6000) return { tier: 7, rank: "✧ Mestre II", color: "#EC4899" };
+  return { tier: 8, rank: "✧ Catedrático", color: "#EC4899" };
+}
 // ── Main component ─────────────────────────────────────────────────────────────
 interface ProfileHeaderProps {
   user: ProfileUser;
@@ -269,7 +283,8 @@ export function ProfileHeader({ user, stats, isOwner, isFollowing }: ProfileHead
             </div>
           )}
 
-          {/* Streak tier badge */}
+          {/* Tier badge based on total study hours */}
+
           <span
             className="rounded-full border px-2 py-0.5 text-[10px] font-bold uppercase tracking-widest"
             style={{
@@ -278,13 +293,7 @@ export function ProfileHeader({ user, stats, isOwner, isFollowing }: ProfileHead
               background: `${accent.accent}26`,
             }}
           >
-            {stats.currentStreak >= 60
-              ? "★ Elite III"
-              : stats.currentStreak >= 30
-                ? "★ Elite II"
-                : stats.currentStreak >= 14
-                  ? "★ Elite I"
-                  : "Estudante"}
+            {getStreakTier(stats.totalMinutes)?.rank}
           </span>
         </div>
 

@@ -54,7 +54,6 @@ export default function SignInPage() {
                 }
                 email = foundEmail;
             }
-            console.log(email, inputValue);
             const { error } = await authClient.signIn.email({
                 email: email,
                 password: data.password

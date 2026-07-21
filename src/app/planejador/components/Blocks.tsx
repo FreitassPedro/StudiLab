@@ -83,8 +83,8 @@ export function BlockCard({
                     : isResizing
                         ? "shadow-md ring-2 ring-primary/30 cursor-ns-resize"
                         : "cursor-grab hover:shadow-md hover:z-20",
-                block.status === "done" 
-                    ? "bg-muted/60 border-muted grayscale-[0.5] opacity-80 text-muted-foreground" 
+                block.status === "done"
+                    ? "bg-muted/60 border-muted grayscale-[0.5] opacity-80 text-muted-foreground"
                     : "",
                 block.isLog && "cursor-default ring-1 ring-primary/20 hover:shadow-none"
             )}
@@ -120,7 +120,7 @@ export function BlockCard({
                     )}
                 </button>
 
-                <h3 
+                <h3
                     className={cn("font-semibold truncate leading-tight text-xs", block.status === "done" && "line-through opacity-70")}
                     style={block.status !== "done" ? { color: baseColor } : undefined}
                 >
@@ -339,7 +339,7 @@ export function NewBlockFormModal({
 
 
     return (
-        <Dialog open={open} onOpenChange={(v) => !v && onCloseModal()} >
+        <Dialog open={open} onOpenChange={(v) => !v && onCloseModal()}>
             <DialogContent className="max-w-sm">
                 <form className="flex flex-col gap-3" onSubmit={handleSubmit(handleSubmitForm)}>
 
@@ -376,9 +376,9 @@ export function NewBlockFormModal({
                                                 {filteredOptions.map((sbj) => (
                                                     <ComboboxItem key={sbj.id} value={sbj.name}>
                                                         <div>
-                                                            <div 
-                                                                className="w-2.5 h-2.5 rounded-full opacity-70 mr-2 inline-block" 
-                                                                style={{ backgroundColor: sbj.color || "#3b82f6" }} 
+                                                            <div
+                                                                className="w-2.5 h-2.5 rounded-full opacity-70 mr-2 inline-block"
+                                                                style={{ backgroundColor: sbj.color || "#3b82f6" }}
                                                             />
                                                             {sbj.name}
                                                         </div>
@@ -474,7 +474,7 @@ export function NewBlockFormModal({
                                         variant="outline"
                                         type="button"
                                     >
-                                        <div 
+                                        <div
                                             className="w-2.5 h-2.5 rounded-full inline-block"
                                             style={{ backgroundColor: color as string }}
                                         />

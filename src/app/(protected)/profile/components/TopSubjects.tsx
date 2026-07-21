@@ -51,7 +51,6 @@ interface SubjectRowProps {
 
 function SubjectRow({ subject, rank, maxMinutes, accent }: SubjectRowProps) {
   const barWidth = `${Math.max(4, (subject.minutes / maxMinutes) * 100)}%`;
-  const emoji = getEmoji(subject.name);
 
   return (
     <div className="flex items-center gap-3.5 rounded-lg px-2 py-3 transition-colors duration-200 hover:bg-foreground/[0.04] border-b border-border last:border-b-0">
@@ -68,7 +67,7 @@ function SubjectRow({ subject, rank, maxMinutes, accent }: SubjectRowProps) {
           border: `1px solid ${subject.color}44`,
         }}
       >
-        {emoji}
+        {subject.emoji}
       </div>
 
       {/* Name */}

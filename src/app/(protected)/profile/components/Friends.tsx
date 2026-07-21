@@ -42,7 +42,7 @@ export function Friends({ targetUserId }: { targetUserId: string }) {
                         >
                             {/* Avatar */}
                             <div
-                                className="relative z-10 h-8 w-8 rounded-full flex items-center justify-center font-bold text-xs shrink-0 bg-primary text-primary-foreground"
+                                className="relative z-10 h-10 w-10 rounded-full flex items-center justify-center font-bold text-xs shrink-0 bg-primary text-primary-foreground"
                             >
                                 {friend.image ? (
                                     /* eslint-disable-next-line @next/next/no-img-element */

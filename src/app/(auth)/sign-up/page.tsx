@@ -53,14 +53,13 @@ export default function SignUpPage() {
         try {
             const email = `${data.username.toLowerCase().replace(/\s+/g, "")}@email.com`;
 
-            const { error, data: user } = await authClient.signUp.email({
+            const { error } = await authClient.signUp.email({
                 name: data.username,
                 email: email,
                 password: data.password,
             });
 
             if (error) {
-                console.error(error);
                 toast.error(error.message || "Falha ao criar conta");
                 return;
             }
