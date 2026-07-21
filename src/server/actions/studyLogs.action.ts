@@ -58,8 +58,9 @@ export async function createStudyLogAction(data: StudyLogInput) {
     revalidatePath("/dashboard");
     revalidatePath("/historico");
     revalidateTag(`study-logs-${user.id}`, "max");
-    revalidateTag(`profile-stats-${user.id}`, "max");
-    // Recalcula e persiste métricas desnormalizadas (streak, totais, semanal)
+    // Recalcula e persiste métricas desnormalizadas na tabela UserStats.
+    // O cache do perfil NÃO é invalidado aqui: ele expira pelo TTL (15min).
+    // Os números do header (streak, totais) são lidos frescos do UserStats em cada re-run.
     await recomputeUserStats(user.id);
     return result;
 }
@@ -98,8 +99,7 @@ export async function updateStudyLogAction(data: UpdateStudyLogInput) {
     revalidatePath("/dashboard");
     revalidatePath("/historico");
     revalidateTag(`study-logs-${user.id}`, "max");
-    revalidateTag(`profile-stats-${user.id}`, "max");
-    // Recalcula métricas (duração pode ter mudado)
+    // Recalcula métricas (duração pode ter mudado) — sem invalidar cache do perfil.
     await recomputeUserStats(user.id);
     return result;
 }
@@ -112,8 +112,7 @@ export async function deleteStudyLogAction(id: string) {
     revalidatePath("/dashboard");
     revalidatePath("/historico");
     revalidateTag(`study-logs-${user.id}`, "max");
-    revalidateTag(`profile-stats-${user.id}`, "max");
-    // Recalcula métricas (um dia pode ter ficado sem logs)
+    // Recalcula métricas (um dia pode ter ficado sem logs) — sem invalidar cache do perfil.
     await recomputeUserStats(user.id);
     return result;
 }

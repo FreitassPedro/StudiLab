@@ -229,11 +229,9 @@ function AvatarFrame({
   );
 }
 
-// Ranks 6h, 24h, 60h, 100h, 200h, 500h, 1000h 
+// Ranks: <1h, <80h, <500h, <800h, <2000h, <4000h, <6000h, 6000h+
 function getStreakTier(totalMinutes: number) {
   const hours = totalMinutes / 60;
-  console.log("hours: ", hours);
-  
   if (hours < 1) return { tier: 1, rank: "Novato", color: "#9CA3AF" };
   if (hours < 80) return { tier: 2, rank: "Estudante", color: "#60A5FA" };
   if (hours < 500) return { tier: 3, rank: "★ Elite I", color: "#A855F7" };

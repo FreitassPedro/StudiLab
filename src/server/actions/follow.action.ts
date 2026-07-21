@@ -2,7 +2,7 @@
 
 import { requireAuth } from "./requireAuth";
 import { prisma } from "@/lib/prisma";
-import { revalidatePath } from "next/cache";
+import { revalidatePath, revalidateTag } from "next/cache";
 
 export async function checkIsFollowing(targetUserId: string): Promise<boolean> {
   try {
@@ -60,10 +60,13 @@ export async function toggleFollow(targetUserId: string) {
     });
   }
 
-  revalidatePath("/dashboard");
-  revalidatePath("/profile");
+  // Invalida o cache de ambos os usuários para refletir contadores atualizados
+  revalidateTag(`user-${currentUser.id}`, "max");
+  revalidateTag(`user-${targetUserId}`, "max");
+  // Invalida lista de amigos do usuário atual
+  revalidateTag(`friends-${currentUser.id}`, "max");
   revalidatePath("/profile/[username]", "page");
-  
+
   return { success: true, isFollowing: !existingFollow };
 }
 

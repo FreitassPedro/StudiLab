@@ -25,8 +25,6 @@ export const getCachedHistoryAnalysis = async (userId: string, startDateStr: str
             const normalizedStart = new Date(startDateStr);
             const normalizedEnd = new Date(endDateStr);
 
-            console.log("Fetching Data from DB", normalizedStart, normalizedEnd);
-
             // UNICA QUERY AO BANCO: Busca todos os logs no intervalo com as relações necessárias
             const logs = await prisma.studyLogs.findMany({
                 where: {
@@ -51,8 +49,6 @@ export const getCachedHistoryAnalysis = async (userId: string, startDateStr: str
                     start_time: "asc",
                 },
             });
-
-            console.log("Logs found:", logs.length);
 
             // --- PROCESSAMENTO EM MEMÓRIA (MUITO MAIS RÁPIDO QUE MÚLTIPLAS QUERIES) ---
 

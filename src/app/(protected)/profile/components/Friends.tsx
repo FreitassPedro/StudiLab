@@ -19,6 +19,8 @@ export function Friends({ targetUserId }: { targetUserId: string }) {
     const { data: friends } = useQuery({
         queryKey: ["friends", targetUserId],
         queryFn: () => getFriends({ targetUserId }),
+        staleTime: 5 * 60 * 1000,  // considera fresco por 5 minutos
+        gcTime: 10 * 60 * 1000,    // mantém em memória por 10 minutos
     })
 
     return (
@@ -55,7 +57,7 @@ export function Friends({ targetUserId }: { targetUserId: string }) {
                             {/* Name */}
                             <div className="relative z-10 flex-1 min-w-0">
                                 <p className="text-sm font-semibold text-foreground truncate">{friend.name}</p>
-                                <p className="text-[11px] text-muted-foreground">@{friend.name}</p>
+                                <p className="text-[11px] text-muted-foreground">@{friend.profile?.username ?? friend.name}</p>
                             </div>
                         </div>
                     );
