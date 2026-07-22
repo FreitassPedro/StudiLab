@@ -1,12 +1,12 @@
 "use server";
 
 
+import { Prisma } from "@/app/generated/prisma/client";
 import { prisma } from "@/lib/prisma";
 import { Topic } from "@/types/types";
 import { requireAuth } from "./requireAuth";
 
 import { cache } from "react";
-import { Prisma } from "@/app/generated/prisma/client";
 
 export const getTopicsAction = cache(async (): Promise<Topic[]> => {
     const user = await requireAuth();

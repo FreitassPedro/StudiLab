@@ -1,7 +1,8 @@
 "use server";
 
-import { Subject } from "@/types/types";
+import { Subject, SubjectTree, TopicNode } from "@/types/types";
 import { prisma } from "@/lib/prisma";
+import { Prisma } from "@/app/generated/prisma/client";
 import { requireAuth } from "./requireAuth";
 
 /**
@@ -94,7 +95,6 @@ export async function deleteSubjectAction(id: string) {
 
 
 import { cache } from "react";
-import { Prisma } from "@/app/generated/prisma/client";
 
 export const getSubjectsAction = cache(async (): Promise<Subject[]> => {
     const user = await requireAuth();

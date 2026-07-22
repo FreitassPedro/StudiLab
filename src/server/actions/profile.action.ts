@@ -12,7 +12,7 @@ import type {
 } from "@/app/(protected)/profile/types";
 import { notFound } from "next/navigation";
 import { revalidateTag, revalidatePath, unstable_cache } from "next/cache";
-import { Prisma } from "@/app/generated/prisma/client";
+import type { Prisma } from "@/app/generated/prisma/client";
 
 
 // ── Cache Global Invariável (badges mudam raramente) ────────────────────────
@@ -326,7 +326,7 @@ export async function updateProfile(data: {
     revalidateTag(`user-${profile.username.toLowerCase()}`, "max");
     revalidatePath(`/profile/${profile.username}`);
   }
-
+  
   revalidatePath("/profile");
 
   return profile;
