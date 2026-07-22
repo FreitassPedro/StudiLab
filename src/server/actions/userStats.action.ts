@@ -295,6 +295,7 @@ export async function backfillUserDailyStatsAction(): Promise<{ inserted: number
     if (allDayAggregates.length === 0) {
         return { inserted: 0, alreadyUpToDate: false };
     }
+    
 
     const result = await prisma.userDailyStats.createMany({
         data: allDayAggregates.map((a) => ({

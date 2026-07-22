@@ -61,6 +61,34 @@ const buildCachedProfileStats = (userId: string) =>
       const sixMonthsAgo = new Date(today.getTime() - 182 * 86400000);
       const todayStr = today.toISOString().split("T")[0];
 
+      // Backfill automático: qualquer perfil visitado (próprio ou de terceiros) sem UserDailyStats
+      // tem seus dados agregados aqui antes de prosseguir. É idempotente e ocorre no máximo 1x por usuário.
+      const hasDailyStats = await prisma.userDailyStats.findFirst({
+        where: { userId },
+        select: { id: true },
+      });
+
+      if (!hasDailyStats) {
+        const dayAggregates = await prisma.studyLogs.groupBy({
+          by: ["study_date"],
+          where: { topic: { subject: { userId } } },
+          _sum: { duration_minutes: true },
+          _count: { id: true },
+        });
+
+        if (dayAggregates.length > 0) {
+          await prisma.userDailyStats.createMany({
+            data: dayAggregates.map((a) => ({
+              userId,
+              date: a.study_date,
+              totalMinutes: a._sum.duration_minutes ?? 0,
+              sessions: a._count.id,
+            })),
+            skipDuplicates: true,
+          });
+        }
+      }
+
       // 4 queries completamente paralelas — zero dependências entre elas
       const [userStats, heatmapRows, recentLogs, rawSubjects] = await Promise.all([
         // 1. Stats desnormalizados — O(1) PK lookup
@@ -198,14 +226,14 @@ export async function getProfileDataAction(username?: string): Promise<ProfileDa
     getCachedBadges(),
     username && !isOwner
       ? prisma.follows.findUnique({
-          where: {
-            followerId_followingId: {
-              followerId: currentUser.id,
-              followingId: userRecord.id,
-            },
+        where: {
+          followerId_followingId: {
+            followerId: currentUser.id,
+            followingId: userRecord.id,
           },
-          select: { followingId: true },
-        })
+        },
+        select: { followingId: true },
+      })
       : Promise.resolve(null),
   ]);
 
@@ -298,6 +326,7 @@ export async function updateProfile(data: {
     revalidateTag(`user-${profile.username.toLowerCase()}`, "max");
     revalidatePath(`/profile/${profile.username}`);
   }
+  
   revalidatePath("/profile");
 
   return profile;
