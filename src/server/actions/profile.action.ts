@@ -12,19 +12,47 @@ import type {
 } from "@/app/(protected)/profile/types";
 import { notFound } from "next/navigation";
 import { revalidateTag, revalidatePath, unstable_cache } from "next/cache";
+import type { Prisma } from "@/app/generated/prisma/client";
 
-// ── Cache Global Invariável (badges mudam raramente) ───────────────────────────
+
+// ── Cache Global Invariável (badges mudam raramente) ────────────────────────
 const getCachedBadges = unstable_cache(
-  async () => await prisma.badge.findMany(),
+  async () => prisma.badge.findMany(),
   ["all-badges-keys"],
   { revalidate: 86400, tags: ["badges"] }
 );
 
-// ── Cache das estatísticas do perfil ──────────────────────────────────────────
-// Estratégia: 3 queries paralelas e especializadas em vez de 1 query massiva com JOIN triplo.
-//  1. heatmap  — select { study_date, duration_minutes } sem JOIN, payload mínimo
-//  2. recent   — take:10 com JOIN completo, ordenado DESC
-//  3. groupBy  — agrupamento por subject feito no banco, não em memória JS
+// ── Cache de userRecord — extraído como função nomeada (não cria nova closure a cada request)
+// Fix: era unstable_cache inline dentro da action → criava instância nova a cada request antes de checar cache.
+// Fix: TTL de 5 minutos adicionado (antes ficava preso indefinidamente até tag ser invalidada).
+const buildCachedUserRecord = (cacheKey: string, tag: string, targetWhere: Prisma.UserWhereInput) =>
+  unstable_cache(
+    async () =>
+      prisma.user.findFirst({
+        where: targetWhere,
+        select: {
+          id: true,
+          name: true,
+          email: true,
+          image: true,
+          createdAt: true,
+          profile: true,
+          _count: { select: { followers: true, following: true } },
+          badges: { select: { badgeId: true } },
+        },
+      }),
+    [`user-record-${cacheKey}`],
+    { revalidate: 300, tags: [tag] } // TTL: 5 minutos
+  );
+
+
+// ── Cache das estatísticas do perfil ────────────────────────────────────────
+// Queries:
+//  1. UserStats     — O(1) PK lookup
+//  2. Heatmap       — UserDailyStats já agregado, 6 meses (~183 linhas máx)
+//  3. recentLogs    — take:10 com JOIN completo
+//  4. topSubjects   — raw SQL: 1 query GROUP BY subjectId, sem remapping em JS
+//                     (antes: groupBy topicId + findMany extra para missingTopics)
 const buildCachedProfileStats = (userId: string) =>
   unstable_cache(
     async () => {
@@ -33,116 +61,64 @@ const buildCachedProfileStats = (userId: string) =>
       const sixMonthsAgo = new Date(today.getTime() - 182 * 86400000);
       const todayStr = today.toISOString().split("T")[0];
 
-      // O(1) — lookup por chave primária na tabela desnormalizada
-      const userStats = await prisma.userStats.findUnique({ where: { userId } });
+      // 4 queries completamente paralelas — zero dependências entre elas
+      const [userStats, heatmapRows, recentLogs, rawSubjects] = await Promise.all([
+        // 1. Stats desnormalizados — O(1) PK lookup
+        prisma.userStats.findUnique({ where: { userId } }),
 
-      // Fallback zero: NÃO chama recomputeUserStats aqui.
-      // O recompute só é chamado em mutações (createStudyLog, updateStudyLog, deleteStudyLog).
-      const safeStats = userStats ?? {
-        totalMinutes: 0,
-        totalSessions: 0,
-        studyDays: 0,
-        currentStreak: 0,
-        longestStreak: 0,
-        weeklyMinutes: 0,
-      };
-
-      // 3 queries paralelas e especializadas
-      const [heatmapRows, recentLogs, subjectAggregates] = await Promise.all([
-        // 1. Heatmap: só date + minutes, sem JOIN — payload mínimo
-        prisma.studyLogs.findMany({
-          where: {
-            topic: { subject: { userId } },
-            study_date: { gte: sixMonthsAgo, lte: today },
-          },
-          select: { study_date: true, duration_minutes: true },
+        // 2. Heatmap — lê UserDailyStats já agregado por dia
+        prisma.userDailyStats.findMany({
+          where: { userId },
+          select: { date: true, totalMinutes: true },
         }),
 
-        // 2. Sessões recentes: 25 linhas com JOIN completo.
-        // take:25 (em vez de 10) cobre os top subjects do groupBy sem precisar de query extra.
+        // 3. Sessões recentes — take:10 com JOIN, ordenado DESC
         prisma.studyLogs.findMany({
           where: { topic: { subject: { userId } } },
           include: { topic: { include: { subject: true } } },
           orderBy: { start_time: "desc" },
-          take: 25,
+          take: 10,
         }),
 
-        // 3. Top subjects: groupBy no banco por subjectId, top 5
-        prisma.studyLogs.groupBy({
-          by: ["topicId"],
-          where: {
-            topic: { subject: { userId } },
-            study_date: { gte: sixMonthsAgo, lte: today },
-          },
-          _sum: { duration_minutes: true },
-          orderBy: { _sum: { duration_minutes: "desc" } },
-          take: 20, // pega mais para poder agrupar por subject depois
-        }),
+        // 4. Top subjects por minutos — 1 raw SQL com GROUP BY subjectId.
+        // Fix: era groupBy(topicId) + findMany(missingTopics) + remapping JS.
+        // Agora: 1 query agrega direto por matéria, retorna top 5 pronto.
+        prisma.$queryRaw<
+          Array<{ id: string; name: string; color: string; emoji: string | null; total: bigint }>
+        >`
+          SELECT s.id, s.name, s.color, s.icon AS emoji, SUM(sl.duration_minutes)::bigint AS total
+          FROM "StudyLogs" sl
+          JOIN "Topic" t ON t.id = sl."topicId"
+          JOIN "Subject" s ON s.id = t."subjectId"
+          WHERE s."userId" = ${userId}
+            AND sl.study_date >= ${sixMonthsAgo}
+            AND sl.study_date <= ${today}
+          GROUP BY s.id, s.name, s.color, s.icon
+          ORDER BY total DESC
+          LIMIT 5
+        `,
       ]);
 
-      // Heatmap derivado da query leve
+      // ── Heatmap ──────────────────────────────────────────────────────────
       const heatmap: Record<string, number> = {};
       let todayMinutes = 0;
 
       for (const row of heatmapRows) {
-        const dateStr = row.study_date.toISOString().split("T")[0];
-        heatmap[dateStr] = (heatmap[dateStr] ?? 0) + row.duration_minutes;
-        if (dateStr === todayStr) todayMinutes += row.duration_minutes;
+        const dateStr = row.date.toISOString().split("T")[0];
+        heatmap[dateStr] = row.totalMinutes;
+        if (dateStr === todayStr) todayMinutes = row.totalMinutes;
       }
 
-      // Mapa topicId → subject info (reutiliza dados das sessões recentes)
-      const subjectInfoMap = new Map<string, { id: string; name: string; color: string; emoji: string }>();
-      for (const log of recentLogs) {
-        const s = log.topic.subject;
-        if (!subjectInfoMap.has(log.topicId)) {
-          subjectInfoMap.set(log.topicId, { id: s.id, name: s.name, color: s.color, emoji: s.icon ?? "📚" });
-        }
-      }
+      // ── Top Subjects — já vem pronto da raw query ─────────────────────
+      const topSubjects: ProfileSubject[] = rawSubjects.map((s) => ({
+        name: s.name,
+        color: s.color,
+        emoji: s.emoji ?? "📚",
+        minutes: Number(s.total),
+      }));
 
-      // Para topics do groupBy que não apareceram nas 10 recentes, busca pontualmente
-      const missingTopicIds = subjectAggregates
-        .map((a) => a.topicId)
-        .filter((tid) => !subjectInfoMap.has(tid));
-
-      if (missingTopicIds.length > 0) {
-        const missingTopics = await prisma.topic.findMany({
-          where: { id: { in: missingTopicIds } },
-          select: { id: true, subject: { select: { id: true, name: true, color: true, icon: true } } },
-        });
-        for (const t of missingTopics) {
-          subjectInfoMap.set(t.id, {
-            id: t.subject.id,
-            name: t.subject.name,
-            color: t.subject.color,
-            emoji: t.subject.icon ?? "📚",
-          });
-        }
-      }
-
-      // Agrega minutos por subjectId (groupBy foi por topicId)
-      const subjectMinutes = new Map<string, { name: string; color: string; emoji: string; minutes: number }>();
-      for (const agg of subjectAggregates) {
-        const info = subjectInfoMap.get(agg.topicId);
-        if (!info) continue;
-        const existing = subjectMinutes.get(info.id);
-        if (existing) {
-          existing.minutes += agg._sum.duration_minutes ?? 0;
-        } else {
-          subjectMinutes.set(info.id, {
-            name: info.name,
-            color: info.color,
-            emoji: info.emoji,
-            minutes: agg._sum.duration_minutes ?? 0,
-          });
-        }
-      }
-
-      const topSubjects: ProfileSubject[] = Array.from(subjectMinutes.values())
-        .sort((a, b) => b.minutes - a.minutes)
-        .slice(0, 5);
-
-      // Exibe apenas as 10 mais recentes — os 25 carregados foram usados para cobrir os subjects
-      const recentSessions: ProfileSession[] = recentLogs.slice(0, 10).map((log) => ({
+      // ── Sessões recentes ──────────────────────────────────────────────
+      const recentSessions: ProfileSession[] = recentLogs.map((log) => ({
         id: log.id,
         subjectName: log.topic.subject.name,
         subjectColor: log.topic.subject.color,
@@ -152,6 +128,16 @@ const buildCachedProfileStats = (userId: string) =>
         study_date: log.study_date,
         notes: log.notes,
       }));
+
+      // ── Stats — fallback zero se usuário ainda não tem registro ──────
+      const safeStats = userStats ?? {
+        totalMinutes: 0,
+        totalSessions: 0,
+        studyDays: 0,
+        currentStreak: 0,
+        longestStreak: 0,
+        weeklyMinutes: 0,
+      };
 
       const stats: ProfileStats = {
         totalMinutes: safeStats.totalMinutes,
@@ -172,14 +158,11 @@ const buildCachedProfileStats = (userId: string) =>
       return { heatmap, topSubjects, recentSessions, stats };
     },
     [`profile-stats-${userId}`],
-    // TTL: 15 minutos. O cache expira naturalmente, sem ser busted por mutações de studyLog.
-    // Isso desacopla a atividade de estudo do custo de re-computação do perfil.
-    // A tag `user-stats-${userId}` foi REMOVIDA intencionalmente para quebrar a cascata:
-    //   recomputeUserStats → revalidateTag(user-stats) → invalida perfil (indesejado).
+    // TTL: 15 minutos. Desacoplado de mutações de studyLog (elas invalidam user-stats, não profile-stats).
     { revalidate: 900, tags: [`profile-stats-${userId}`] }
   );
 
-// ── Action pública principal ───────────────────────────────────────────────────
+// ── Action pública principal ─────────────────────────────────────────────────
 export async function getProfileDataAction(username?: string): Promise<ProfileData> {
   const currentUser = await requireAuth();
 
@@ -189,24 +172,7 @@ export async function getProfileDataAction(username?: string): Promise<ProfileDa
     ? { profile: { username: { equals: username, mode: "insensitive" as const } } }
     : { id: currentUser.id };
 
-  const userRecord = await unstable_cache(
-    async () =>
-      prisma.user.findFirst({
-        where: targetWhere,
-        select: {
-          id: true,
-          name: true,
-          email: true,
-          image: true,
-          createdAt: true,
-          profile: true,
-          _count: { select: { followers: true, following: true } },
-          badges: { select: { badgeId: true } },
-        },
-      }),
-    [`user-record-${cacheKey}`],
-    { tags: [tag] }
-  )();
+  const userRecord = await buildCachedUserRecord(cacheKey, tag, targetWhere)();
 
   if (!userRecord) notFound();
 
@@ -282,7 +248,7 @@ export async function getProfileDataAction(username?: string): Promise<ProfileDa
   };
 }
 
-// ── Atualizar perfil ───────────────────────────────────────────────────────────
+// ── Atualizar perfil ─────────────────────────────────────────────────────────
 export async function updateProfile(data: {
   username?: string;
   bio?: string;
@@ -327,7 +293,6 @@ export async function updateProfile(data: {
     await prisma.user.update({ where: { id: currentUser.id }, data: cleanedUserData });
   }
 
-  // Invalida os caches corretos após edição de perfil
   revalidateTag(`user-${currentUser.id}`, "max");
   if (profile.username) {
     revalidateTag(`user-${profile.username.toLowerCase()}`, "max");
@@ -338,7 +303,7 @@ export async function updateProfile(data: {
   return profile;
 }
 
-// ── Buscar amigos (quem o targetUser segue) — Cacheado ───────────────────────
+// ── Buscar amigos (quem o targetUser segue) — Cacheado ──────────────────────
 export const getFriends = async ({ targetUserId }: { targetUserId: string }) => {
   return unstable_cache(
     async () =>
@@ -346,7 +311,6 @@ export const getFriends = async ({ targetUserId }: { targetUserId: string }) => 
         select: {
           id: true,
           name: true,
-          email: true,
           image: true,
           profile: { select: { username: true } },
         },

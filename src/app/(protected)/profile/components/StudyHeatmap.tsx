@@ -125,6 +125,7 @@ export function StudyHeatmap({ heatmap }: StudyHeatmapProps) {
 
   const columns = useMemo(() => buildColumns(heatmap, WEEKS), [heatmap]);
 
+  console.log(heatmap);
   const today = new Date();
   const todayKey = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, "0")}-${String(today.getDate()).padStart(2, "0")}`;
 
@@ -169,8 +170,8 @@ export function StudyHeatmap({ heatmap }: StudyHeatmapProps) {
                 {col.cells.map((cell, d) => {
 
                   // Se a celula for depois de hoje, não renderizar
-                  if(cell.dateKey > todayKey) return null; 
-                  
+                  if (cell.dateKey > todayKey) return null;
+
                   return (
                     <HeatCell
                       key={d}

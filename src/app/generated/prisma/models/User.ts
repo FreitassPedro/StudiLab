@@ -206,6 +206,7 @@ export type UserWhereInput = {
   followers?: Prisma.FollowsListRelationFilter
   following?: Prisma.FollowsListRelationFilter
   badges?: Prisma.UserBadgeListRelationFilter
+  dailyStats?: Prisma.UserDailyStatsListRelationFilter
 }
 
 export type UserOrderByWithRelationInput = {
@@ -224,6 +225,7 @@ export type UserOrderByWithRelationInput = {
   followers?: Prisma.FollowsOrderByRelationAggregateInput
   following?: Prisma.FollowsOrderByRelationAggregateInput
   badges?: Prisma.UserBadgeOrderByRelationAggregateInput
+  dailyStats?: Prisma.UserDailyStatsOrderByRelationAggregateInput
 }
 
 export type UserWhereUniqueInput = Prisma.AtLeast<{
@@ -245,6 +247,7 @@ export type UserWhereUniqueInput = Prisma.AtLeast<{
   followers?: Prisma.FollowsListRelationFilter
   following?: Prisma.FollowsListRelationFilter
   badges?: Prisma.UserBadgeListRelationFilter
+  dailyStats?: Prisma.UserDailyStatsListRelationFilter
 }, "id" | "email">
 
 export type UserOrderByWithAggregationInput = {
@@ -289,6 +292,7 @@ export type UserCreateInput = {
   followers?: Prisma.FollowsCreateNestedManyWithoutFollowingInput
   following?: Prisma.FollowsCreateNestedManyWithoutFollowerInput
   badges?: Prisma.UserBadgeCreateNestedManyWithoutUserInput
+  dailyStats?: Prisma.UserDailyStatsCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateInput = {
@@ -307,6 +311,7 @@ export type UserUncheckedCreateInput = {
   followers?: Prisma.FollowsUncheckedCreateNestedManyWithoutFollowingInput
   following?: Prisma.FollowsUncheckedCreateNestedManyWithoutFollowerInput
   badges?: Prisma.UserBadgeUncheckedCreateNestedManyWithoutUserInput
+  dailyStats?: Prisma.UserDailyStatsUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserUpdateInput = {
@@ -325,6 +330,7 @@ export type UserUpdateInput = {
   followers?: Prisma.FollowsUpdateManyWithoutFollowingNestedInput
   following?: Prisma.FollowsUpdateManyWithoutFollowerNestedInput
   badges?: Prisma.UserBadgeUpdateManyWithoutUserNestedInput
+  dailyStats?: Prisma.UserDailyStatsUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateInput = {
@@ -343,6 +349,7 @@ export type UserUncheckedUpdateInput = {
   followers?: Prisma.FollowsUncheckedUpdateManyWithoutFollowingNestedInput
   following?: Prisma.FollowsUncheckedUpdateManyWithoutFollowerNestedInput
   badges?: Prisma.UserBadgeUncheckedUpdateManyWithoutUserNestedInput
+  dailyStats?: Prisma.UserDailyStatsUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateManyInput = {
@@ -522,6 +529,20 @@ export type UserUpdateOneRequiredWithoutStatsNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutStatsInput, Prisma.UserUpdateWithoutStatsInput>, Prisma.UserUncheckedUpdateWithoutStatsInput>
 }
 
+export type UserCreateNestedOneWithoutDailyStatsInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutDailyStatsInput, Prisma.UserUncheckedCreateWithoutDailyStatsInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutDailyStatsInput
+  connect?: Prisma.UserWhereUniqueInput
+}
+
+export type UserUpdateOneRequiredWithoutDailyStatsNestedInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutDailyStatsInput, Prisma.UserUncheckedCreateWithoutDailyStatsInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutDailyStatsInput
+  upsert?: Prisma.UserUpsertWithoutDailyStatsInput
+  connect?: Prisma.UserWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutDailyStatsInput, Prisma.UserUpdateWithoutDailyStatsInput>, Prisma.UserUncheckedUpdateWithoutDailyStatsInput>
+}
+
 export type UserCreateWithoutSubjectsInput = {
   id: string
   name: string
@@ -537,6 +558,7 @@ export type UserCreateWithoutSubjectsInput = {
   followers?: Prisma.FollowsCreateNestedManyWithoutFollowingInput
   following?: Prisma.FollowsCreateNestedManyWithoutFollowerInput
   badges?: Prisma.UserBadgeCreateNestedManyWithoutUserInput
+  dailyStats?: Prisma.UserDailyStatsCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutSubjectsInput = {
@@ -554,6 +576,7 @@ export type UserUncheckedCreateWithoutSubjectsInput = {
   followers?: Prisma.FollowsUncheckedCreateNestedManyWithoutFollowingInput
   following?: Prisma.FollowsUncheckedCreateNestedManyWithoutFollowerInput
   badges?: Prisma.UserBadgeUncheckedCreateNestedManyWithoutUserInput
+  dailyStats?: Prisma.UserDailyStatsUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutSubjectsInput = {
@@ -587,6 +610,7 @@ export type UserUpdateWithoutSubjectsInput = {
   followers?: Prisma.FollowsUpdateManyWithoutFollowingNestedInput
   following?: Prisma.FollowsUpdateManyWithoutFollowerNestedInput
   badges?: Prisma.UserBadgeUpdateManyWithoutUserNestedInput
+  dailyStats?: Prisma.UserDailyStatsUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutSubjectsInput = {
@@ -604,6 +628,7 @@ export type UserUncheckedUpdateWithoutSubjectsInput = {
   followers?: Prisma.FollowsUncheckedUpdateManyWithoutFollowingNestedInput
   following?: Prisma.FollowsUncheckedUpdateManyWithoutFollowerNestedInput
   badges?: Prisma.UserBadgeUncheckedUpdateManyWithoutUserNestedInput
+  dailyStats?: Prisma.UserDailyStatsUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutSessionsInput = {
@@ -621,6 +646,7 @@ export type UserCreateWithoutSessionsInput = {
   followers?: Prisma.FollowsCreateNestedManyWithoutFollowingInput
   following?: Prisma.FollowsCreateNestedManyWithoutFollowerInput
   badges?: Prisma.UserBadgeCreateNestedManyWithoutUserInput
+  dailyStats?: Prisma.UserDailyStatsCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutSessionsInput = {
@@ -638,6 +664,7 @@ export type UserUncheckedCreateWithoutSessionsInput = {
   followers?: Prisma.FollowsUncheckedCreateNestedManyWithoutFollowingInput
   following?: Prisma.FollowsUncheckedCreateNestedManyWithoutFollowerInput
   badges?: Prisma.UserBadgeUncheckedCreateNestedManyWithoutUserInput
+  dailyStats?: Prisma.UserDailyStatsUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutSessionsInput = {
@@ -671,6 +698,7 @@ export type UserUpdateWithoutSessionsInput = {
   followers?: Prisma.FollowsUpdateManyWithoutFollowingNestedInput
   following?: Prisma.FollowsUpdateManyWithoutFollowerNestedInput
   badges?: Prisma.UserBadgeUpdateManyWithoutUserNestedInput
+  dailyStats?: Prisma.UserDailyStatsUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutSessionsInput = {
@@ -688,6 +716,7 @@ export type UserUncheckedUpdateWithoutSessionsInput = {
   followers?: Prisma.FollowsUncheckedUpdateManyWithoutFollowingNestedInput
   following?: Prisma.FollowsUncheckedUpdateManyWithoutFollowerNestedInput
   badges?: Prisma.UserBadgeUncheckedUpdateManyWithoutUserNestedInput
+  dailyStats?: Prisma.UserDailyStatsUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutAccountsInput = {
@@ -705,6 +734,7 @@ export type UserCreateWithoutAccountsInput = {
   followers?: Prisma.FollowsCreateNestedManyWithoutFollowingInput
   following?: Prisma.FollowsCreateNestedManyWithoutFollowerInput
   badges?: Prisma.UserBadgeCreateNestedManyWithoutUserInput
+  dailyStats?: Prisma.UserDailyStatsCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutAccountsInput = {
@@ -722,6 +752,7 @@ export type UserUncheckedCreateWithoutAccountsInput = {
   followers?: Prisma.FollowsUncheckedCreateNestedManyWithoutFollowingInput
   following?: Prisma.FollowsUncheckedCreateNestedManyWithoutFollowerInput
   badges?: Prisma.UserBadgeUncheckedCreateNestedManyWithoutUserInput
+  dailyStats?: Prisma.UserDailyStatsUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutAccountsInput = {
@@ -755,6 +786,7 @@ export type UserUpdateWithoutAccountsInput = {
   followers?: Prisma.FollowsUpdateManyWithoutFollowingNestedInput
   following?: Prisma.FollowsUpdateManyWithoutFollowerNestedInput
   badges?: Prisma.UserBadgeUpdateManyWithoutUserNestedInput
+  dailyStats?: Prisma.UserDailyStatsUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutAccountsInput = {
@@ -772,6 +804,7 @@ export type UserUncheckedUpdateWithoutAccountsInput = {
   followers?: Prisma.FollowsUncheckedUpdateManyWithoutFollowingNestedInput
   following?: Prisma.FollowsUncheckedUpdateManyWithoutFollowerNestedInput
   badges?: Prisma.UserBadgeUncheckedUpdateManyWithoutUserNestedInput
+  dailyStats?: Prisma.UserDailyStatsUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutProfileInput = {
@@ -789,6 +822,7 @@ export type UserCreateWithoutProfileInput = {
   followers?: Prisma.FollowsCreateNestedManyWithoutFollowingInput
   following?: Prisma.FollowsCreateNestedManyWithoutFollowerInput
   badges?: Prisma.UserBadgeCreateNestedManyWithoutUserInput
+  dailyStats?: Prisma.UserDailyStatsCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutProfileInput = {
@@ -806,6 +840,7 @@ export type UserUncheckedCreateWithoutProfileInput = {
   followers?: Prisma.FollowsUncheckedCreateNestedManyWithoutFollowingInput
   following?: Prisma.FollowsUncheckedCreateNestedManyWithoutFollowerInput
   badges?: Prisma.UserBadgeUncheckedCreateNestedManyWithoutUserInput
+  dailyStats?: Prisma.UserDailyStatsUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutProfileInput = {
@@ -839,6 +874,7 @@ export type UserUpdateWithoutProfileInput = {
   followers?: Prisma.FollowsUpdateManyWithoutFollowingNestedInput
   following?: Prisma.FollowsUpdateManyWithoutFollowerNestedInput
   badges?: Prisma.UserBadgeUpdateManyWithoutUserNestedInput
+  dailyStats?: Prisma.UserDailyStatsUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutProfileInput = {
@@ -856,6 +892,7 @@ export type UserUncheckedUpdateWithoutProfileInput = {
   followers?: Prisma.FollowsUncheckedUpdateManyWithoutFollowingNestedInput
   following?: Prisma.FollowsUncheckedUpdateManyWithoutFollowerNestedInput
   badges?: Prisma.UserBadgeUncheckedUpdateManyWithoutUserNestedInput
+  dailyStats?: Prisma.UserDailyStatsUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutFollowingInput = {
@@ -873,6 +910,7 @@ export type UserCreateWithoutFollowingInput = {
   stats?: Prisma.UserStatsCreateNestedOneWithoutUserInput
   followers?: Prisma.FollowsCreateNestedManyWithoutFollowingInput
   badges?: Prisma.UserBadgeCreateNestedManyWithoutUserInput
+  dailyStats?: Prisma.UserDailyStatsCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutFollowingInput = {
@@ -890,6 +928,7 @@ export type UserUncheckedCreateWithoutFollowingInput = {
   stats?: Prisma.UserStatsUncheckedCreateNestedOneWithoutUserInput
   followers?: Prisma.FollowsUncheckedCreateNestedManyWithoutFollowingInput
   badges?: Prisma.UserBadgeUncheckedCreateNestedManyWithoutUserInput
+  dailyStats?: Prisma.UserDailyStatsUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutFollowingInput = {
@@ -912,6 +951,7 @@ export type UserCreateWithoutFollowersInput = {
   stats?: Prisma.UserStatsCreateNestedOneWithoutUserInput
   following?: Prisma.FollowsCreateNestedManyWithoutFollowerInput
   badges?: Prisma.UserBadgeCreateNestedManyWithoutUserInput
+  dailyStats?: Prisma.UserDailyStatsCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutFollowersInput = {
@@ -929,6 +969,7 @@ export type UserUncheckedCreateWithoutFollowersInput = {
   stats?: Prisma.UserStatsUncheckedCreateNestedOneWithoutUserInput
   following?: Prisma.FollowsUncheckedCreateNestedManyWithoutFollowerInput
   badges?: Prisma.UserBadgeUncheckedCreateNestedManyWithoutUserInput
+  dailyStats?: Prisma.UserDailyStatsUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutFollowersInput = {
@@ -962,6 +1003,7 @@ export type UserUpdateWithoutFollowingInput = {
   stats?: Prisma.UserStatsUpdateOneWithoutUserNestedInput
   followers?: Prisma.FollowsUpdateManyWithoutFollowingNestedInput
   badges?: Prisma.UserBadgeUpdateManyWithoutUserNestedInput
+  dailyStats?: Prisma.UserDailyStatsUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutFollowingInput = {
@@ -979,6 +1021,7 @@ export type UserUncheckedUpdateWithoutFollowingInput = {
   stats?: Prisma.UserStatsUncheckedUpdateOneWithoutUserNestedInput
   followers?: Prisma.FollowsUncheckedUpdateManyWithoutFollowingNestedInput
   badges?: Prisma.UserBadgeUncheckedUpdateManyWithoutUserNestedInput
+  dailyStats?: Prisma.UserDailyStatsUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserUpsertWithoutFollowersInput = {
@@ -1007,6 +1050,7 @@ export type UserUpdateWithoutFollowersInput = {
   stats?: Prisma.UserStatsUpdateOneWithoutUserNestedInput
   following?: Prisma.FollowsUpdateManyWithoutFollowerNestedInput
   badges?: Prisma.UserBadgeUpdateManyWithoutUserNestedInput
+  dailyStats?: Prisma.UserDailyStatsUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutFollowersInput = {
@@ -1024,6 +1068,7 @@ export type UserUncheckedUpdateWithoutFollowersInput = {
   stats?: Prisma.UserStatsUncheckedUpdateOneWithoutUserNestedInput
   following?: Prisma.FollowsUncheckedUpdateManyWithoutFollowerNestedInput
   badges?: Prisma.UserBadgeUncheckedUpdateManyWithoutUserNestedInput
+  dailyStats?: Prisma.UserDailyStatsUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutBadgesInput = {
@@ -1041,6 +1086,7 @@ export type UserCreateWithoutBadgesInput = {
   stats?: Prisma.UserStatsCreateNestedOneWithoutUserInput
   followers?: Prisma.FollowsCreateNestedManyWithoutFollowingInput
   following?: Prisma.FollowsCreateNestedManyWithoutFollowerInput
+  dailyStats?: Prisma.UserDailyStatsCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutBadgesInput = {
@@ -1058,6 +1104,7 @@ export type UserUncheckedCreateWithoutBadgesInput = {
   stats?: Prisma.UserStatsUncheckedCreateNestedOneWithoutUserInput
   followers?: Prisma.FollowsUncheckedCreateNestedManyWithoutFollowingInput
   following?: Prisma.FollowsUncheckedCreateNestedManyWithoutFollowerInput
+  dailyStats?: Prisma.UserDailyStatsUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutBadgesInput = {
@@ -1091,6 +1138,7 @@ export type UserUpdateWithoutBadgesInput = {
   stats?: Prisma.UserStatsUpdateOneWithoutUserNestedInput
   followers?: Prisma.FollowsUpdateManyWithoutFollowingNestedInput
   following?: Prisma.FollowsUpdateManyWithoutFollowerNestedInput
+  dailyStats?: Prisma.UserDailyStatsUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutBadgesInput = {
@@ -1108,6 +1156,7 @@ export type UserUncheckedUpdateWithoutBadgesInput = {
   stats?: Prisma.UserStatsUncheckedUpdateOneWithoutUserNestedInput
   followers?: Prisma.FollowsUncheckedUpdateManyWithoutFollowingNestedInput
   following?: Prisma.FollowsUncheckedUpdateManyWithoutFollowerNestedInput
+  dailyStats?: Prisma.UserDailyStatsUncheckedUpdateManyWithoutUserNestedInput
 }
 
 export type UserCreateWithoutStatsInput = {
@@ -1125,6 +1174,7 @@ export type UserCreateWithoutStatsInput = {
   followers?: Prisma.FollowsCreateNestedManyWithoutFollowingInput
   following?: Prisma.FollowsCreateNestedManyWithoutFollowerInput
   badges?: Prisma.UserBadgeCreateNestedManyWithoutUserInput
+  dailyStats?: Prisma.UserDailyStatsCreateNestedManyWithoutUserInput
 }
 
 export type UserUncheckedCreateWithoutStatsInput = {
@@ -1142,6 +1192,7 @@ export type UserUncheckedCreateWithoutStatsInput = {
   followers?: Prisma.FollowsUncheckedCreateNestedManyWithoutFollowingInput
   following?: Prisma.FollowsUncheckedCreateNestedManyWithoutFollowerInput
   badges?: Prisma.UserBadgeUncheckedCreateNestedManyWithoutUserInput
+  dailyStats?: Prisma.UserDailyStatsUncheckedCreateNestedManyWithoutUserInput
 }
 
 export type UserCreateOrConnectWithoutStatsInput = {
@@ -1175,6 +1226,7 @@ export type UserUpdateWithoutStatsInput = {
   followers?: Prisma.FollowsUpdateManyWithoutFollowingNestedInput
   following?: Prisma.FollowsUpdateManyWithoutFollowerNestedInput
   badges?: Prisma.UserBadgeUpdateManyWithoutUserNestedInput
+  dailyStats?: Prisma.UserDailyStatsUpdateManyWithoutUserNestedInput
 }
 
 export type UserUncheckedUpdateWithoutStatsInput = {
@@ -1192,6 +1244,95 @@ export type UserUncheckedUpdateWithoutStatsInput = {
   followers?: Prisma.FollowsUncheckedUpdateManyWithoutFollowingNestedInput
   following?: Prisma.FollowsUncheckedUpdateManyWithoutFollowerNestedInput
   badges?: Prisma.UserBadgeUncheckedUpdateManyWithoutUserNestedInput
+  dailyStats?: Prisma.UserDailyStatsUncheckedUpdateManyWithoutUserNestedInput
+}
+
+export type UserCreateWithoutDailyStatsInput = {
+  id: string
+  name: string
+  email: string
+  emailVerified?: boolean
+  image?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  subjects?: Prisma.SubjectCreateNestedManyWithoutUserInput
+  accounts?: Prisma.AccountCreateNestedManyWithoutUserInput
+  sessions?: Prisma.SessionCreateNestedManyWithoutUserInput
+  profile?: Prisma.ProfileCreateNestedOneWithoutUserInput
+  stats?: Prisma.UserStatsCreateNestedOneWithoutUserInput
+  followers?: Prisma.FollowsCreateNestedManyWithoutFollowingInput
+  following?: Prisma.FollowsCreateNestedManyWithoutFollowerInput
+  badges?: Prisma.UserBadgeCreateNestedManyWithoutUserInput
+}
+
+export type UserUncheckedCreateWithoutDailyStatsInput = {
+  id: string
+  name: string
+  email: string
+  emailVerified?: boolean
+  image?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  subjects?: Prisma.SubjectUncheckedCreateNestedManyWithoutUserInput
+  accounts?: Prisma.AccountUncheckedCreateNestedManyWithoutUserInput
+  sessions?: Prisma.SessionUncheckedCreateNestedManyWithoutUserInput
+  profile?: Prisma.ProfileUncheckedCreateNestedOneWithoutUserInput
+  stats?: Prisma.UserStatsUncheckedCreateNestedOneWithoutUserInput
+  followers?: Prisma.FollowsUncheckedCreateNestedManyWithoutFollowingInput
+  following?: Prisma.FollowsUncheckedCreateNestedManyWithoutFollowerInput
+  badges?: Prisma.UserBadgeUncheckedCreateNestedManyWithoutUserInput
+}
+
+export type UserCreateOrConnectWithoutDailyStatsInput = {
+  where: Prisma.UserWhereUniqueInput
+  create: Prisma.XOR<Prisma.UserCreateWithoutDailyStatsInput, Prisma.UserUncheckedCreateWithoutDailyStatsInput>
+}
+
+export type UserUpsertWithoutDailyStatsInput = {
+  update: Prisma.XOR<Prisma.UserUpdateWithoutDailyStatsInput, Prisma.UserUncheckedUpdateWithoutDailyStatsInput>
+  create: Prisma.XOR<Prisma.UserCreateWithoutDailyStatsInput, Prisma.UserUncheckedCreateWithoutDailyStatsInput>
+  where?: Prisma.UserWhereInput
+}
+
+export type UserUpdateToOneWithWhereWithoutDailyStatsInput = {
+  where?: Prisma.UserWhereInput
+  data: Prisma.XOR<Prisma.UserUpdateWithoutDailyStatsInput, Prisma.UserUncheckedUpdateWithoutDailyStatsInput>
+}
+
+export type UserUpdateWithoutDailyStatsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  emailVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  image?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  subjects?: Prisma.SubjectUpdateManyWithoutUserNestedInput
+  accounts?: Prisma.AccountUpdateManyWithoutUserNestedInput
+  sessions?: Prisma.SessionUpdateManyWithoutUserNestedInput
+  profile?: Prisma.ProfileUpdateOneWithoutUserNestedInput
+  stats?: Prisma.UserStatsUpdateOneWithoutUserNestedInput
+  followers?: Prisma.FollowsUpdateManyWithoutFollowingNestedInput
+  following?: Prisma.FollowsUpdateManyWithoutFollowerNestedInput
+  badges?: Prisma.UserBadgeUpdateManyWithoutUserNestedInput
+}
+
+export type UserUncheckedUpdateWithoutDailyStatsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  emailVerified?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  image?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  subjects?: Prisma.SubjectUncheckedUpdateManyWithoutUserNestedInput
+  accounts?: Prisma.AccountUncheckedUpdateManyWithoutUserNestedInput
+  sessions?: Prisma.SessionUncheckedUpdateManyWithoutUserNestedInput
+  profile?: Prisma.ProfileUncheckedUpdateOneWithoutUserNestedInput
+  stats?: Prisma.UserStatsUncheckedUpdateOneWithoutUserNestedInput
+  followers?: Prisma.FollowsUncheckedUpdateManyWithoutFollowingNestedInput
+  following?: Prisma.FollowsUncheckedUpdateManyWithoutFollowerNestedInput
+  badges?: Prisma.UserBadgeUncheckedUpdateManyWithoutUserNestedInput
 }
 
 
@@ -1206,6 +1347,7 @@ export type UserCountOutputType = {
   followers: number
   following: number
   badges: number
+  dailyStats: number
 }
 
 export type UserCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -1215,6 +1357,7 @@ export type UserCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.I
   followers?: boolean | UserCountOutputTypeCountFollowersArgs
   following?: boolean | UserCountOutputTypeCountFollowingArgs
   badges?: boolean | UserCountOutputTypeCountBadgesArgs
+  dailyStats?: boolean | UserCountOutputTypeCountDailyStatsArgs
 }
 
 /**
@@ -1269,6 +1412,13 @@ export type UserCountOutputTypeCountBadgesArgs<ExtArgs extends runtime.Types.Ext
   where?: Prisma.UserBadgeWhereInput
 }
 
+/**
+ * UserCountOutputType without action
+ */
+export type UserCountOutputTypeCountDailyStatsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.UserDailyStatsWhereInput
+}
+
 
 export type UserSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
@@ -1286,6 +1436,7 @@ export type UserSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = r
   followers?: boolean | Prisma.User$followersArgs<ExtArgs>
   following?: boolean | Prisma.User$followingArgs<ExtArgs>
   badges?: boolean | Prisma.User$badgesArgs<ExtArgs>
+  dailyStats?: boolean | Prisma.User$dailyStatsArgs<ExtArgs>
   _count?: boolean | Prisma.UserCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["user"]>
 
@@ -1329,6 +1480,7 @@ export type UserInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = 
   followers?: boolean | Prisma.User$followersArgs<ExtArgs>
   following?: boolean | Prisma.User$followingArgs<ExtArgs>
   badges?: boolean | Prisma.User$badgesArgs<ExtArgs>
+  dailyStats?: boolean | Prisma.User$dailyStatsArgs<ExtArgs>
   _count?: boolean | Prisma.UserCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type UserIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {}
@@ -1345,6 +1497,7 @@ export type $UserPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs =
     followers: Prisma.$FollowsPayload<ExtArgs>[]
     following: Prisma.$FollowsPayload<ExtArgs>[]
     badges: Prisma.$UserBadgePayload<ExtArgs>[]
+    dailyStats: Prisma.$UserDailyStatsPayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -1756,6 +1909,7 @@ export interface Prisma__UserClient<T, Null = never, ExtArgs extends runtime.Typ
   followers<T extends Prisma.User$followersArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$followersArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$FollowsPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   following<T extends Prisma.User$followingArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$followingArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$FollowsPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   badges<T extends Prisma.User$badgesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$badgesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$UserBadgePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  dailyStats<T extends Prisma.User$dailyStatsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$dailyStatsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$UserDailyStatsPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -2364,6 +2518,30 @@ export type User$badgesArgs<ExtArgs extends runtime.Types.Extensions.InternalArg
   take?: number
   skip?: number
   distinct?: Prisma.UserBadgeScalarFieldEnum | Prisma.UserBadgeScalarFieldEnum[]
+}
+
+/**
+ * User.dailyStats
+ */
+export type User$dailyStatsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the UserDailyStats
+   */
+  select?: Prisma.UserDailyStatsSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the UserDailyStats
+   */
+  omit?: Prisma.UserDailyStatsOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.UserDailyStatsInclude<ExtArgs> | null
+  where?: Prisma.UserDailyStatsWhereInput
+  orderBy?: Prisma.UserDailyStatsOrderByWithRelationInput | Prisma.UserDailyStatsOrderByWithRelationInput[]
+  cursor?: Prisma.UserDailyStatsWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.UserDailyStatsScalarFieldEnum | Prisma.UserDailyStatsScalarFieldEnum[]
 }
 
 /**

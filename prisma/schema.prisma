@@ -65,6 +65,7 @@ model User {
   followers     Follows[]  @relation("Following")
   following     Follows[]  @relation("Follower")
   badges        UserBadge[]
+  dailyStats    UserDailyStats[]
 
   @@map("user")
 }
@@ -190,4 +191,18 @@ model UserStats {
   studyDays     Int       @default(0)
 
   updatedAt     DateTime  @updatedAt
+}
+
+model UserDailyStats {
+  id           String   @id @default(uuid())
+  userId       String
+  date         DateTime @db.Date  // O dia exato (sem horas)
+  totalMinutes Int      @default(0)
+  sessions     Int      @default(0)
+
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  // Garante que só existe 1 linha por dia para cada usuário
+  @@unique([userId, date])
+  @@index([userId, date(sort: Desc)])
 }

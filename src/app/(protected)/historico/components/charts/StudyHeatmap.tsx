@@ -6,7 +6,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { useActivityAnalysis } from '@/hooks/useActivity';
 import useSearchRangeStore, { RangeType } from '@/store/useSearchRangeStore';
-import { formatDateFromDB } from '@/lib/utils';
+
+
 import { startOfMonth, endOfMonth, startOfYear, endOfYear, eachDayOfInterval, format, isSameDay } from 'date-fns';
 
 // --- Constants & Helpers ---
@@ -213,13 +214,10 @@ export function StudyHeatmap() {
 
   const { data: analysis, isLoading } = useActivityAnalysis(searchInterval.start, searchInterval.end);
 
+  // HeatMap vem diretamente do UserDailyStats (já agregado no servidor)
+  // Antes: iterava sobre analysis?.logs calculando minutos manualmente no client
   const minutesByDate = useMemo(() => {
-    const map: Record<string, number> = {};
-    analysis?.logs.forEach(log => {
-      const dateKey = formatDateFromDB(log.study_date);
-      map[dateKey] = (map[dateKey] || 0) + log.duration_minutes;
-    });
-    return map;
+    return analysis?.charts?.heatMap ?? {};
   }, [analysis]);
 
   const getMinutesForDate = (date: Date) => {

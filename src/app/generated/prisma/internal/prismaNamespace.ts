@@ -395,7 +395,8 @@ export const ModelName = {
   Follows: 'Follows',
   Badge: 'Badge',
   UserBadge: 'UserBadge',
-  UserStats: 'UserStats'
+  UserStats: 'UserStats',
+  UserDailyStats: 'UserDailyStats'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -411,7 +412,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "subject" | "topic" | "studyLogs" | "user" | "session" | "account" | "verification" | "profile" | "follows" | "badge" | "userBadge" | "userStats"
+    modelProps: "subject" | "topic" | "studyLogs" | "user" | "session" | "account" | "verification" | "profile" | "follows" | "badge" | "userBadge" | "userStats" | "userDailyStats"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -1303,6 +1304,80 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         }
       }
     }
+    UserDailyStats: {
+      payload: Prisma.$UserDailyStatsPayload<ExtArgs>
+      fields: Prisma.UserDailyStatsFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.UserDailyStatsFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$UserDailyStatsPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.UserDailyStatsFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$UserDailyStatsPayload>
+        }
+        findFirst: {
+          args: Prisma.UserDailyStatsFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$UserDailyStatsPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.UserDailyStatsFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$UserDailyStatsPayload>
+        }
+        findMany: {
+          args: Prisma.UserDailyStatsFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$UserDailyStatsPayload>[]
+        }
+        create: {
+          args: Prisma.UserDailyStatsCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$UserDailyStatsPayload>
+        }
+        createMany: {
+          args: Prisma.UserDailyStatsCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.UserDailyStatsCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$UserDailyStatsPayload>[]
+        }
+        delete: {
+          args: Prisma.UserDailyStatsDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$UserDailyStatsPayload>
+        }
+        update: {
+          args: Prisma.UserDailyStatsUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$UserDailyStatsPayload>
+        }
+        deleteMany: {
+          args: Prisma.UserDailyStatsDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.UserDailyStatsUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.UserDailyStatsUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$UserDailyStatsPayload>[]
+        }
+        upsert: {
+          args: Prisma.UserDailyStatsUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$UserDailyStatsPayload>
+        }
+        aggregate: {
+          args: Prisma.UserDailyStatsAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateUserDailyStats>
+        }
+        groupBy: {
+          args: Prisma.UserDailyStatsGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.UserDailyStatsGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.UserDailyStatsCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.UserDailyStatsCountAggregateOutputType> | number
+        }
+      }
+    }
   }
 } & {
   other: {
@@ -1498,6 +1573,17 @@ export const UserStatsScalarFieldEnum = {
 } as const
 
 export type UserStatsScalarFieldEnum = (typeof UserStatsScalarFieldEnum)[keyof typeof UserStatsScalarFieldEnum]
+
+
+export const UserDailyStatsScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  date: 'date',
+  totalMinutes: 'totalMinutes',
+  sessions: 'sessions'
+} as const
+
+export type UserDailyStatsScalarFieldEnum = (typeof UserDailyStatsScalarFieldEnum)[keyof typeof UserDailyStatsScalarFieldEnum]
 
 
 export const SortOrder = {
@@ -1714,6 +1800,7 @@ export type GlobalOmitConfig = {
   badge?: Prisma.BadgeOmit
   userBadge?: Prisma.UserBadgeOmit
   userStats?: Prisma.UserStatsOmit
+  userDailyStats?: Prisma.UserDailyStatsOmit
 }
 
 /* Types for Logging */

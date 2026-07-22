@@ -78,3 +78,8 @@ export type UserBadge = Prisma.UserBadgeModel
  * Atualizada incrementalmente em cada mutação de StudyLog — nunca calculada em tempo de request.
  */
 export type UserStats = Prisma.UserStatsModel
+/**
+ * Model UserDailyStats
+ * 
+ */
+export type UserDailyStats = Prisma.UserDailyStatsModel

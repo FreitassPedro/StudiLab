@@ -25,69 +25,64 @@ export const getCachedHistoryAnalysis = async (userId: string, startDateStr: str
             const normalizedStart = new Date(startDateStr);
             const normalizedEnd = new Date(endDateStr);
 
-            // UNICA QUERY AO BANCO: Busca todos os logs no intervalo com as relações necessárias
-            const logs = await prisma.studyLogs.findMany({
-                where: {
-                    study_date: {
-                        gte: normalizedStart,
-                        lte: normalizedEnd,
+            // 2 queries paralelas:
+            // - UserDailyStats: heatMap e summary numérico (já agregado, sem JOIN)
+            // - StudyLogs: logs detalhados com subject/topic para pie chart e timeline
+            const [dailyStats, logs] = await Promise.all([
+                prisma.userDailyStats.findMany({
+                    where: {
+                        userId,
+                        date: { gte: normalizedStart, lte: normalizedEnd },
                     },
-                    topic: {
-                        subject: {
-                            userId: userId,
-                        },
+                    select: { date: true, totalMinutes: true, sessions: true },
+                }),
+                prisma.studyLogs.findMany({
+                    where: {
+                        study_date: { gte: normalizedStart, lte: normalizedEnd },
+                        topic: { subject: { userId } },
                     },
-                },
-                include: {
-                    topic: {
-                        include: {
-                            subject: true,
-                        },
-                    },
-                },
-                orderBy: {
-                    start_time: "asc",
-                },
-            });
+                    include: { topic: { include: { subject: true } } },
+                    orderBy: { start_time: "asc" },
+                }),
+            ]);
 
-            // --- PROCESSAMENTO EM MEMÓRIA (MUITO MAIS RÁPIDO QUE MÚLTIPLAS QUERIES) ---
+            // ── HeatMap — vem diretamente de UserDailyStats, sem processar logs ──
+            const heatMap: Record<string, number> = {};
+            let totalMinutesFromDaily = 0;
+            let totalSessionsFromDaily = 0;
 
-            // 1. Inicializar estruturas
+            for (const row of dailyStats) {
+                const key = formatDateFromDB(row.date);
+                heatMap[key] = row.totalMinutes;
+                totalMinutesFromDaily += row.totalMinutes;
+                totalSessionsFromDaily += row.sessions;
+            }
+
+            // ── Processamento dos logs detalhados (pie chart + area chart) ──
             const subjectStats = new Map<string, { id: string; name: string; color: string; totalMinutes: number; totalSessions: number }>();
             const areaChartMap = new Map<string, { totalMinutes: number; materiaMap: Map<string, { name: string; color: string; minutes: number }> }>();
-            const heatMap: Record<string, number> = {};
-            let totalMinutes = 0;
             let longestSession = 0;
 
-            // 2. Passagem única pelos logs
-            logs.forEach(log => {
+            for (const log of logs) {
                 const minutes = log.duration_minutes;
-                totalMinutes += minutes;
-
                 if (minutes > longestSession) longestSession = minutes;
 
                 const subject = log.topic.subject;
                 const dateKey = formatDateFromDB(log.study_date);
 
-                // Stats por Matéria (para Pie e Summary)
+                // Stats por matéria
                 let sbjStats = subjectStats.get(subject.id);
                 if (!sbjStats) {
-                    sbjStats = {
-                        id: subject.id,
-                        name: subject.name,
-                        color: subject.color,
-                        totalMinutes: 0,
-                        totalSessions: 0
-                    };
+                    sbjStats = { id: subject.id, name: subject.name, color: subject.color, totalMinutes: 0, totalSessions: 0 };
                     subjectStats.set(subject.id, sbjStats);
                 }
                 sbjStats.totalMinutes += minutes;
                 sbjStats.totalSessions += 1;
 
-                // Area Chart Data
+                // Area chart data
                 let dayArea = areaChartMap.get(dateKey);
                 if (!dayArea) {
-                    dayArea = { totalMinutes: 0, materiaMap: new Map<string, { name: string; color: string; minutes: number }>() };
+                    dayArea = { totalMinutes: 0, materiaMap: new Map() };
                     areaChartMap.set(dateKey, dayArea);
                 }
                 dayArea.totalMinutes += minutes;
@@ -98,14 +93,14 @@ export const getCachedHistoryAnalysis = async (userId: string, startDateStr: str
                     dayArea.materiaMap.set(subject.id, areaMateria);
                 }
                 areaMateria.minutes += minutes;
+            }
 
-                // HeatMap (por dia)
-                heatMap[dateKey] = (heatMap[dateKey] || 0) + minutes;
-            });
             const sortedSubjects = Array.from(subjectStats.values()).sort((a, b) => b.totalMinutes - a.totalMinutes);
             const topSubjectData = sortedSubjects[0] || null;
 
-            const totalSessions = logs.length;
+            // Usa totais do UserDailyStats como fonte de verdade (mais preciso que somar logs)
+            const totalMinutes = totalMinutesFromDaily;
+            const totalSessions = totalSessionsFromDaily || logs.length;
             const avgSession = totalSessions > 0 ? Math.round(totalMinutes / totalSessions) : 0;
             const diffDays = Math.round((normalizedEnd.getTime() - normalizedStart.getTime()) / 86400000);
             const dayCount = Math.max(1, diffDays + 1);
