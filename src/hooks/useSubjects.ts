@@ -15,10 +15,16 @@ export const subjectsKeys = {
     tree: metadataKeys.subjectTree,
 };
 
+const STALE_TIME = 1000 * 60 * 60 * 12; // 12 horas — metadados mudam raramente
+
 export const useSubjectsOptions = () => queryOptions({
     queryKey: subjectsKeys.all,
     queryFn: () => getSubjectsAction(),
-
+    staleTime: STALE_TIME,
+    gcTime: 1000 * 60 * 60 * 24, // 24h no cache
+    refetchOnWindowFocus: false,
+    refetchOnReconnect: false,
+    refetchOnMount: false,
 });
 
 /***

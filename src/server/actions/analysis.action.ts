@@ -19,8 +19,15 @@ export type HistoryAnalysis = {
     };
 };
 
-export const getCachedHistoryAnalysis = async (userId: string, startDateStr: string, endDateStr: string) => {
-    return unstable_cache(
+// ── Factory extraída para FORA da função pública ─────────────────────────────
+// Problema anterior: unstable_cache era criado DENTRO de getCachedHistoryAnalysis,
+// o que gerava nova closure a cada request → Next.js não conseguia de-duplicar chamadas
+// concorrentes para o mesmo userId+período, causando queries redundantes ao banco.
+//
+// Solução: factory definida fora → mesma referência de função → Next.js agrupa
+// chamadas concorrentes e executa a query apenas uma vez.
+const buildCachedHistoryAnalysis = (userId: string, startDateStr: string, endDateStr: string) =>
+    unstable_cache(
         async () => {
             const normalizedStart = new Date(startDateStr);
             const normalizedEnd = new Date(endDateStr);
@@ -41,7 +48,32 @@ export const getCachedHistoryAnalysis = async (userId: string, startDateStr: str
                         study_date: { gte: normalizedStart, lte: normalizedEnd },
                         topic: { subject: { userId } },
                     },
-                    include: { topic: { include: { subject: true } } },
+                    // select mínimo com JOIN explícito — retorna apenas campos necessários
+                    // para pie chart, area chart e timeline. Evita over-fetching.
+                    select: {
+                        id: true,
+                        study_date: true,
+                        start_time: true,
+                        end_time: true,
+                        duration_minutes: true,
+                        notes: true,
+                        material_type: true,
+                        topicId: true,
+                        topic: {
+                            select: {
+                                id: true,
+                                name: true,
+                                subjectId: true,
+                                subject: {
+                                    select: {
+                                        id: true,
+                                        name: true,
+                                        color: true,
+                                    },
+                                },
+                            },
+                        },
+                    },
                     orderBy: { start_time: "asc" },
                 }),
             ]);
@@ -144,7 +176,19 @@ export const getCachedHistoryAnalysis = async (userId: string, startDateStr: str
         },
         [`study-logs-analysis-${userId}-${startDateStr}-${endDateStr}`],
         { tags: [`study-logs-${userId}`] }
-    )();
+    );
+
+// ── Cache público: mapa de factories para evitar recriar closures ─────────────
+// Chave composta por userId + período para compartilhar cache entre componentes
+// que requisitam o mesmo intervalo no mesmo request.
+const analysisCacheMap = new Map<string, ReturnType<typeof buildCachedHistoryAnalysis>>();
+
+export const getCachedHistoryAnalysis = async (userId: string, startDateStr: string, endDateStr: string) => {
+    const cacheKey = `${userId}:${startDateStr}:${endDateStr}`;
+    if (!analysisCacheMap.has(cacheKey)) {
+        analysisCacheMap.set(cacheKey, buildCachedHistoryAnalysis(userId, startDateStr, endDateStr));
+    }
+    return analysisCacheMap.get(cacheKey)!();
 };
 
 export async function getHistoryAnalysisAction(startDateStr: string, endDateStr: string): Promise<HistoryAnalysis> {

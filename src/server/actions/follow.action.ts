@@ -63,7 +63,6 @@ export async function toggleFollow(targetUserId: string) {
   // Invalida o cache de ambos os usuários para refletir contadores atualizados
   revalidateTag(`user-${currentUser.id}`, "max");
   revalidateTag(`user-${targetUserId}`, "max");
-  // Invalida lista de amigos do usuário atual
   revalidateTag(`friends-${currentUser.id}`, "max");
   revalidatePath("/profile/[username]", "page");
 

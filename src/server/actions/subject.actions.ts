@@ -2,7 +2,6 @@
 
 import { Subject, SubjectTree, TopicNode } from "@/types/types";
 import { prisma } from "@/lib/prisma";
-import { Prisma } from "@/app/generated/prisma/client";
 import { requireAuth } from "./requireAuth";
 
 /**
@@ -95,6 +94,7 @@ export async function deleteSubjectAction(id: string) {
 
 
 import { cache } from "react";
+import { Prisma } from "@/app/generated/prisma/client";
 
 export const getSubjectsAction = cache(async (): Promise<Subject[]> => {
     const user = await requireAuth();
@@ -136,7 +136,7 @@ export async function createBulkSubjectsWithTopicsAction(data: {
                     // Já existe: filtra apenas os tópicos que faltam
                     const existingTopicNames = new Set(existing.topics.map((t) => t.name));
                     const newTopics = subjectData.topics.filter((t) => !existingTopicNames.has(t));
-                    
+
                     for (const t of newTopics) {
                         topicsToCreate.push({ name: t, subjectId: existing.id });
                     }

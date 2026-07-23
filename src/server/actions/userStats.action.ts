@@ -15,51 +15,66 @@ export type UserStatsData = {
 };
 
 /**
- * Recalcula e persiste as métricas de um usuário nas tabelas `UserDailyStats` e `UserStats`.
- *
- * Estratégia:
- *  - BACKFILL (one-time): Se o usuário não tiver nenhum UserDailyStats, agrega todos os logs
- *    de uma vez usando groupBy no banco e insere via createMany.
- *  - SYNC INCREMENTAL: Para as datas modificadas, faz 1 groupBy em batch e N upserts em paralelo
- *    (Promise.all). Elimina totalmente queries dentro de loop.
- *  - GLOBAL STATS: 4 queries em Promise.all — zero queries sequenciais.
- *  - STREAK: Limitado a 400 dias. Streak > 1 ano é impossível de quebrar, não precisa de 10 anos.
+ * Garante que UserDailyStats está populado para o usuário.
+ * Usa uma única query groupBy para agregar todos os logs — sem trazer linhas para JS.
+ * Idempotente: skipDuplicates garante que não duplica mesmo se chamado múltiplas vezes.
+ * Retorna true se foi necessário fazer backfill, false se já existia.
  */
-export async function recomputeUserStats(userId: string, modifiedDates: Date[] = []): Promise<void> {
-    const today = new Date();
-    today.setUTCHours(0, 0, 0, 0);
-
-    // ── 1. BACKFILL (executado no máximo uma vez por usuário) ────────────────────
-    // Usa findFirst em vez de count: retorna na primeira linha encontrada (mais leve).
+async function ensureUserDailyStatsBackfill(userId: string): Promise<boolean> {
+    // findFirst é mais leve que count — retorna na primeira linha encontrada
     const hasDailyStats = await prisma.userDailyStats.findFirst({
         where: { userId },
         select: { id: true },
     });
 
-    if (!hasDailyStats) {
-        // Agrega todos os logs no banco via groupBy — sem trazer linhas para a memória JS.
-        const allDayAggregates = await prisma.studyLogs.groupBy({
-            by: ["study_date"],
-            where: { topic: { subject: { userId } } },
-            _sum: { duration_minutes: true },
-            _count: { id: true },
-        });
+    if (hasDailyStats) return false;
 
-        if (allDayAggregates.length > 0) {
-            await prisma.userDailyStats.createMany({
-                data: allDayAggregates.map((a) => ({
-                    userId,
-                    date: a.study_date,
-                    totalMinutes: a._sum.duration_minutes ?? 0,
-                    sessions: a._count.id,
-                })),
-                skipDuplicates: true,
-            });
-        }
+    // Agrega todos os logs no banco via groupBy — zero processamento em JS
+    const allDayAggregates = await prisma.studyLogs.groupBy({
+        by: ["study_date"],
+        where: { topic: { subject: { userId } } },
+        _sum: { duration_minutes: true },
+        _count: { id: true },
+    });
+
+    if (allDayAggregates.length > 0) {
+        await prisma.userDailyStats.createMany({
+            data: allDayAggregates.map((a) => ({
+                userId,
+                date: a.study_date,
+                totalMinutes: a._sum.duration_minutes ?? 0,
+                sessions: a._count.id,
+            })),
+            skipDuplicates: true,
+        });
+    }
+
+    return true;
+}
+
+/**
+ * Recalcula e persiste as métricas de um usuário nas tabelas `UserDailyStats` e `UserStats`.
+ *
+ * Estratégia:
+ *  - BACKFILL (one-time): Se o usuário não tiver nenhum UserDailyStats, agrega todos os logs
+ *    de uma vez usando groupBy no banco e insere via createMany.
+ *  - SYNC INCREMENTAL: Para as datas modificadas, faz 1 groupBy em batch + N upserts em Promise.all.
+ *    O check de backfill é IGNORADO neste caminho — só é feito quando modifiedDates está vazio.
+ *  - GLOBAL STATS: 4 queries em Promise.all — zero queries sequenciais.
+ *  - STREAK: Limitado a 400 dias.
+ */
+export async function recomputeUserStats(userId: string, modifiedDates: Date[] = []): Promise<void> {
+    const today = new Date();
+    today.setUTCHours(0, 0, 0, 0);
+
+    // ── 1. BACKFILL — executado NO MÁXIMO UMA VEZ por usuário, e APENAS quando não há datas incrementais ─
+    // Quando modifiedDates existe, o backfill já foi feito anteriormente (o usuário tem dados).
+    // Verificar hasDailyStats no caminho incremental é desperdício de query.
+    if (modifiedDates.length === 0) {
+        await ensureUserDailyStatsBackfill(userId);
     }
 
     // ── 2. SYNC INCREMENTAL das datas modificadas ────────────────────────────────
-    // Agora: 1 groupBy em batch + N operações em Promise.all (paralelas).
     if (modifiedDates.length > 0) {
         // Deduplica as datas para evitar redundância
         const uniqueDateTimes = Array.from(new Set(modifiedDates.map((d) => d.getTime())));
@@ -121,14 +136,14 @@ export async function recomputeUserStats(userId: string, modifiedDates: Date[] =
             where: { userId, date: { gte: weekStart, lte: today } },
             _sum: { totalMinutes: true },
         }),
-        // Dias para calcular streak — limitado a 400 (>1 ano, prático o suficiente)
+        // Dias para calcular streak — limitado a 400 (>1 ano)
         prisma.userDailyStats.findMany({
             where: { userId },
             select: { date: true },
             orderBy: { date: "desc" },
             take: 400,
         }),
-        // Recorde histórico — folded no Promise.all, era query serial separada antes
+        // Recorde histórico — folded no Promise.all
         prisma.userStats.findUnique({
             where: { userId },
             select: { longestStreak: true },
@@ -196,27 +211,28 @@ export async function recomputeUserStats(userId: string, modifiedDates: Date[] =
         },
     });
 
+    // revalidateTag(tag, profile): Next.js 16 requer 2 argumentos — "max" = sem expiração de TTL
     revalidateTag(`user-stats-${userId}`, "max");
 }
 
-// ── Action pública cacheada: O(1) lookup em UserStats ────────────────────────
-// Fix: extraída como função nomeada para evitar criar closure nova a cada request.
-const buildCachedUserStats = (userId: string) =>
-    unstable_cache(
+// ── Cache Global: factory extraída para evitar criar nova closure a cada request ─
+// pattern correto: definir fora da função pública, não inline dentro dela.
+const cachedUserStatsMap = new Map<string, ReturnType<typeof buildCachedUserStats>>();
+
+function buildCachedUserStats(userId: string) {
+    return unstable_cache(
         async (): Promise<UserStatsData> => {
             const stats = await prisma.userStats.findUnique({ where: { userId } });
 
             // Lazy init + auto-backfill: Se UserStats não existe, o usuário é "antigo" (pré-rollup).
-            // Triggera o backfill completo de UserDailyStats e recomputa os globais antes de retornar.
             if (!stats) {
-                // Verifica se o usuário tem algum log (para diferenciar "nunca estudou" de "usuário antigo")
+                // Verifica se o usuário tem algum log (diferenciar "nunca estudou" de "usuário antigo")
                 const hasAnyLog = await prisma.studyLogs.findFirst({
                     where: { topic: { subject: { userId } } },
                     select: { id: true },
                 });
 
                 if (hasAnyLog) {
-                    // Usuário antigo sem rollup — triggera backfill e recompute silenciosamente
                     await recomputeUserStats(userId);
                     const freshStats = await prisma.userStats.findUnique({ where: { userId } });
                     if (freshStats) {
@@ -257,58 +273,37 @@ const buildCachedUserStats = (userId: string) =>
         [`user-stats-${userId}`],
         { tags: [`user-stats-${userId}`] }
     );
+}
 
+// ── Action pública cacheada: O(1) lookup em UserStats ────────────────────────
 export async function getUserStatsAction(): Promise<UserStatsData> {
     const user = await requireAuth();
-    return buildCachedUserStats(user.id)();
+    // Reutiliza instância do cache (não cria nova closure a cada request)
+    if (!cachedUserStatsMap.has(user.id)) {
+        cachedUserStatsMap.set(user.id, buildCachedUserStats(user.id));
+    }
+    return cachedUserStatsMap.get(user.id)!();
 }
 
 /**
  * Preenche a tabela UserDailyStats para usuários antigos que ainda não têm dados lá.
- * Pode ser chamada explicitamente pelo usuário ou na inicialização do app.
  * É idempotente — não duplica dados graças ao skipDuplicates.
- *
  * Retorna: { inserted: number, alreadyUpToDate: boolean }
  */
 export async function backfillUserDailyStatsAction(): Promise<{ inserted: number; alreadyUpToDate: boolean }> {
     const user = await requireAuth();
     const userId = user.id;
 
-    // Verifica se já existe algum dado
-    const hasDailyStats = await prisma.userDailyStats.findFirst({
-        where: { userId },
-        select: { id: true },
-    });
+    const didBackfill = await ensureUserDailyStatsBackfill(userId);
 
-    if (hasDailyStats) {
+    if (!didBackfill) {
         return { inserted: 0, alreadyUpToDate: true };
     }
-
-    // Agrega todos os logs no banco via groupBy — zero processamento em JS
-    const allDayAggregates = await prisma.studyLogs.groupBy({
-        by: ["study_date"],
-        where: { topic: { subject: { userId } } },
-        _sum: { duration_minutes: true },
-        _count: { id: true },
-    });
-
-    if (allDayAggregates.length === 0) {
-        return { inserted: 0, alreadyUpToDate: false };
-    }
-    
-
-    const result = await prisma.userDailyStats.createMany({
-        data: allDayAggregates.map((a) => ({
-            userId,
-            date: a.study_date,
-            totalMinutes: a._sum.duration_minutes ?? 0,
-            sessions: a._count.id,
-        })),
-        skipDuplicates: true,
-    });
 
     // Com UserDailyStats populado, atualiza o UserStats global
     await recomputeUserStats(userId);
 
-    return { inserted: result.count, alreadyUpToDate: false };
+    // Conta quantos foram inseridos
+    const count = await prisma.userDailyStats.count({ where: { userId } });
+    return { inserted: count, alreadyUpToDate: false };
 }
