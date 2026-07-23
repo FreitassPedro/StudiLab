@@ -30,11 +30,12 @@ export async function recomputeUserStats(userId: string, modifiedDates: Date[] =
     today.setUTCHours(0, 0, 0, 0);
 
     // ── 1. BACKFILL (executado no máximo uma vez por usuário) ────────────────────
-    // Usa findFirst em vez de count: retorna na primeira linha encontrada (mais leve).
-    const hasDailyStats = await prisma.userDailyStats.findFirst({
-        where: { userId },
-        select: { id: true },
-    });
+    // Quando modifiedDates está preenchido, a chamada veio de um CRUD — o usuário já
+    // tem UserDailyStats. O findFirst é desnecessário nesse caminho.
+    const needsBackfillCheck = modifiedDates.length === 0;
+    const hasDailyStats = needsBackfillCheck
+        ? await prisma.userDailyStats.findFirst({ where: { userId }, select: { id: true } })
+        : true;
 
     if (!hasDailyStats) {
         // Agrega todos os logs no banco via groupBy — sem trazer linhas para a memória JS.
@@ -109,22 +110,18 @@ export async function recomputeUserStats(userId: string, modifiedDates: Date[] =
     const daysFromMonday = dayOfWeek === 0 ? 6 : dayOfWeek - 1;
     const weekStart = new Date(today.getTime() - daysFromMonday * 86400000);
 
-    const [totals, weeklyAgg, recentDays, currentRecord] = await Promise.all([
+    const [totals, recentDays, currentRecord] = await Promise.all([
         // Totais históricos completos — 1 aggregate scan na tabela pequena
         prisma.userDailyStats.aggregate({
             where: { userId },
             _sum: { totalMinutes: true, sessions: true },
             _count: { id: true },
         }),
-        // Minutos da semana corrente — 1 aggregate scan filtrado
-        prisma.userDailyStats.aggregate({
-            where: { userId, date: { gte: weekStart, lte: today } },
-            _sum: { totalMinutes: true },
-        }),
         // Dias para calcular streak — limitado a 400 (>1 ano, prático o suficiente)
+        // totalMinutes incluído para calcular weeklyMinutes sem query extra
         prisma.userDailyStats.findMany({
             where: { userId },
-            select: { date: true },
+            select: { date: true, totalMinutes: true },
             orderBy: { date: "desc" },
             take: 400,
         }),
@@ -134,6 +131,10 @@ export async function recomputeUserStats(userId: string, modifiedDates: Date[] =
             select: { longestStreak: true },
         }),
     ]);
+
+    const weeklyMinutes = recentDays
+        .filter((d) => d.date >= weekStart && d.date <= today)
+        .reduce((sum, d) => sum + d.totalMinutes, 0);
 
     const studyDays = totals._count.id ?? 0;
     const lastStudyDate = recentDays[0]?.date ?? null;
@@ -182,7 +183,7 @@ export async function recomputeUserStats(userId: string, modifiedDates: Date[] =
             lastStudyDate,
             totalMinutes: totals._sum.totalMinutes ?? 0,
             totalSessions: totals._sum.sessions ?? 0,
-            weeklyMinutes: weeklyAgg._sum.totalMinutes ?? 0,
+            weeklyMinutes,
             studyDays,
         },
         update: {
@@ -191,7 +192,7 @@ export async function recomputeUserStats(userId: string, modifiedDates: Date[] =
             lastStudyDate,
             totalMinutes: totals._sum.totalMinutes ?? 0,
             totalSessions: totals._sum.sessions ?? 0,
-            weeklyMinutes: weeklyAgg._sum.totalMinutes ?? 0,
+            weeklyMinutes,
             studyDays,
         },
     });
